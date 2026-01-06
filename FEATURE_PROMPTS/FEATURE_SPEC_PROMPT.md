@@ -1,3 +1,7 @@
+INPUTS:
+* AGENTS.md (existing)
+* Existing codebase (zip file)
+
 Ask me questions so that we can develop a feature specification document for this idea.
 
 The resulting document should answer at least (but not limited to) this set of questions:
