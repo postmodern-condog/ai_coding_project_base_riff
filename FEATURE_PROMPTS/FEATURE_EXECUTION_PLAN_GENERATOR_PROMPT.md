@@ -264,7 +264,7 @@ If you can't provide files, describe:
 
 ---
 
-## Feature Specification
+## Feature & Technical Specification
 
 {Paste or attach your feature spec here. This should include:}
 - What the feature does (user-facing behavior)
