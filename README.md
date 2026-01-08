@@ -19,58 +19,103 @@ git clone https://github.com/yourusername/ai_coding_project_base.git
 
 ### Option 2: Copy the Files
 Download and copy these files to your project:
+
+**For greenfield projects:**
 - `PRODUCT_SPEC_PROMPT.md`
 - `TECHNICAL_SPEC_PROMPT.md`
-- `GENERATOR_PROMPT.md` (for new projects)
-- `FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md` (for adding features)
+- `GENERATOR_PROMPT.md`
+- `START_PROMPTS.md`
+
+**For adding features to existing projects:**
+- `FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md`
+- `FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md`
+- `FEATURE_PROMPTS/FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md`
 - `START_PROMPTS.md`
 
 ## Workflow Overview
 
+### Greenfield Projects
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           SPECIFICATION PHASE                           │
+│                         SPECIFICATION PHASE                             │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │   Your Idea                                                             │
 │       ↓                                                                 │
-│   PRODUCT_SPEC_PROMPT  ──────→  PRODUCT_SPEC.md                        │
+│   PRODUCT_SPEC_PROMPT  ──────→  PRODUCT_SPEC.md                         │
 │       ↓                                                                 │
-│   TECHNICAL_SPEC_PROMPT  ────→  TECHNICAL_SPEC.md                      │
+│   TECHNICAL_SPEC_PROMPT  ────→  TECHNICAL_SPEC.md                       │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↓
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                            PLANNING PHASE                               │
+│                           PLANNING PHASE                                │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│   Choose your generator:                                                │
-│                                                                         │
-│   ┌─────────────────────┐    ┌─────────────────────────────────────┐   │
-│   │ New Project?        │    │ Adding to Existing Project?         │   │
-│   │                     │    │                                     │   │
-│   │ GENERATOR_PROMPT    │    │ FEATURE_EXECUTION_PLAN_GENERATOR    │   │
-│   │         ↓           │    │              ↓                      │   │
-│   │ • EXECUTION_PLAN.md │    │ • EXECUTION_PLAN.md                 │   │
-│   │ • AGENTS.md         │    │ • AGENTS.md additions               │   │
-│   └─────────────────────┘    └─────────────────────────────────────┘   │
+│   GENERATOR_PROMPT  ─────────→  EXECUTION_PLAN.md                       │
+│                                  AGENTS.md                              │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↓
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           EXECUTION PHASE                               │
+│                          EXECUTION PHASE                                │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│   START_PROMPTS  ────→  Execute phases iteratively with AI agents      │
+│   Add generated documents to project root                               │
+│       ↓                                                                 │
+│   START_PROMPTS  ────→  Execute phases iteratively with AI agents       │
 │                                                                         │
-│   Phase 1 → Checkpoint → Phase 2 → Checkpoint → Phase 3 → ...          │
+│   Phase 1 → Checkpoint → Phase 2 → Checkpoint → Phase 3 → ...           │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Adding Features to Existing Projects
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         SPECIFICATION PHASE                             │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   Your Feature Idea                                                     │
+│       ↓                                                                 │
+│   FEATURE_SPEC_PROMPT  ──────→  FEATURE_SPEC.md                         │
+│       ↓                                                                 │
+│   FEATURE_TECHNICAL_SPEC_PROMPT  ────→  FEATURE_TECHNICAL_SPEC.md       │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           PLANNING PHASE                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   Inputs: Specs + existing AGENTS.md                                    │
+│       ↓                                                                 │
+│   FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT  ─→  EXECUTION_PLAN.md        │
+│                                                  AGENTS_ADDITIONS.md    │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          EXECUTION PHASE                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   Add generated documents to project root                               │
+│   Merge AGENTS_ADDITIONS.md into existing AGENTS.md                     │
+│       ↓                                                                 │
+│   START_PROMPTS  ────→  Execute phases iteratively with AI agents       │
+│                                                                         │
+│   Phase 1 → Checkpoint → Phase 2 → Checkpoint → Phase 3 → ...           │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Step-by-Step Usage
 
-### Step 1: Product Specification
+### Greenfield Projects
+
+#### Step 1: Product Specification
 
 Paste `PRODUCT_SPEC_PROMPT.md` into your AI assistant along with your idea.
 
@@ -93,7 +138,7 @@ Users struggle to track their daily habits consistently...
 - Secondary: Students building study routines
 ```
 
-### Step 2: Technical Specification
+#### Step 2: Technical Specification
 
 Paste `TECHNICAL_SPEC_PROMPT.md` along with your `PRODUCT_SPEC.md`.
 
@@ -122,39 +167,11 @@ The AI will guide you through:
 | frequency | enum | daily/weekly/custom |
 ```
 
-### Step 3: Choose Your Generator
+#### Step 3: Generate Execution Plan
 
-**Use `GENERATOR_PROMPT.md` when:**
-- Starting a brand new project
-- Building from scratch with no existing codebase
-- You need both EXECUTION_PLAN.md and AGENTS.md
+Paste `GENERATOR_PROMPT.md` along with your `PRODUCT_SPEC.md` and `TECHNICAL_SPEC.md`.
 
-**Use `FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md` when:**
-- Adding a feature to an existing project
-- You already have an AGENTS.md file
-- You need to integrate with existing code patterns
-
-```
-                    ┌──────────────────────────┐
-                    │  Do you have an existing │
-                    │  codebase with AGENTS.md?│
-                    └────────────┬─────────────┘
-                                 │
-                    ┌────────────┴────────────┐
-                    │                         │
-                    ▼                         ▼
-               ┌────────┐               ┌────────┐
-               │   No   │               │  Yes   │
-               └────┬───┘               └────┬───┘
-                    │                        │
-                    ▼                        ▼
-        ┌───────────────────┐    ┌─────────────────────────┐
-        │ GENERATOR_PROMPT  │    │ FEATURE_EXECUTION_PLAN  │
-        │                   │    │ _GENERATOR_PROMPT       │
-        └───────────────────┘    └─────────────────────────┘
-```
-
-**Output:** `EXECUTION_PLAN.md` and `AGENTS.md` (or additions)
+**Output:** `EXECUTION_PLAN.md` and `AGENTS.md`
 
 ```markdown
 # Example EXECUTION_PLAN.md snippet:
@@ -176,15 +193,50 @@ The AI will guide you through:
 - Create: `src/app/layout.tsx` — Root layout
 ```
 
-### Step 4: Execute with START_PROMPTS
+#### Step 4: Execute with START_PROMPTS
 
-Use the prompts in `START_PROMPTS.md` to guide execution:
+1. Add the generated `EXECUTION_PLAN.md` and `AGENTS.md` to your project root
+2. Use the prompts in `START_PROMPTS.md` to guide execution:
+   - **Fresh start** — Orient the AI to your project structure
+   - **Phase prep** — Check prerequisites before starting a phase
+   - **Phase start** — Execute all tasks in a phase autonomously
 
-- **Fresh start** — Orient the AI to your project structure
-- **Phase prep** — Check prerequisites before starting a phase
-- **Phase start** — Execute all tasks in a phase autonomously
+---
+
+### Adding Features to Existing Projects
+
+#### Step 1: Feature Specification
+
+Paste `FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md` into your AI assistant along with your feature idea.
+
+**Output:** `FEATURE_SPEC.md`
+
+#### Step 2: Feature Technical Specification
+
+Paste `FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md` along with your `FEATURE_SPEC.md`.
+
+**Output:** `FEATURE_TECHNICAL_SPEC.md`
+
+#### Step 3: Generate Feature Execution Plan
+
+Paste `FEATURE_PROMPTS/FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md` along with:
+- Your `FEATURE_SPEC.md`
+- Your `FEATURE_TECHNICAL_SPEC.md`
+- Your existing `AGENTS.md` (required input)
+
+**Output:** `EXECUTION_PLAN.md` and `AGENTS_ADDITIONS.md`
+
+#### Step 4: Execute with START_PROMPTS
+
+1. Add the generated `EXECUTION_PLAN.md` to your project root
+2. Merge `AGENTS_ADDITIONS.md` into your existing `AGENTS.md`
+3. Use the prompts in `START_PROMPTS.md` to guide execution:
+   - **Phase prep** — Check prerequisites before starting a phase
+   - **Phase start** — Execute all tasks in a phase autonomously
 
 ## Output Documents
+
+### Greenfield Projects
 
 | Document | Purpose |
 |----------|---------|
@@ -192,6 +244,15 @@ Use the prompts in `START_PROMPTS.md` to guide execution:
 | `TECHNICAL_SPEC.md` | Defines *how* it will be built technically |
 | `EXECUTION_PLAN.md` | Breaks work into phases, steps, and tasks with acceptance criteria |
 | `AGENTS.md` | Workflow guidelines for AI agents (TDD policy, context management, guardrails) |
+
+### Feature Development
+
+| Document | Purpose |
+|----------|---------|
+| `FEATURE_SPEC.md` | Defines *what* the feature does and *why* |
+| `FEATURE_TECHNICAL_SPEC.md` | Defines *how* the feature integrates technically |
+| `EXECUTION_PLAN.md` | Breaks feature work into phases, steps, and tasks |
+| `AGENTS_ADDITIONS.md` | Additional workflow guidelines to merge into existing `AGENTS.md` |
 
 ## Tips for Best Results
 
@@ -209,13 +270,18 @@ Use the prompts in `START_PROMPTS.md` to guide execution:
 
 ```
 ai_coding_project_base/
-├── PRODUCT_SPEC_PROMPT.md           # Step 1: Product specification prompt
-├── TECHNICAL_SPEC_PROMPT.md         # Step 2: Technical specification prompt
-├── GENERATOR_PROMPT.md              # Step 3a: For new projects
-├── FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md  # Step 3b: For features
-├── START_PROMPTS.md                 # Step 4: Execution prompts
+├── PRODUCT_SPEC_PROMPT.md           # Greenfield: Product specification prompt
+├── TECHNICAL_SPEC_PROMPT.md         # Greenfield: Technical specification prompt
+├── GENERATOR_PROMPT.md              # Greenfield: Execution plan generator
+├── START_PROMPTS.md                 # Execution prompts for all workflows
+├── FEATURE_PROMPTS/                 # Feature development prompts
+│   ├── FEATURE_SPEC_PROMPT.md       # Feature: Product specification prompt
+│   ├── FEATURE_TECHNICAL_SPEC_PROMPT.md  # Feature: Technical specification prompt
+│   └── FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md  # Feature: Execution plan generator
 ├── docs/                            # Additional documentation
-└── deprecated/                      # Legacy prompts (kept for reference)
+├── deprecated/                      # Legacy prompts (kept for reference)
+├── CLAUDE.md                        # Claude Code configuration
+└── TODOS.md                         # Task tracking
 ```
 
 ## License
