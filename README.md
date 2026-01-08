@@ -34,8 +34,10 @@ your-project/
 ├── TECHNICAL_SPEC.md        # How it's built
 ├── EXECUTION_PLAN.md        # Tasks with acceptance criteria
 ├── AGENTS.md                # Workflow rules for AI agents
-├── .claude/skills/...       # Code verification (Claude Code)
-├── .codex/skills/...        # Code verification (Codex CLI)
+├── .claude/
+│   ├── commands/            # Execution commands (copied from toolkit)
+│   └── skills/              # Code verification skill
+├── .codex/skills/           # Code verification skill (Codex CLI)
 └── [your code]
 ```
 
@@ -49,36 +51,39 @@ git clone https://github.com/yourusername/ai_coding_project_base.git
 cd ai_coding_project_base
 ```
 
-### 2. Initialize Your Project
-Open Claude Code in the toolkit directory and run:
-```
-/setup ~/Projects/my-new-app
+### 2. Initialize & Generate (from toolkit directory)
+
+```bash
+# Still in ai_coding_project_base directory:
+/setup ~/Projects/my-new-app       # Copy execution commands + skills
+/product-spec ~/Projects/my-new-app       # Define what you're building
+/technical-spec ~/Projects/my-new-app     # Define how it's built
+/generate-plan ~/Projects/my-new-app      # Create EXECUTION_PLAN.md + AGENTS.md
 ```
 
-This copies all necessary files (commands, skills, prompts) to your project.
+### 3. Execute (from your project directory)
 
-### 3. Generate Documents & Execute
-
-**For a new project:**
-```
+```bash
 cd ~/Projects/my-new-app
-/product-spec        # Define what you're building
-/technical-spec      # Define how it's built
-/generate-plan       # Create EXECUTION_PLAN.md + AGENTS.md
 /fresh-start         # Orient to project, load context
 /phase-prep 1        # Check prerequisites for Phase 1
 /phase-start 1       # Execute Phase 1
 ```
 
-**For a new feature:**
-```
+**For adding features to existing projects:**
+```bash
+# From toolkit directory:
+/setup ~/Projects/existing-app            # Copy execution commands + skills
+/feature-spec ~/Projects/existing-app     # Define the feature
+/feature-technical-spec ~/Projects/existing-app
+/feature-plan ~/Projects/existing-app
+
+# From your project:
 cd ~/Projects/existing-app
-/feature-spec             # Define the feature
-/feature-technical-spec   # Define integration approach
-/feature-plan             # Create EXECUTION_PLAN.md + AGENTS_ADDITIONS.md
-/fresh-start              # Orient to project, load context
-/phase-prep 1             # Check prerequisites for Phase 1
-/phase-start 1            # Execute Phase 1
+# Merge AGENTS_ADDITIONS.md into AGENTS.md
+/fresh-start
+/phase-prep 1
+/phase-start 1
 ```
 
 ### Alternative: Manual Setup
@@ -166,19 +171,19 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 
 ## Slash Commands Reference
 
-### Setup & Document Generation
+### Generation Commands (run from toolkit directory)
 
 | Command | Description |
 |---------|-------------|
-| `/setup [path]` | Initialize a project with toolkit files |
-| `/product-spec` | Generate PRODUCT_SPEC.md through Q&A |
-| `/technical-spec` | Generate TECHNICAL_SPEC.md (requires PRODUCT_SPEC.md) |
-| `/generate-plan` | Generate EXECUTION_PLAN.md + AGENTS.md |
-| `/feature-spec` | Generate FEATURE_SPEC.md through Q&A |
-| `/feature-technical-spec` | Generate FEATURE_TECHNICAL_SPEC.md |
-| `/feature-plan` | Generate EXECUTION_PLAN.md + AGENTS_ADDITIONS.md |
+| `/setup [path]` | Copy execution commands + skills to target project |
+| `/product-spec [path]` | Generate PRODUCT_SPEC.md through Q&A |
+| `/technical-spec [path]` | Generate TECHNICAL_SPEC.md (requires PRODUCT_SPEC.md) |
+| `/generate-plan [path]` | Generate EXECUTION_PLAN.md + AGENTS.md |
+| `/feature-spec [path]` | Generate FEATURE_SPEC.md through Q&A |
+| `/feature-technical-spec [path]` | Generate FEATURE_TECHNICAL_SPEC.md |
+| `/feature-plan [path]` | Generate EXECUTION_PLAN.md + AGENTS_ADDITIONS.md |
 
-### Execution & Monitoring
+### Execution Commands (run from your project directory)
 
 | Command | Description |
 |---------|-------------|
@@ -233,28 +238,28 @@ ai_coding_project_base/
 │   ├── FEATURE_SPEC_PROMPT.md       # Feature: Product specification prompt
 │   ├── FEATURE_TECHNICAL_SPEC_PROMPT.md  # Feature: Technical specification prompt
 │   └── FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md  # Feature: Execution plan generator
-├── .claude/                         # Claude Code configuration (copy to new projects)
-│   ├── commands/                    # Slash commands
-│   │   ├── setup.md                 # /setup — Initialize new project
-│   │   ├── product-spec.md          # /product-spec — Generate product spec
-│   │   ├── technical-spec.md        # /technical-spec — Generate tech spec
-│   │   ├── generate-plan.md         # /generate-plan — Generate execution plan
-│   │   ├── feature-spec.md          # /feature-spec — Generate feature spec
-│   │   ├── feature-technical-spec.md # /feature-technical-spec — Generate feature tech spec
-│   │   ├── feature-plan.md          # /feature-plan — Generate feature plan
-│   │   ├── fresh-start.md           # /fresh-start — Orient to project
-│   │   ├── phase-prep.md            # /phase-prep N — Check prerequisites
-│   │   ├── phase-start.md           # /phase-start N — Execute phase
-│   │   ├── phase-checkpoint.md      # /phase-checkpoint N — Run checks
-│   │   ├── verify-task.md           # /verify-task X.Y.Z — Verify task
-│   │   └── progress.md              # /progress — Show progress
+├── .claude/
+│   ├── commands/
+│   │   ├── setup.md                 # /setup — Initialize new project (toolkit only)
+│   │   ├── product-spec.md          # /product-spec — Generate product spec (toolkit only)
+│   │   ├── technical-spec.md        # /technical-spec — Generate tech spec (toolkit only)
+│   │   ├── generate-plan.md         # /generate-plan — Generate execution plan (toolkit only)
+│   │   ├── feature-spec.md          # /feature-spec — Generate feature spec (toolkit only)
+│   │   ├── feature-technical-spec.md # /feature-technical-spec (toolkit only)
+│   │   ├── feature-plan.md          # /feature-plan — Generate feature plan (toolkit only)
+│   │   ├── fresh-start.md           # /fresh-start — Orient to project (copied to target)
+│   │   ├── phase-prep.md            # /phase-prep N — Check prerequisites (copied to target)
+│   │   ├── phase-start.md           # /phase-start N — Execute phase (copied to target)
+│   │   ├── phase-checkpoint.md      # /phase-checkpoint N — Run checks (copied to target)
+│   │   ├── verify-task.md           # /verify-task X.Y.Z — Verify task (copied to target)
+│   │   └── progress.md              # /progress — Show progress (copied to target)
 │   └── skills/
 │       └── code-verification/
-│           └── SKILL.md             # Code verification skill
-├── .codex/                          # Codex CLI skills (copy to new projects)
+│           └── SKILL.md             # Code verification skill (copied to target)
+├── .codex/
 │   └── skills/
 │       └── code-verification/
-│           └── SKILL.md             # Code verification skill
+│           └── SKILL.md             # Code verification skill (copied to target)
 ├── docs/                            # Additional documentation
 ├── deprecated/                      # Legacy prompts (kept for reference)
 ├── CLAUDE.md                        # Claude Code configuration

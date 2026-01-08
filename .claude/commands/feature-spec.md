@@ -1,18 +1,19 @@
 ---
 description: Generate FEATURE_SPEC.md through guided Q&A
+argument-hint: [target-directory]
 allowed-tools: Read, Write, AskUserQuestion
 ---
 
-Generate a feature specification document using the guided Q&A process.
+Generate a feature specification document for the project at `$1`.
 
 ## Prerequisites
 
-Check that `FEATURE_SPEC_PROMPT.md` exists in the current directory. If not:
-"FEATURE_SPEC_PROMPT.md not found. Run /setup from the ai_coding_project_base toolkit first."
+- This command must be run from the ai_coding_project_base toolkit directory
+- If `$1` is empty, ask the user for the target directory path
 
 ## Process
 
-Follow the instructions in @FEATURE_SPEC_PROMPT.md exactly:
+Follow the instructions in @FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md exactly:
 
 1. Ask the user to describe the feature they want to add
 2. Work through each question category (Problem, Users, Behavior, Integration, Scope)
@@ -21,9 +22,13 @@ Follow the instructions in @FEATURE_SPEC_PROMPT.md exactly:
 
 ## Output
 
-Write the completed specification to `FEATURE_SPEC.md` in the current directory.
+Write the completed specification to `$1/FEATURE_SPEC.md`.
 
 ## Next Step
 
 When complete, inform the user:
-"FEATURE_SPEC.md created. Run /feature-technical-spec to define the integration approach."
+```
+FEATURE_SPEC.md created at $1/FEATURE_SPEC.md
+
+Next: Run /feature-technical-spec $1
+```

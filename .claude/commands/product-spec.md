@@ -1,14 +1,15 @@
 ---
 description: Generate PRODUCT_SPEC.md through guided Q&A
+argument-hint: [target-directory]
 allowed-tools: Read, Write, AskUserQuestion
 ---
 
-Generate a product specification document using the guided Q&A process.
+Generate a product specification document for the project at `$1`.
 
 ## Prerequisites
 
-Check that `PRODUCT_SPEC_PROMPT.md` exists in the current directory. If not, inform the user:
-"PRODUCT_SPEC_PROMPT.md not found. Run /setup from the ai_coding_project_base toolkit first."
+- This command must be run from the ai_coding_project_base toolkit directory
+- If `$1` is empty, ask the user for the target directory path
 
 ## Process
 
@@ -21,9 +22,13 @@ Follow the instructions in @PRODUCT_SPEC_PROMPT.md exactly:
 
 ## Output
 
-Write the completed specification to `PRODUCT_SPEC.md` in the current directory.
+Write the completed specification to `$1/PRODUCT_SPEC.md`.
 
 ## Next Step
 
 When complete, inform the user:
-"PRODUCT_SPEC.md created. Run /technical-spec to define the technical approach."
+```
+PRODUCT_SPEC.md created at $1/PRODUCT_SPEC.md
+
+Next: Run /technical-spec $1
+```
