@@ -264,13 +264,22 @@ If you can't provide files, describe:
 
 ---
 
-## Feature & Technical Specification
+## Feature Specification Documents (Required)
 
-{Paste or attach your feature spec here. This should include:}
+{Paste or attach both documents from the previous workflow steps:}
+
+### FEATURE_SPEC.md
 - What the feature does (user-facing behavior)
+- Target users and core user experience
+- Integration points with existing functionality
+- Scope boundaries
+
+### FEATURE_TECHNICAL_SPEC.md
 - Technical requirements and constraints
-- Acceptance criteria for the feature as a whole
-- Any wireframes, API contracts, or data models
+- Data model changes and migration strategy
+- API contracts (new and modified endpoints)
+- Files to create and modify
+- Regression risk assessment
 
 ═══════════════════════════════════════════════════════════════════
 PART 6: AGENTS.md ADDITIONS FORMAT
@@ -364,8 +373,9 @@ Generate:
 1. EXECUTION_PLAN.md
 2. Suggested AGENTS.md additions (if needed)
 
-Note: The execution plan references FEATURE_SPEC.md (your feature specification)
-instead of TECHNICAL_SPEC.md for context management purposes.
+Note: The execution plan references FEATURE_SPEC.md and FEATURE_TECHNICAL_SPEC.md
+(your feature specification documents) instead of PRODUCT_SPEC.md and TECHNICAL_SPEC.md
+for context management purposes.
 ```
 
 ---

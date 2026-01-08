@@ -353,32 +353,6 @@ Generate:
 2. AGENTS.md
 ```
 
----
-
-## Follow-Up Prompts
-
-### Refine a specific task
-```
-Review Task {X.Y.Z} and improve:
-1. Make acceptance criteria more specific and testable
-2. Clarify file paths
-3. Verify dependencies are accurate
-```
-
-### Add a feature
-```
-Add {feature} to the execution plan:
-1. Determine which phase it belongs in
-2. Create tasks with full details
-3. Update dependencies
-```
-
-### Handle scope change
-```
-Scope change: {description}
-
-Update EXECUTION_PLAN.md to reflect this.
-```
 
 ---
 
