@@ -1,36 +1,89 @@
 # AI Coding Project Toolkit
 
-A structured prompt framework for building software products with AI coding assistants. This toolkit guides you through product specification, technical design, and implementation planning—producing documents that AI agents can execute against.
+A structured prompt framework for building software with AI coding assistants. Instead of ad-hoc prompting, this toolkit provides a systematic workflow that produces documents AI agents can execute against autonomously.
 
-## What This Solves
+## The Problem
 
-AI coding assistants are powerful but work best with clear, structured context. This toolkit provides prompts that help you:
+AI coding assistants are powerful but inconsistent. Without structure:
+- Scope creeps and requirements get forgotten
+- Code quality varies between sessions
+- No verification that acceptance criteria are met
+- Context is lost between conversations
+- Behavior differs across tools (Claude Code, Codex CLI, etc.)
 
-1. **Define what to build** — through guided product and technical specifications
-2. **Plan how to build it** — with phased execution plans and acceptance criteria
-3. **Execute systematically** — using prompts designed for iterative, agent-driven development
+## The Solution
 
-## Quick Start
+A three-phase workflow with reusable prompts:
 
-### Option 1: Clone the Repository
-```bash
-git clone https://github.com/yourusername/ai_coding_project_base.git
+1. **Specification** — Guided Q&A extracts clear requirements into `PRODUCT_SPEC.md` and `TECHNICAL_SPEC.md`
+2. **Planning** — Generator prompts produce `EXECUTION_PLAN.md` (tasks with acceptance criteria) and `AGENTS.md` (workflow rules)
+3. **Execution** — AI agents work autonomously within guardrails, with human checkpoints between phases
+
+## Key Features
+
+- **Documents as contracts** — Specs and plans are artifacts AI agents execute against, not just notes
+- **Verification built in** — Every task has testable acceptance criteria; the `code-verification` skill enforces them
+- **Tool agnostic** — Works with both Claude Code and Codex CLI via shared skill directories
+- **Two workflows** — Greenfield projects start from scratch; feature development integrates with existing code
+
+## What You End Up With
+
+```
+your-project/
+├── PRODUCT_SPEC.md          # What you're building
+├── TECHNICAL_SPEC.md        # How it's built
+├── EXECUTION_PLAN.md        # Tasks with acceptance criteria
+├── AGENTS.md                # Workflow rules for AI agents
+├── .claude/skills/...       # Code verification (Claude Code)
+├── .codex/skills/...        # Code verification (Codex CLI)
+└── [your code]
 ```
 
-### Option 2: Copy the Files
-Download and copy these files to your project:
+These documents persist across sessions, enabling any AI agent to pick up where another left off.
 
-**For greenfield projects:**
-- `PRODUCT_SPEC_PROMPT.md`
-- `TECHNICAL_SPEC_PROMPT.md`
-- `GENERATOR_PROMPT.md`
-- `START_PROMPTS.md`
+## Quick Start (Claude Code)
 
-**For adding features to existing projects:**
-- `FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md`
-- `FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md`
-- `FEATURE_PROMPTS/FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md`
-- `START_PROMPTS.md`
+### 1. Clone the Toolkit
+```bash
+git clone https://github.com/yourusername/ai_coding_project_base.git
+cd ai_coding_project_base
+```
+
+### 2. Initialize Your Project
+Open Claude Code in the toolkit directory and run:
+```
+/setup ~/Projects/my-new-app
+```
+
+This copies all necessary files (commands, skills, prompts) to your project.
+
+### 3. Generate Documents & Execute
+
+**For a new project:**
+```
+cd ~/Projects/my-new-app
+/product-spec        # Define what you're building
+/technical-spec      # Define how it's built
+/generate-plan       # Create EXECUTION_PLAN.md + AGENTS.md
+/fresh-start         # Orient to project, load context
+/phase-prep 1        # Check prerequisites for Phase 1
+/phase-start 1       # Execute Phase 1
+```
+
+**For a new feature:**
+```
+cd ~/Projects/existing-app
+/feature-spec             # Define the feature
+/feature-technical-spec   # Define integration approach
+/feature-plan             # Create EXECUTION_PLAN.md + AGENTS_ADDITIONS.md
+/fresh-start              # Orient to project, load context
+/phase-prep 1             # Check prerequisites for Phase 1
+/phase-start 1            # Execute Phase 1
+```
+
+### Alternative: Manual Setup
+
+If not using Claude Code, copy files manually and use `START_PROMPTS.md` for guidance.
 
 ## Workflow Overview
 
@@ -111,128 +164,30 @@ Download and copy these files to your project:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Step-by-Step Usage
+## Slash Commands Reference
 
-### Greenfield Projects
+### Setup & Document Generation
 
-#### Step 1: Product Specification
+| Command | Description |
+|---------|-------------|
+| `/setup [path]` | Initialize a project with toolkit files |
+| `/product-spec` | Generate PRODUCT_SPEC.md through Q&A |
+| `/technical-spec` | Generate TECHNICAL_SPEC.md (requires PRODUCT_SPEC.md) |
+| `/generate-plan` | Generate EXECUTION_PLAN.md + AGENTS.md |
+| `/feature-spec` | Generate FEATURE_SPEC.md through Q&A |
+| `/feature-technical-spec` | Generate FEATURE_TECHNICAL_SPEC.md |
+| `/feature-plan` | Generate EXECUTION_PLAN.md + AGENTS_ADDITIONS.md |
 
-Paste `PRODUCT_SPEC_PROMPT.md` into your AI assistant along with your idea.
+### Execution & Monitoring
 
-The AI will ask questions to clarify:
-- What problem the app solves
-- Who the target users are
-- Core user experience
-- MVP features
-- Data requirements
-
-**Output:** `PRODUCT_SPEC.md`
-
-```markdown
-# Example output snippet:
-## Problem Statement
-Users struggle to track their daily habits consistently...
-
-## Target Users
-- Primary: Young professionals (25-35) seeking self-improvement
-- Secondary: Students building study routines
-```
-
-#### Step 2: Technical Specification
-
-Paste `TECHNICAL_SPEC_PROMPT.md` along with your `PRODUCT_SPEC.md`.
-
-The AI will guide you through:
-- Architecture decisions
-- Tech stack selection
-- Data models
-- API contracts
-- Implementation sequence
-
-**Output:** `TECHNICAL_SPEC.md`
-
-```markdown
-# Example output snippet:
-## Tech Stack
-- Frontend: Next.js 14 with App Router
-- Database: SQLite with Drizzle ORM
-- Styling: Tailwind CSS
-
-## Data Models
-### Habit
-| Field | Type | Description |
-|-------|------|-------------|
-| id | uuid | Primary key |
-| name | string | Habit name |
-| frequency | enum | daily/weekly/custom |
-```
-
-#### Step 3: Generate Execution Plan
-
-Paste `GENERATOR_PROMPT.md` along with your `PRODUCT_SPEC.md` and `TECHNICAL_SPEC.md`.
-
-**Output:** `EXECUTION_PLAN.md` and `AGENTS.md`
-
-```markdown
-# Example EXECUTION_PLAN.md snippet:
-## Phase 1: Foundation
-
-### Step 1.1: Project Setup
-
-#### Task 1.1.A: Initialize Project Structure
-
-**What:** Create Next.js project with required dependencies
-
-**Acceptance Criteria:**
-- [ ] Project runs with `npm run dev`
-- [ ] Tailwind CSS configured and working
-- [ ] Basic folder structure in place
-
-**Files:**
-- Create: `src/app/page.tsx` — Landing page
-- Create: `src/app/layout.tsx` — Root layout
-```
-
-#### Step 4: Execute with START_PROMPTS
-
-1. Add the generated `EXECUTION_PLAN.md` and `AGENTS.md` to your project root
-2. Use the prompts in `START_PROMPTS.md` to guide execution:
-   - **Fresh start** — Orient the AI to your project structure
-   - **Phase prep** — Check prerequisites before starting a phase
-   - **Phase start** — Execute all tasks in a phase autonomously
-
----
-
-### Adding Features to Existing Projects
-
-#### Step 1: Feature Specification
-
-Paste `FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md` into your AI assistant along with your feature idea.
-
-**Output:** `FEATURE_SPEC.md`
-
-#### Step 2: Feature Technical Specification
-
-Paste `FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md` along with your `FEATURE_SPEC.md`.
-
-**Output:** `FEATURE_TECHNICAL_SPEC.md`
-
-#### Step 3: Generate Feature Execution Plan
-
-Paste `FEATURE_PROMPTS/FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md` along with:
-- Your `FEATURE_SPEC.md`
-- Your `FEATURE_TECHNICAL_SPEC.md`
-- Your existing `AGENTS.md` (required input)
-
-**Output:** `EXECUTION_PLAN.md` and `AGENTS_ADDITIONS.md`
-
-#### Step 4: Execute with START_PROMPTS
-
-1. Add the generated `EXECUTION_PLAN.md` to your project root
-2. Merge `AGENTS_ADDITIONS.md` into your existing `AGENTS.md`
-3. Use the prompts in `START_PROMPTS.md` to guide execution:
-   - **Phase prep** — Check prerequisites before starting a phase
-   - **Phase start** — Execute all tasks in a phase autonomously
+| Command | Description |
+|---------|-------------|
+| `/fresh-start` | Orient to project structure, load context |
+| `/phase-prep N` | Check prerequisites before starting phase N |
+| `/phase-start N` | Execute all tasks in phase N autonomously |
+| `/phase-checkpoint N` | Run tests and verification after phase N |
+| `/verify-task X.Y.Z` | Run code-verification on a specific task |
+| `/progress` | Show progress through EXECUTION_PLAN.md |
 
 ## Output Documents
 
@@ -278,6 +233,28 @@ ai_coding_project_base/
 │   ├── FEATURE_SPEC_PROMPT.md       # Feature: Product specification prompt
 │   ├── FEATURE_TECHNICAL_SPEC_PROMPT.md  # Feature: Technical specification prompt
 │   └── FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md  # Feature: Execution plan generator
+├── .claude/                         # Claude Code configuration (copy to new projects)
+│   ├── commands/                    # Slash commands
+│   │   ├── setup.md                 # /setup — Initialize new project
+│   │   ├── product-spec.md          # /product-spec — Generate product spec
+│   │   ├── technical-spec.md        # /technical-spec — Generate tech spec
+│   │   ├── generate-plan.md         # /generate-plan — Generate execution plan
+│   │   ├── feature-spec.md          # /feature-spec — Generate feature spec
+│   │   ├── feature-technical-spec.md # /feature-technical-spec — Generate feature tech spec
+│   │   ├── feature-plan.md          # /feature-plan — Generate feature plan
+│   │   ├── fresh-start.md           # /fresh-start — Orient to project
+│   │   ├── phase-prep.md            # /phase-prep N — Check prerequisites
+│   │   ├── phase-start.md           # /phase-start N — Execute phase
+│   │   ├── phase-checkpoint.md      # /phase-checkpoint N — Run checks
+│   │   ├── verify-task.md           # /verify-task X.Y.Z — Verify task
+│   │   └── progress.md              # /progress — Show progress
+│   └── skills/
+│       └── code-verification/
+│           └── SKILL.md             # Code verification skill
+├── .codex/                          # Codex CLI skills (copy to new projects)
+│   └── skills/
+│       └── code-verification/
+│           └── SKILL.md             # Code verification skill
 ├── docs/                            # Additional documentation
 ├── deprecated/                      # Legacy prompts (kept for reference)
 ├── CLAUDE.md                        # Claude Code configuration

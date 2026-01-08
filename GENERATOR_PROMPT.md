@@ -190,14 +190,27 @@ AGENT (Executor)
 
 ## Task Execution
 
-1. **Load context** — Read AGENTS.md, TECHNICAL_SPEC.md, and your task from EXECUTION_PLAN.md
+1. **Load context** — Read AGENTS.md, your spec documents, and your task from EXECUTION_PLAN.md
 2. **Check CLAUDE.md** — Read project root CLAUDE.md if it exists
-3. **Verify dependencies** — Confirm prior tasks are complete
-4. **Write tests first** — One test per acceptance criterion
-5. **Implement** — Minimum code to pass tests
-6. **Verify** — Run all tests, confirm acceptance criteria met
-7. **Update progress** — Check off completed acceptance criteria in EXECUTION_PLAN.md
-8. **Commit** — Format: `task(1.1.A): brief description`
+3. **Create branch** — If first task in step, create branch: `git checkout -b step-{phase}.{step}`
+4. **Verify dependencies** — Confirm prior tasks are complete
+5. **Write tests first** — One test per acceptance criterion
+6. **Implement** — Minimum code to pass tests
+7. **Verify** — Use code-verification skill (see Verification section below)
+8. **Update progress** — Check off completed criteria in EXECUTION_PLAN.md (see checkbox format below)
+9. **Commit** — Format: `task(1.1.A): brief description`
+
+### Checkbox Format
+
+When updating EXECUTION_PLAN.md, change unchecked boxes to checked:
+
+```markdown
+# Before
+- [ ] User can log in with email and password
+
+# After
+- [x] User can log in with email and password
+```
 
 ---
 
@@ -207,7 +220,9 @@ AGENT (Executor)
 
 Before starting any task, load:
 1. AGENTS.md (this file)
-2. TECHNICAL_SPEC.md
+2. Specification documents:
+   - Greenfield projects: PRODUCT_SPEC.md and TECHNICAL_SPEC.md
+   - Feature work: FEATURE_SPEC.md and FEATURE_TECHNICAL_SPEC.md
 3. Your task definition from EXECUTION_PLAN.md
 
 **Preserve context while debugging.** If tests fail within a task, continue in the same conversation until resolved.
@@ -218,9 +233,24 @@ Task N starts (fresh)
     → Implement
     → Tests fail → Debug (keep context) → Fix
     → Tests pass
+    → Verify (code-verification skill or manual checklist)
+    → Update checkboxes in EXECUTION_PLAN.md
     → Task complete
 Task N+1 starts (fresh)
 ```
+
+### Context Hygiene
+
+Context pollution degrades response quality. Follow these rules:
+
+1. **Use `/compact` between phases** — After completing a step, run `/compact` to summarize and free context
+2. **Never exceed 60% context capacity** — If responses become repetitive or confused, context is polluted
+3. **Separate concerns by phase:**
+   - Research (read-only exploration)
+   - Plan (design approach)
+   - Implement (write code)
+   - Validate (verify acceptance criteria)
+4. **When in doubt, start fresh** — A clean context with reloaded documents beats a polluted one
 
 ---
 
@@ -231,6 +261,39 @@ Task N+1 starts (fresh)
 - Never skip or disable tests to make them pass
 - Never claim "working" when functionality is broken
 - Read full error output before attempting fixes
+
+---
+
+## Verification
+
+After implementing each task, verify all acceptance criteria are met.
+
+### Primary: Code Verification Skill (Claude Code)
+
+If using Claude Code with the code-verification skill available:
+
+```
+Use /code-verification to verify this task against its acceptance criteria
+```
+
+The skill will:
+- Parse each acceptance criterion
+- Spawn sub-agents to verify each one
+- Attempt fixes (up to 5 times) for failures
+- Generate a verification report
+
+### Fallback: Manual Verification Checklist
+
+If the code-verification skill is not available, manually verify:
+
+1. **Run tests** — `npm test` (or equivalent)
+2. **Type check** — `npm run typecheck` (or equivalent)
+3. **Lint** — `npm run lint` (or equivalent)
+4. **Manual check** — For each acceptance criterion:
+   - Read the criterion
+   - Verify it is met (inspect code, run app, check output)
+   - If not met, fix and re-verify
+5. **Document** — Note verification status in completion report
 
 ---
 
@@ -265,10 +328,35 @@ When done:
 
 ## Git Conventions
 
-| Item | Format |
-|------|--------|
-| Branch | `task-{id}` |
-| Commit | `task({id}): {description}` |
+### Branch Strategy
+
+Create one branch per **step** (not per task):
+
+```
+git checkout -b step-{phase}.{step}
+# Example: git checkout -b step-1.2
+```
+
+**Branch lifecycle:**
+1. Create branch from main/develop before starting first task in step
+2. Commit after each task completion
+3. Push branch when step is complete
+4. Create PR for review at phase checkpoints
+5. Merge after checkpoint approval
+
+### Commit Format
+
+```
+task({id}): {description}
+# Example: task(1.2.A): Add user authentication endpoint
+```
+
+### Branch Naming
+
+| Item | Format | Example |
+|------|--------|---------|
+| Step branch | `step-{phase}.{step}` | `step-1.2` |
+| Commit | `task({id}): {description}` | `task(1.2.A): Add login form` |
 
 ---
 

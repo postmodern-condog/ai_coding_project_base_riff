@@ -306,6 +306,82 @@ output suggested additions in this format:
 
 Common additions to consider:
 
+**Git Branch Strategy** — If not already defined in AGENTS.md
+```
+## Git Conventions
+
+### Branch Strategy
+
+Create one branch per **step** (not per task):
+
+git checkout -b step-{phase}.{step}
+# Example: git checkout -b step-1.2
+
+**Branch lifecycle:**
+1. Create branch from main/develop before starting first task in step
+2. Commit after each task completion
+3. Push branch when step is complete
+4. Create PR for review at phase checkpoints
+5. Merge after checkpoint approval
+
+### Commit Format
+
+task({id}): {description}
+# Example: task(1.2.A): Add user authentication endpoint
+
+### Branch Naming
+
+| Item | Format | Example |
+|------|--------|---------|
+| Step branch | `step-{phase}.{step}` | `step-1.2` |
+| Commit | `task({id}): {description}` | `task(1.2.A): Add login form` |
+```
+
+**Code Verification Workflow** — Recommended for all features
+```
+## Verification
+
+After implementing each task, verify all acceptance criteria are met.
+
+### Primary: Code Verification Skill (Claude Code)
+
+If using Claude Code with the code-verification skill available:
+
+Use /code-verification to verify this task against its acceptance criteria
+
+The skill will:
+- Parse each acceptance criterion
+- Spawn sub-agents to verify each one
+- Attempt fixes (up to 5 times) for failures
+- Generate a verification report
+
+### Fallback: Manual Verification Checklist
+
+If the code-verification skill is not available, manually verify:
+
+1. **Run tests** — `npm test` (or equivalent)
+2. **Type check** — `npm run typecheck` (or equivalent)
+3. **Lint** — `npm run lint` (or equivalent)
+4. **Manual check** — For each acceptance criterion:
+   - Read the criterion
+   - Verify it is met (inspect code, run app, check output)
+   - If not met, fix and re-verify
+5. **Document** — Note verification status in completion report
+```
+
+**Checkbox Update Format** — If not already defined in AGENTS.md
+```
+## Progress Tracking
+
+When completing acceptance criteria, update EXECUTION_PLAN.md checkboxes:
+
+# Before
+- [ ] User can log in with email and password
+
+# After
+- [x] User can log in with email and password
+```
+
 **Browser Verification Workflow** — If feature has UI acceptance criteria
 ```
 ## Browser Verification
