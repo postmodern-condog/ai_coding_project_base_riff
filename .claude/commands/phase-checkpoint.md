@@ -1,7 +1,7 @@
 ---
 description: Run checkpoint criteria after completing a phase
 argument-hint: [phase-number]
-allowed-tools: Bash, Read, Glob, Grep
+allowed-tools: Bash, Read, Edit, Glob, Grep, AskUserQuestion
 ---
 
 Phase $1 is complete. Run the checkpoint criteria from @EXECUTION_PLAN.md.
@@ -28,6 +28,20 @@ Run these commands and report results:
    ```
    (or equivalent, if applicable)
 
+4. **Security Scan**
+
+   Follow `.claude/skills/security-scan/SKILL.md`:
+   - Run dependency audit (npm audit, pip-audit, etc.)
+   - Run secrets detection
+   - Run static analysis for insecure patterns
+
+   For CRITICAL or HIGH issues:
+   - Present each issue with resolution options
+   - Apply fixes based on user choices
+   - Re-scan to confirm resolution
+
+   Security scan blocks checkpoint if CRITICAL or HIGH issues remain unresolved.
+
 ## Manual Verification
 
 From the "Phase $1 Checkpoint" section in EXECUTION_PLAN.md:
@@ -41,7 +55,21 @@ From the "Phase $1 Checkpoint" section in EXECUTION_PLAN.md:
 
 ## Report
 
-Provide:
-- Pass/fail status for each automated check
-- List of manual items for me to verify
-- Overall: Ready to proceed to Phase {next} or issues to address
+```
+Phase $1 Checkpoint Results
+===========================
+
+Automated Checks:
+- [ ] Tests: PASSED/FAILED
+- [ ] Type Check: PASSED/FAILED/SKIPPED
+- [ ] Linting: PASSED/FAILED/SKIPPED
+- [ ] Security: PASSED/FAILED/PASSED WITH NOTES
+
+Security Summary: X critical, Y high, Z medium (if applicable)
+
+Manual Verification Required:
+- [ ] {item from EXECUTION_PLAN.md}
+- [ ] {item from EXECUTION_PLAN.md}
+
+Overall: Ready to proceed to Phase {next} | Issues to address
+```

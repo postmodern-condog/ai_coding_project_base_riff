@@ -13,54 +13,21 @@ We are building an MVP - bias your choices towards simplicity, ease of implement
 
 We will ultimately pass this document on to the next stage of the workflow, which is converting this document into tasks that an AI coding agent will execute on autonomously. This document needs to contain enough detail that the AI coding agent will successfully be able to implement.
 
-Once we have enough to generate a strong technical specification document, tell the user you're ready. Generate `TECHNICAL_SPEC.md` with the following structure:
+Once we have enough to generate a strong technical specification document, tell the user you're ready. Generate `TECHNICAL_SPEC.md` that:
 
-```markdown
-# Technical Specification: {Product Name}
+1. Addresses these required topics:
+   - **Tech stack** — what technologies and why (with rationale for choices)
+   - **Architecture overview** — how components interact
+   - **Data models** — entities, fields, types, relationships
+   - **API/interface contracts** — endpoints, methods, request/response shapes (if applicable)
+   - **Implementation sequence** — what to build first and why
 
-## Tech Stack
-| Layer | Technology | Rationale |
-|-------|------------|-----------|
-| Frontend | {framework} | {why} |
-| Backend | {framework/runtime} | {why} |
-| Database | {database} | {why} |
-| Hosting | {platform} | {why} |
+2. Addresses these topics where relevant:
+   - State management approach
+   - Key dependencies and libraries
+   - Edge cases and boundary conditions
+   - Authentication/authorization approach (if applicable)
 
-## Architecture Overview
-{System diagram description, key components and how they interact}
+3. Is structured in whatever way best communicates this specific system
 
-## Data Models
-{For each entity: table/schema definition with fields, types, and relationships}
-
-### {Entity Name}
-| Field | Type | Description | Constraints |
-|-------|------|-------------|-------------|
-| id | uuid | Primary key | required |
-| ... | ... | ... | ... |
-
-## API/Interface Contracts
-{Endpoints, methods, request/response shapes}
-
-### {Endpoint Group}
-| Method | Path | Description | Request | Response |
-|--------|------|-------------|---------|----------|
-| GET | /api/... | ... | ... | ... |
-
-## State Management
-{How application state is managed - client-side, server-side, or both}
-
-## Dependencies & Libraries
-| Package | Version | Purpose |
-|---------|---------|---------|
-| ... | ... | ... |
-
-## Edge Cases & Boundary Conditions
-{Known edge cases and how they should be handled}
-
-## Implementation Sequence
-{Ordered list of what to build first, with rationale for ordering}
-
-1. {First thing to build} — {why first}
-2. {Second thing} — {why second}
-...
-```
+You have latitude to organize the document as appropriate for the project. A CLI tool needs different technical detail than a web app. A simple CRUD app differs from a real-time system. Use your judgment to create a document that gives an AI coding agent everything it needs to implement successfully.

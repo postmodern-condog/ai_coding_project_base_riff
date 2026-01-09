@@ -38,91 +38,53 @@ We are building an MVP of this feature - bias your choices towards simplicity, e
 
 We will ultimately pass this document on to the next stage of the workflow, which is converting this document into tasks that an AI coding agent will execute on autonomously. This document needs to contain enough detail that the AI coding agent will successfully be able to implement the feature while maintaining consistency with the existing codebase.
 
-Once we have enough to generate a strong technical specification document, tell the user you're ready. Generate `FEATURE_TECHNICAL_SPEC.md` with the following structure:
-```
+Once we have enough to generate a strong technical specification document, tell the user you're ready. Generate `FEATURE_TECHNICAL_SPEC.md` that:
 
----
+1. Addresses these required topics:
+   - **Integration analysis** — what files to modify, what files to create, what existing patterns to follow
+   - **Data model changes** — new entities, modified entities, migration needs
+   - **Regression risk assessment** — what could break and how to mitigate
+   - **Implementation sequence** — what to build first and why, considering dependencies on existing code
 
-## Output Structure
+2. Addresses these topics where relevant:
+   - API changes (new and modified endpoints)
+   - State management integration
+   - New dependencies
+   - Migration strategy and rollback plan
+   - Edge cases specific to this feature
 
-```markdown
-# Feature Technical Specification: {Feature Name}
+3. **For legacy/brownfield codebases**, additionally address:
 
-## Existing Tech Stack
-{Reference the tech stack from AGENTS.md or project context - do not propose changes unless necessary}
+   - **Technical debt assessment** — Identify code that must be touched but is problematic:
+     - Undocumented functions with unclear behavior
+     - Tightly coupled components that resist change
+     - Missing or inadequate test coverage in affected areas
+     - Deprecated patterns that the feature must work around
 
-## Integration Analysis
+   - **Undocumented behavior discovery** — Flag areas where:
+     - Business logic is embedded in code without explanation
+     - Edge cases are handled implicitly (magic numbers, special cases)
+     - Behavior differs from what documentation suggests
+     - "Tribal knowledge" is required to understand the code
 
-### Files to Modify
-| File | Change Type | Description |
-|------|-------------|-------------|
-| {path} | {extend/modify/refactor} | {what changes and why} |
+   - **Human decision points** — Explicitly mark decisions that require human judgment:
+     ```
+     ⚠️ REQUIRES HUMAN DECISION: {description}
+     Options:
+     1. {option A} — {tradeoffs}
+     2. {option B} — {tradeoffs}
+     Recommendation: {your recommendation and why}
+     ```
+     Use this for: architectural choices, breaking changes, data migrations, deprecation strategies
 
-### Files to Create
-| File | Purpose | Pattern Reference |
-|------|---------|-------------------|
-| {path} | {what it does} | {existing file to use as template} |
+   - **Migration risk checklist**:
+     - [ ] Data migration required? If yes, is it reversible?
+     - [ ] Breaking changes to existing APIs? If yes, versioning strategy?
+     - [ ] Dependent services affected? If yes, coordination needed?
+     - [ ] Feature flags needed for gradual rollout?
+     - [ ] Rollback plan if deployment fails?
 
-### Existing Patterns to Follow
-{List existing code patterns this feature should follow for consistency}
-- {Pattern 1}: Found in `{file}` — {description}
-- {Pattern 2}: Found in `{file}` — {description}
+4. Is structured in whatever way best communicates this specific feature's integration
 
-## Data Model Changes
-
-### New Entities
-{For each new entity: schema definition with fields, types, relationships}
-
-#### {Entity Name}
-| Field | Type | Description | Constraints |
-|-------|------|-------------|-------------|
-| ... | ... | ... | ... |
-
-### Modified Entities
-| Entity | Change | Migration Required |
-|--------|--------|-------------------|
-| {existing entity} | {what changes} | {yes/no} |
-
-## API Changes
-
-### New Endpoints
-| Method | Path | Description | Request | Response |
-|--------|------|-------------|---------|----------|
-| ... | ... | ... | ... | ... |
-
-### Modified Endpoints
-| Method | Path | Change | Backwards Compatible |
-|--------|------|--------|---------------------|
-| ... | ... | ... | {yes/no} |
-
-## State Management
-{How this feature's state integrates with existing state management}
-
-## New Dependencies
-| Package | Version | Purpose | Alternatives Considered |
-|---------|---------|---------|------------------------|
-| ... | ... | ... | ... |
-
-## Regression Risk Assessment
-{What existing functionality could break and how to mitigate}
-
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| {what could break} | {low/medium/high} | {description} | {how to prevent/detect} |
-
-## Migration Strategy
-{If data model changes require migration}
-- Migration approach: {description}
-- Rollback plan: {how to undo if needed}
-- Data preservation: {how existing data is handled}
-
-## Edge Cases & Boundary Conditions
-{Feature-specific edge cases and how they should be handled}
-
-## Implementation Sequence
-{Ordered list of what to build first, considering dependencies on existing code}
-
-1. {First thing to build} — {why first, what it depends on}
-2. {Second thing} — {why second}
-...
+You have latitude to organize the document as appropriate for the feature. A database schema change needs different detail than a UI-only feature. Use your judgment to create a document that gives an AI coding agent everything it needs to implement the feature while maintaining consistency with the existing codebase.
 ```

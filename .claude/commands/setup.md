@@ -25,6 +25,7 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    - `phase-checkpoint.md`
    - `verify-task.md`
    - `progress.md`
+   - `security-scan.md`
 
    Copy skills directories:
    - `.claude/skills/` → target's `.claude/skills/`

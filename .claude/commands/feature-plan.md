@@ -1,7 +1,7 @@
 ---
 description: Generate EXECUTION_PLAN.md and AGENTS_ADDITIONS.md for a feature
 argument-hint: [target-directory]
-allowed-tools: Read, Write, Glob, Grep
+allowed-tools: Read, Write, Edit, AskUserQuestion, Glob, Grep
 ---
 
 Generate the execution plan and agent additions for the project at `$1`.
@@ -32,11 +32,26 @@ Write both documents to the target directory:
 - `$1/EXECUTION_PLAN.md`
 - `$1/AGENTS_ADDITIONS.md`
 
+## Verification (Automatic)
+
+After writing EXECUTION_PLAN.md, run the spec-verification skill:
+
+1. Follow `.claude/skills/spec-verification/SKILL.md`
+2. Verify context preservation: Check that all key items from FEATURE_TECHNICAL_SPEC.md and FEATURE_SPEC.md appear as tasks or acceptance criteria
+3. Run quality checks for untestable criteria, missing dependencies, vague language, regression coverage
+4. Present any CRITICAL issues to the user with resolution options
+5. Apply fixes based on user choices
+6. Re-verify until clean or max iterations reached
+
+**IMPORTANT**: Do not proceed to "Next Step" until verification passes or user explicitly chooses to proceed with noted issues.
+
 ## Next Step
 
-When complete, inform the user:
+When verification is complete, inform the user:
 ```
-EXECUTION_PLAN.md and AGENTS_ADDITIONS.md created at $1
+EXECUTION_PLAN.md and AGENTS_ADDITIONS.md created and verified at $1
+
+Verification: PASSED | PASSED WITH NOTES | NEEDS REVIEW
 
 Next steps:
 1. cd $1

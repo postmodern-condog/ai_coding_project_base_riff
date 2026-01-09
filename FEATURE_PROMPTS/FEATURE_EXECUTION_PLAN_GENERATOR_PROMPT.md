@@ -312,16 +312,16 @@ Common additions to consider:
 
 ### Branch Strategy
 
-Create one branch per **step** (not per task):
+Create one branch per **phase** (not per step or task):
 
-git checkout -b step-{phase}.{step}
-# Example: git checkout -b step-1.2
+git checkout -b phase-{N}
+# Example: git checkout -b phase-1
 
 **Branch lifecycle:**
-1. Create branch from main/develop before starting first task in step
-2. Commit after each task completion
-3. Push branch when step is complete
-4. Create PR for review at phase checkpoints
+1. Create branch from main/develop before starting first task in phase
+2. Commit after each task completion (all tasks sequential on same branch)
+3. Do not push until human reviews at checkpoint
+4. Create PR for review at phase checkpoint
 5. Merge after checkpoint approval
 
 ### Commit Format
@@ -329,12 +329,14 @@ git checkout -b step-{phase}.{step}
 task({id}): {description}
 # Example: task(1.2.A): Add user authentication endpoint
 
-### Branch Naming
+### Branch and Commit Structure
 
 | Item | Format | Example |
 |------|--------|---------|
-| Step branch | `step-{phase}.{step}` | `step-1.2` |
+| Phase branch | `phase-{N}` | `phase-1` |
 | Commit | `task({id}): {description}` | `task(1.2.A): Add login form` |
+
+Steps are logical groupings within the branch—not separate branches.
 ```
 
 **Code Verification Workflow** — Recommended for all features

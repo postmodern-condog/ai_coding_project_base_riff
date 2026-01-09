@@ -1,6 +1,6 @@
 # Execution Toolkit Generator
 
-Generate an execution toolkit from a technical specification. This prompt produces two documents with distinct purposes:
+Generate an execution toolkit from product and technical specifications. This prompt produces two documents with distinct purposes:
 
 - **EXECUTION_PLAN.md** — What to build (tasks, acceptance criteria, dependencies)
 - **AGENTS.md** — How to work (workflow rules, guardrails, verification protocol)
@@ -10,7 +10,7 @@ Generate an execution toolkit from a technical specification. This prompt produc
 ## The Prompt
 
 ```
-I need you to generate an execution toolkit from the attached technical specification.
+I need you to generate an execution toolkit from the attached specifications (PRODUCT_SPEC.md and TECHNICAL_SPEC.md).
 
 Generate two documents:
 1. EXECUTION_PLAN.md — Task breakdown with acceptance criteria
@@ -156,6 +156,14 @@ Human must complete before agents begin:
 PART 3: AGENTS.md FORMAT
 ══════════════════════════════════════════════════════════════════════════════
 
+**SIZE CONSTRAINT: Keep AGENTS.md under 150 lines.**
+
+Research shows frontier LLMs follow ~150 instructions consistently. Beyond this,
+instruction-following degrades. If you need more rules:
+- Put the core workflow in AGENTS.md (≤150 lines)
+- Put context-specific rules in subdirectory `.claude/CLAUDE.md` files
+- Don't include code style guidelines (use linters via hooks instead)
+
 # AGENTS.md
 
 Workflow guidelines for AI agents executing tasks from EXECUTION_PLAN.md.
@@ -192,7 +200,7 @@ AGENT (Executor)
 
 1. **Load context** — Read AGENTS.md, your spec documents, and your task from EXECUTION_PLAN.md
 2. **Check CLAUDE.md** — Read project root CLAUDE.md if it exists
-3. **Create branch** — If first task in step, create branch: `git checkout -b step-{phase}.{step}`
+3. **Create branch** — If first task in phase, create branch: `git checkout -b phase-{N}`
 4. **Verify dependencies** — Confirm prior tasks are complete
 5. **Write tests first** — One test per acceptance criterion
 6. **Implement** — Minimum code to pass tests
@@ -330,18 +338,18 @@ When done:
 
 ### Branch Strategy
 
-Create one branch per **step** (not per task):
+Create one branch per **phase** (not per step or task):
 
 ```
-git checkout -b step-{phase}.{step}
-# Example: git checkout -b step-1.2
+git checkout -b phase-{N}
+# Example: git checkout -b phase-1
 ```
 
 **Branch lifecycle:**
-1. Create branch from main/develop before starting first task in step
-2. Commit after each task completion
-3. Push branch when step is complete
-4. Create PR for review at phase checkpoints
+1. Create branch from main/develop before starting first task in phase
+2. Commit after each task completion (all tasks sequential on same branch)
+3. Do not push until human reviews at checkpoint
+4. Create PR for review at phase checkpoint
 5. Merge after checkpoint approval
 
 ### Commit Format
@@ -351,12 +359,14 @@ task({id}): {description}
 # Example: task(1.2.A): Add user authentication endpoint
 ```
 
-### Branch Naming
+### Branch and Commit Structure
 
 | Item | Format | Example |
 |------|--------|---------|
-| Step branch | `step-{phase}.{step}` | `step-1.2` |
+| Phase branch | `phase-{N}` | `phase-1` |
 | Commit | `task({id}): {description}` | `task(1.2.A): Add login form` |
+
+Steps are logical groupings within the branch—not separate branches.
 
 ---
 
@@ -429,10 +439,16 @@ Red flags to fix:
 ✗ Missing spec reference
 
 ══════════════════════════════════════════════════════════════════════════════
-SPECIFICATION
+SPECIFICATION DOCUMENTS
 ══════════════════════════════════════════════════════════════════════════════
 
-{Paste or attach TECHNICAL_SPEC.md here}
+## PRODUCT_SPEC.md
+
+{Paste or attach PRODUCT_SPEC.md here — provides product context: problem, users, MVP scope}
+
+## TECHNICAL_SPEC.md
+
+{Paste or attach TECHNICAL_SPEC.md here — provides technical details: architecture, data models, APIs}
 
 ══════════════════════════════════════════════════════════════════════════════
 

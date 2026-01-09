@@ -49,44 +49,11 @@ If the user wants to add capabilities beyond the feature scope during our discus
 
 We will ultimately pass this document on to the next stage of the workflow, a technical specification designed by a software engineer. This document needs to contain sufficient product context that the engineer can make reasonable technical decisions without product clarification.
 
-Once we have enough to generate a strong feature specification, tell the user that you can generate it when they're ready. Generate `FEATURE_SPEC.md` with the following structure:
-```
+Once we have enough to generate a strong feature specification, tell the user that you can generate it when they're ready. Generate `FEATURE_SPEC.md` that:
 
----
+1. Addresses all the required questions listed above (Core Feature Definition, Integration, Scope Boundaries)
+2. Includes any future enhancements that came up during discussion
+3. Is structured in whatever way best communicates this specific feature
 
-## Output Structure
-
-```markdown
-# Feature Specification: {Feature Name}
-
-## Problem Statement
-{What problem does this feature solve and why does it matter}
-
-## Target Users
-{Who benefits from this feature}
-
-## Core User Experience
-{Step-by-step user journey through the feature's main flow}
-
-## Feature Requirements
-{Bulleted list of must-have capabilities for this feature}
-
-## Data Requirements
-{What new data needs to be stored/persisted}
-
-## Integration Points
-{How this feature connects with existing functionality}
-
-| Existing Component | Integration Type | Notes |
-|--------------------|------------------|-------|
-| {component} | {uses/extends/modifies} | {details} |
-
-## Backwards Compatibility
-{Any concerns about breaking existing functionality}
-
-## Out of Scope
-{What is explicitly NOT part of this feature}
-
-## Future Enhancements
-{Ideas discussed but deferred from this feature's scope}
+You have latitude to organize the document as appropriate for the feature. A small UI enhancement will look different from a major new capability. Use your judgment to create a document that gives a software engineer everything they need to make technical decisions about integrating this feature.
 ```

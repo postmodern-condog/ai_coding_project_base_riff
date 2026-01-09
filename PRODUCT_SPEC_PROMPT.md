@@ -21,32 +21,10 @@ If the user wants to add features beyond the MVP scope during our discussion, ac
 
 We will ultimately pass this document on to the next stage of the workflow, a technical specification designed by a software engineer. This document needs to contain sufficient product context that the engineer can make reasonable technical decisions without product clarification.
 
-Once we have enough to generate a strong one-pager, tell the user that you can generate a product specification when they're ready. Generate `PRODUCT_SPEC.md` with the following structure:
+Once we have enough to generate a strong one-pager, tell the user that you can generate a product specification when they're ready. Generate `PRODUCT_SPEC.md` that:
 
-```markdown
-# Product Specification: {Product Name}
+1. Addresses all the required questions listed above
+2. Includes any post-MVP considerations that came up during discussion
+3. Is structured in whatever way best communicates this specific product
 
-## Problem Statement
-{What problem does this solve and why does it matter}
-
-## Target Users
-{Who is this for, primary and secondary users}
-
-## Platform
-{Where does this live - web, mobile, CLI, etc.}
-
-## Core User Experience
-{Step-by-step user journey through the main flow}
-
-## MVP Features
-{Bulleted list of must-have features}
-
-## Data Requirements
-{What data needs to be stored/persisted}
-
-## Authentication & Access Control
-{User accounts, permissions, roles if applicable}
-
-## Post-MVP Considerations
-{Ideas discussed but deferred from MVP scope}
-```
+You have latitude to organize the document as appropriate for the product. A CLI tool will look different from a web app. A simple utility will be shorter than a complex platform. Use your judgment to create a document that gives a software engineer everything they need to make technical decisions.

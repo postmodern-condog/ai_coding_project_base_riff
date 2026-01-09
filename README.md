@@ -22,7 +22,8 @@ A three-phase workflow with reusable prompts:
 ## Key Features
 
 - **Documents as contracts** — Specs and plans are artifacts AI agents execute against, not just notes
-- **Verification built in** — Every task has testable acceptance criteria; the `code-verification` skill enforces them
+- **Automatic spec verification** — After generating each document, the `spec-verification` skill checks for lost context and quality issues
+- **Code verification built in** — Every task has testable acceptance criteria; the `code-verification` skill enforces them
 - **Tool agnostic** — Works with both Claude Code and Codex CLI via shared skill directories
 - **Two workflows** — Greenfield projects start from scratch; feature development integrates with existing code
 
@@ -104,6 +105,8 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 │   PRODUCT_SPEC_PROMPT  ──────→  PRODUCT_SPEC.md                         │
 │       ↓                                                                 │
 │   TECHNICAL_SPEC_PROMPT  ────→  TECHNICAL_SPEC.md                       │
+│       ↓                                                                 │
+│   [Auto-Verify] ─────────────→  Check context preservation & quality    │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↓
@@ -113,6 +116,8 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 │                                                                         │
 │   GENERATOR_PROMPT  ─────────→  EXECUTION_PLAN.md                       │
 │                                  AGENTS.md                              │
+│       ↓                                                                 │
+│   [Auto-Verify] ─────────────→  Check context preservation & quality    │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↓
@@ -141,6 +146,8 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 │   FEATURE_SPEC_PROMPT  ──────→  FEATURE_SPEC.md                         │
 │       ↓                                                                 │
 │   FEATURE_TECHNICAL_SPEC_PROMPT  ────→  FEATURE_TECHNICAL_SPEC.md       │
+│       ↓                                                                 │
+│   [Auto-Verify] ─────────────→  Check context preservation & quality    │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↓
@@ -152,6 +159,8 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 │       ↓                                                                 │
 │   FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT  ─→  EXECUTION_PLAN.md        │
 │                                                  AGENTS_ADDITIONS.md    │
+│       ↓                                                                 │
+│   [Auto-Verify] ─────────────→  Check context preservation & quality    │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↓
@@ -177,11 +186,12 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 |---------|-------------|
 | `/setup [path]` | Copy execution commands + skills to target project |
 | `/product-spec [path]` | Generate PRODUCT_SPEC.md through Q&A |
-| `/technical-spec [path]` | Generate TECHNICAL_SPEC.md (requires PRODUCT_SPEC.md) |
-| `/generate-plan [path]` | Generate EXECUTION_PLAN.md + AGENTS.md |
+| `/technical-spec [path]` | Generate TECHNICAL_SPEC.md (requires PRODUCT_SPEC.md) + auto-verify |
+| `/generate-plan [path]` | Generate EXECUTION_PLAN.md + AGENTS.md + auto-verify |
 | `/feature-spec [path]` | Generate FEATURE_SPEC.md through Q&A |
-| `/feature-technical-spec [path]` | Generate FEATURE_TECHNICAL_SPEC.md |
-| `/feature-plan [path]` | Generate EXECUTION_PLAN.md + AGENTS_ADDITIONS.md |
+| `/feature-technical-spec [path]` | Generate FEATURE_TECHNICAL_SPEC.md + auto-verify |
+| `/feature-plan [path]` | Generate EXECUTION_PLAN.md + AGENTS_ADDITIONS.md + auto-verify |
+| `/verify-spec <type>` | Manually verify a spec document (technical-spec, execution-plan, etc.) |
 
 ### Execution Commands (run from your project directory)
 
@@ -192,6 +202,7 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 | `/phase-start N` | Execute all tasks in phase N autonomously |
 | `/phase-checkpoint N` | Run tests and verification after phase N |
 | `/verify-task X.Y.Z` | Run code-verification on a specific task |
+| `/security-scan` | Scan for security vulnerabilities in deps, code, and secrets |
 | `/progress` | Show progress through EXECUTION_PLAN.md |
 
 ## Output Documents
@@ -226,6 +237,136 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 
 5. **Track follow-ups in TODOS.md** — The framework encourages capturing scope creep items rather than addressing them immediately
 
+## Automatic Spec Verification
+
+After generating `TECHNICAL_SPEC.md`, `EXECUTION_PLAN.md`, or their feature equivalents, the toolkit automatically runs verification to catch two types of problems:
+
+### Context Preservation
+
+Ensures nothing important is lost as requirements flow through the document chain:
+
+```
+PRODUCT_SPEC.md → TECHNICAL_SPEC.md → EXECUTION_PLAN.md
+```
+
+For each upstream document, verification extracts key items (features, constraints, edge cases) and confirms they appear in the downstream document—either directly, consolidated into broader items, or explicitly deferred.
+
+### Quality Checks
+
+Scans for common specification anti-patterns:
+
+| Issue Type | Example | Why It Matters |
+|------------|---------|----------------|
+| Vague language | "API should be fast" | Can't write tests for unmeasurable requirements |
+| Missing rationale | "Use Redis" | Without "why", future decisions lack context |
+| Undefined contracts | "POST /users" without request shape | Implementation will guess or stall |
+| Untestable criteria | "Should feel intuitive" | Acceptance criteria must be verifiable |
+| Scope creep | Feature in tech spec not in product spec | Requirements should flow downstream, not appear spontaneously |
+
+### Interactive Repair
+
+When issues are found, verification presents each one with resolution options:
+
+```
+ISSUE 1 of 2: Vague Language
+Location: TECHNICAL_SPEC.md, Section "Performance"
+Problem: "API responses should be fast" is unmeasurable
+
+How would you like to resolve this?
+○ Use suggested: "API responses return within 200ms p95" (Recommended)
+○ Specify custom target
+○ Remove requirement
+```
+
+Fixes are applied automatically based on your choices, then re-verified.
+
+### Manual Verification
+
+Run verification manually anytime:
+
+```bash
+/verify-spec technical-spec      # Verify TECHNICAL_SPEC.md
+/verify-spec execution-plan      # Verify EXECUTION_PLAN.md
+/verify-spec feature-technical   # Verify FEATURE_TECHNICAL_SPEC.md
+/verify-spec feature-plan        # Verify feature EXECUTION_PLAN.md
+```
+
+## Using Web Interfaces (Claude, ChatGPT, etc.)
+
+The slash commands optimize for **workflow integration and consistency**, but web-based LLM interfaces may produce **higher quality specification documents** in certain scenarios. Consider the trade-offs:
+
+### When Web Interfaces May Be Better
+
+| Scenario | Why |
+|----------|-----|
+| **Greenfield product specs** | Web search enables competitor analysis, market research, and industry best practices |
+| **Complex product decisions** | Extended thinking modes provide deeper reasoning on trade-offs |
+| **Rich reference material** | Projects/uploads let you include user research, brand guides, competitor docs |
+| **Document iteration** | Artifact panels make it easier to refine sections while viewing the whole |
+
+### When Slash Commands Are Better
+
+| Scenario | Why |
+|----------|-----|
+| **Feature development** | Needs codebase access to understand existing patterns and constraints |
+| **Technical specs** | Benefits from reading actual code, not just descriptions |
+| **Workflow velocity** | Documents land in the right place, ready for next step |
+| **Team consistency** | Same environment produces predictable, uniform outputs |
+
+### Hybrid Workflow
+
+You can generate specs in a web interface and continue execution in Claude Code:
+
+**For greenfield projects:**
+```bash
+# 1. In Claude/ChatGPT web interface:
+#    - Paste contents of PRODUCT_SPEC_PROMPT.md
+#    - Complete the Q&A, copy the resulting markdown
+
+# 2. Save to your project:
+#    - Create PRODUCT_SPEC.md in your target directory
+
+# 3. Continue in Claude Code (from toolkit directory):
+/technical-spec ~/Projects/my-app    # Reads your PRODUCT_SPEC.md
+/generate-plan ~/Projects/my-app
+
+# 4. Execute normally:
+cd ~/Projects/my-app
+/fresh-start
+/phase-prep 1
+/phase-start 1
+```
+
+**For feature development:**
+```bash
+# 1. In web interface:
+#    - Paste contents of FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md
+#    - Include relevant context about your existing app
+#    - Copy the resulting markdown
+
+# 2. Save to your project:
+#    - Create FEATURE_SPEC.md in your target directory
+
+# 3. Continue in Claude Code (from toolkit directory):
+/feature-technical-spec ~/Projects/my-app    # Benefits from codebase access
+/feature-plan ~/Projects/my-app
+
+# 4. Execute normally
+```
+
+### Prompt Files for Web Use
+
+The raw prompts are available for copy-paste into any LLM:
+
+| Document | Prompt File |
+|----------|-------------|
+| PRODUCT_SPEC.md | `PRODUCT_SPEC_PROMPT.md` |
+| TECHNICAL_SPEC.md | `TECHNICAL_SPEC_PROMPT.md` |
+| FEATURE_SPEC.md | `FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md` |
+| FEATURE_TECHNICAL_SPEC.md | `FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md` |
+
+**Note:** EXECUTION_PLAN.md and AGENTS.md generation (`GENERATOR_PROMPT.md`) requires reading the spec files, so these are best done in Claude Code where file access is available.
+
 ## File Structure
 
 ```
@@ -247,19 +388,27 @@ ai_coding_project_base/
 │   │   ├── feature-spec.md          # /feature-spec — Generate feature spec (toolkit only)
 │   │   ├── feature-technical-spec.md # /feature-technical-spec (toolkit only)
 │   │   ├── feature-plan.md          # /feature-plan — Generate feature plan (toolkit only)
+│   │   ├── verify-spec.md           # /verify-spec — Verify spec document (toolkit only)
 │   │   ├── fresh-start.md           # /fresh-start — Orient to project (copied to target)
 │   │   ├── phase-prep.md            # /phase-prep N — Check prerequisites (copied to target)
 │   │   ├── phase-start.md           # /phase-start N — Execute phase (copied to target)
 │   │   ├── phase-checkpoint.md      # /phase-checkpoint N — Run checks (copied to target)
 │   │   ├── verify-task.md           # /verify-task X.Y.Z — Verify task (copied to target)
+│   │   ├── security-scan.md         # /security-scan — Security scanning (copied to target)
 │   │   └── progress.md              # /progress — Show progress (copied to target)
 │   └── skills/
-│       └── code-verification/
-│           └── SKILL.md             # Code verification skill (copied to target)
+│       ├── code-verification/
+│       │   └── SKILL.md             # Code verification skill (copied to target)
+│       ├── security-scan/
+│       │   └── SKILL.md             # Security scan skill (copied to target)
+│       └── spec-verification/
+│           └── SKILL.md             # Spec verification skill (toolkit only)
 ├── .codex/
 │   └── skills/
-│       └── code-verification/
-│           └── SKILL.md             # Code verification skill (copied to target)
+│       ├── code-verification/
+│       │   └── SKILL.md             # Code verification skill (copied to target)
+│       └── security-scan/
+│           └── SKILL.md             # Security scan skill (copied to target)
 ├── docs/                            # Additional documentation
 ├── deprecated/                      # Legacy prompts (kept for reference)
 ├── CLAUDE.md                        # Claude Code configuration
