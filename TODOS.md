@@ -6,7 +6,9 @@
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues)
 - [ ] Intro commands for each Step
 - [ ] Verify that the Chrome DevTools integration works
-- [ ] Add git worktrees support for parallel task execution
+- [ ] Git worktrees for parallel task execution (see below)
+- [ ] Cross-tool compatibility with config generation (see below) — combines former "Cross-Tool Compatibility" and "Autonomous Execution Permissions"
+- [ ] Address Claude Code dependency — slash commands only work in Claude Code (see below)
 - [x] Add `/list-todos` command (see below) — DONE
 
 ## Future Concepts
@@ -201,63 +203,140 @@ Add optional integration with issue trackers (Jira, Linear, GitHub Issues) to li
 - How to handle offline/disconnected scenarios?
 - Should we auto-create sub-issues for tasks?
 
-### Cross-Tool Compatibility
+### Git Worktrees for Parallel Task Execution
 
-Investigate whether the generated project structure (`.claude/commands/`, `.claude/skills/`, spec documents) could be leveraged by AI coding tools beyond Claude Code and Codex CLI.
+Enable parallel execution of independent tasks within a step using git worktrees.
 
-**Tools to investigate:**
+**Context:**
+- The GENERATOR_PROMPT.md already considers parallelizability when breaking out tasks within steps
+- Tasks within a step that have no dependencies on each other could theoretically run simultaneously
+- Git worktrees allow multiple branches/working directories checked out at once
 
-| Tool | Type | Potential Integration |
-|------|------|----------------------|
-| Cursor | IDE | Rules files, `.cursor/` directory |
-| Windsurf | IDE | Custom instructions |
-| Aider | CLI | `.aider.conf.yml`, conventions files |
-| Continue | IDE extension | `.continue/` config |
-| GitHub Copilot Workspace | Cloud | Task definitions |
-| Amazon Q Developer | IDE/CLI | Custom prompts |
+**Concept:**
+```
+step-1.1/
+├── task-1.1.A (worktree 1) ── Agent 1 working
+├── task-1.1.B (worktree 2) ── Agent 2 working (parallel, no dependency on A)
+└── task-1.1.C (waiting)    ── Depends on A, must wait
+```
 
-**Questions to answer:**
+**Requirements:**
+1. Orchestrator-level functionality to:
+   - Analyze task dependencies within a step
+   - Spawn parallel agents for independent tasks
+   - Manage git worktrees (create, merge, cleanup)
+   - Coordinate completion and handle conflicts
+2. Merge strategy when parallel tasks complete
+3. Conflict resolution when tasks touch same files unexpectedly
 
-1. What configuration formats do these tools use?
-2. Can we generate tool-specific config files from our universal spec documents?
-3. Is there a common subset that works across tools?
-4. Should `/setup` generate configs for multiple tools?
-5. Can AGENTS.md be translated into tool-specific rule formats?
+**Open questions:**
+- What orchestrator mechanism? (Claude Code subagents? External script?)
+- How to detect/prevent conflicts before they happen?
+- Is the complexity worth the speed gain for typical projects?
+- How does this interact with the current phase-branch model?
 
-**Potential deliverables:**
+**Potential approach:**
+- Add `parallel: true/false` flag to task definitions in EXECUTION_PLAN.md
+- Create `/parallel-step` command that uses worktrees
+- Keep sequential execution as default, parallel as opt-in
 
-- `/setup --tool=cursor` flag to generate Cursor-compatible config
-- Universal `AGENTS.md` → tool-specific rules converter
-- Documentation on manual setup for unsupported tools
+### Cross-Tool Compatibility with Config Generation
 
-### Autonomous Execution Permissions
+Generate tool-specific configuration files to make the toolkit work with AI coding tools beyond Claude Code.
 
-Investigate what permissions AI coding tools need for autonomous phase execution, and whether we can generate configuration files that pre-authorize these permissions.
+**Goal:** When running `/setup`, generate configs for the user's preferred tool(s) so the workflow works across different AI assistants.
 
-**Permission categories to investigate:**
+**Tools to support (priority order):**
+
+| Tool | Type | Config Format | Slash Command Equivalent |
+|------|------|---------------|-------------------------|
+| Cursor | IDE | `.cursor/rules/*.mdc` | Rules with glob patterns |
+| Codex CLI | CLI | Research needed | Research needed |
+| Aider | CLI | `.aider.conf.yml` | Conventions file |
+| Windsurf | IDE | Custom instructions | TBD |
+| Continue | IDE extension | `.continue/config.json` | TBD |
+
+**Config generation approach:**
+
+1. **Translate AGENTS.md to tool-specific rules**
+   - Parse AGENTS.md sections
+   - Generate equivalent config for target tool
+   - Example: AGENTS.md "Git Conventions" → Cursor rule file
+
+2. **Generate permission configs**
+   - Each tool has different permission models:
+     - Claude Code: `allowed-tools` in commands, `settings.json`
+     - Codex CLI: sandbox mode flags
+     - Cursor: Less restrictive by default
+   - Generate appropriate permission setup for autonomous execution
+
+3. **Proposed `/setup` enhancement:**
+   ```bash
+   /setup ~/my-project                    # Claude Code only (default)
+   /setup ~/my-project --tool=cursor      # Also generate Cursor configs
+   /setup ~/my-project --tool=aider       # Also generate Aider configs
+   /setup ~/my-project --tool=all         # Generate all supported configs
+   ```
+
+**Permission categories to handle:**
 
 | Category | Examples | Risk Level |
 |----------|----------|------------|
 | File operations | Create, edit, delete files | Medium |
 | Shell execution | npm install, pytest, build commands | High |
-| Network access | API calls, package downloads | Medium |
 | Git operations | Commit, branch, push | Medium |
 | Environment access | Read env vars, secrets | High |
 
+**Deliverables:**
+
+1. Research each tool's config format and document findings
+2. Create config generators for top 2-3 tools
+3. Add `--tool` flag to `/setup`
+4. Documentation for manual setup with unsupported tools
+5. Permission manifest in EXECUTION_PLAN.md (per-phase requirements)
+
+### Address Claude Code Dependency
+
+Currently, the toolkit's slash commands (`.claude/commands/`) only work in Claude Code. This limits adoption for users of other tools.
+
+**Current state:**
+
+| Component | Claude Code | Codex CLI | Other Tools |
+|-----------|-------------|-----------|-------------|
+| Slash commands (`/phase-start`, etc.) | ✅ Works | ❌ Not supported | ❌ Not supported |
+| Skills (`.claude/skills/`) | ✅ Works | ✅ Works (via `.codex/skills/`) | ❓ Manual reference |
+| Spec documents | ✅ Works | ✅ Works | ✅ Works |
+| AGENTS.md | ✅ Works | ✅ Works | ✅ Works |
+| Prompt files | ✅ Works | ✅ Manual paste | ✅ Manual paste |
+
+**Problem:** The "magic" of the toolkit is in the slash commands. Without them, users must manually paste prompts and follow START_PROMPTS.md, losing much of the workflow automation.
+
+**Options to address:**
+
+1. **Documentation-only approach**
+   - Clearly document that slash commands are Claude Code only
+   - Improve START_PROMPTS.md for manual usage
+   - Accept this as a limitation
+
+2. **Tool-specific command equivalents**
+   - Research if Codex CLI has command/alias system
+   - Research Cursor's command palette integration
+   - Generate equivalent automation for each tool
+
+3. **External CLI wrapper**
+   - Create a standalone CLI (`ai-toolkit`) that works outside Claude Code
+   - Wraps the prompts and invokes the user's preferred AI tool
+   - More work but truly tool-agnostic
+
 **Questions to answer:**
 
-1. What permission models do different tools use?
-   - Claude Code: `allowed-tools` in commands, `settings.json` allowlists
-   - Codex CLI: sandbox mode, `--dangerously-skip-permissions`
-   - Others: TBD
-2. Can we generate permission config files during `/setup`?
-3. Should AGENTS.md declare required permissions per phase?
-4. Can we create a "permission manifest" that tools can read?
-5. What's the minimum permission set for each phase type?
+1. Does Codex CLI have a slash command or alias equivalent?
+2. What percentage of users are on Claude Code vs other tools?
+3. Is the external CLI wrapper worth the maintenance burden?
+4. Should we just accept Claude Code as the "premium" experience?
 
-**Potential deliverables:**
+**Minimum viable action:**
 
-- Permission manifest format in EXECUTION_PLAN.md (per-phase tool requirements)
-- `/setup` generates tool-specific permission configs
-- Documentation on permission requirements for autonomous execution
-- "Dry run" mode that lists required permissions without executing
+- Update README to clearly state slash commands are Claude Code specific
+- Improve documentation for manual usage with other tools
+- Defer tool-specific command generation to cross-tool compatibility work
