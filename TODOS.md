@@ -220,25 +220,69 @@ step-1.1/
 └── task-1.1.C (waiting)    ── Depends on A, must wait
 ```
 
-**Requirements:**
-1. Orchestrator-level functionality to:
-   - Analyze task dependencies within a step
-   - Spawn parallel agents for independent tasks
-   - Manage git worktrees (create, merge, cleanup)
-   - Coordinate completion and handle conflicts
-2. Merge strategy when parallel tasks complete
-3. Conflict resolution when tasks touch same files unexpectedly
+**Research Findings (January 2026):**
 
-**Open questions:**
-- What orchestrator mechanism? (Claude Code subagents? External script?)
-- How to detect/prevent conflicts before they happen?
-- Is the complexity worth the speed gain for typical projects?
-- How does this interact with the current phase-branch model?
+#### Orchestration Options
 
-**Potential approach:**
-- Add `parallel: true/false` flag to task definitions in EXECUTION_PLAN.md
-- Create `/parallel-step` command that uses worktrees
-- Keep sequential execution as default, parallel as opt-in
+| Approach | Max Concurrency | Isolation | Complexity |
+|----------|-----------------|-----------|------------|
+| Claude Code Task Tool | 10 subagents | Shared filesystem | Low |
+| Git worktrees | Unlimited | Full directory isolation | Medium |
+| Docker containers | Unlimited | Full process isolation | High |
+
+**Claude Code Task Tool (Recommended for most cases):**
+- Supports up to 10 concurrent subagents via `subagent_type` parameter
+- Subagents share filesystem but have isolated context
+- Good for tasks that don't touch the same files
+- Example: Running tests while generating docs
+
+**Git Worktrees (For file-conflict-prone tasks):**
+- Each worktree is a separate checkout of the repo
+- Full isolation — parallel agents can modify same files
+- Requires merge step at the end
+- Commands: `git worktree add`, `git worktree remove`
+
+**Conflict Prevention Strategies:**
+
+1. **Static analysis before parallel execution:**
+   - Parse task file lists from EXECUTION_PLAN.md
+   - Flag overlapping files as sequential-only
+   - Only parallelize tasks with disjoint file sets
+
+2. **File locking (simpler):**
+   - First agent to touch a file "claims" it
+   - Other agents wait or skip conflicting tasks
+
+3. **Optimistic with merge (git worktrees):**
+   - Run all tasks in parallel
+   - Merge worktrees at step completion
+   - Human resolves any conflicts
+
+#### Recommended Implementation
+
+**Phase 1: Task Tool parallelism (no worktrees)**
+- Parse EXECUTION_PLAN.md for tasks marked `parallel: true`
+- Spawn up to 10 subagents via Task Tool
+- Wait for all to complete before next step
+- Works today with no git changes
+
+**Phase 2: Git worktrees (optional, for heavy parallelism)**
+- Add `/parallel-step` command
+- Creates worktree per parallel task
+- Merges all worktrees on step completion
+- Handles conflicts with human escalation
+
+**Open questions (answered):**
+- ~~What orchestrator mechanism?~~ → Task Tool for simple cases, worktrees for isolation
+- ~~How to detect/prevent conflicts?~~ → Static file list analysis from EXECUTION_PLAN.md
+- ~~Is complexity worth it?~~ → Task Tool parallelism is low-complexity; start there
+- ~~How does this interact with phase-branch model?~~ → Worktrees branch off phase branch, merge back
+
+**Remaining work:**
+1. Add `parallel: true/false` flag to EXECUTION_PLAN.md task format
+2. Update GENERATOR_PROMPT.md to emit parallel flags
+3. Create `/parallel-step` command using Task Tool
+4. (Optional) Add git worktree support for full isolation
 
 ### Cross-Tool Compatibility with Config Generation
 
@@ -246,97 +290,136 @@ Generate tool-specific configuration files to make the toolkit work with AI codi
 
 **Goal:** When running `/setup`, generate configs for the user's preferred tool(s) so the workflow works across different AI assistants.
 
-**Tools to support (priority order):**
+**Research Findings (January 2026):**
 
-| Tool | Type | Config Format | Slash Command Equivalent |
-|------|------|---------------|-------------------------|
-| Cursor | IDE | `.cursor/rules/*.mdc` | Rules with glob patterns |
-| Codex CLI | CLI | Research needed | Research needed |
-| Aider | CLI | `.aider.conf.yml` | Conventions file |
-| Windsurf | IDE | Custom instructions | TBD |
-| Continue | IDE extension | `.continue/config.json` | TBD |
+#### Cursor
 
-**Config generation approach:**
+| Aspect | Details |
+|--------|---------|
+| Config location | `.cursor/rules/*.mdc` (MDC = Markdown Components) |
+| AGENTS.md support | **Native** — Cursor automatically reads AGENTS.md |
+| Slash commands | `.cursor/commands/*.md` — similar to Claude Code |
+| Rule format | Frontmatter with `globs` pattern, then markdown instructions |
 
-1. **Translate AGENTS.md to tool-specific rules**
-   - Parse AGENTS.md sections
-   - Generate equivalent config for target tool
-   - Example: AGENTS.md "Git Conventions" → Cursor rule file
+**Example Cursor rule (`.cursor/rules/testing.mdc`):**
+```mdc
+---
+globs: ["**/*.test.ts", "**/*.spec.ts"]
+---
+When writing tests:
+- Use vitest for unit tests
+- Follow AAA pattern (Arrange, Act, Assert)
+```
 
-2. **Generate permission configs**
-   - Each tool has different permission models:
-     - Claude Code: `allowed-tools` in commands, `settings.json`
-     - Codex CLI: sandbox mode flags
-     - Cursor: Less restrictive by default
-   - Generate appropriate permission setup for autonomous execution
+**Key insight:** Cursor's native AGENTS.md support means minimal config generation needed.
 
-3. **Proposed `/setup` enhancement:**
-   ```bash
-   /setup ~/my-project                    # Claude Code only (default)
-   /setup ~/my-project --tool=cursor      # Also generate Cursor configs
-   /setup ~/my-project --tool=aider       # Also generate Aider configs
-   /setup ~/my-project --tool=all         # Generate all supported configs
-   ```
+#### Codex CLI
 
-**Permission categories to handle:**
+| Aspect | Details |
+|--------|---------|
+| Config location | `~/.codex/prompts/*.md` (user-level) or `.codex/prompts/*.md` (project) |
+| AGENTS.md support | **Native** — Codex CLI reads AGENTS.md automatically |
+| Slash commands | **Yes** — `/prompts:commandname` syntax |
+| Invocation | `codex /prompts:phase-start 1` |
 
-| Category | Examples | Risk Level |
-|----------|----------|------------|
-| File operations | Create, edit, delete files | Medium |
-| Shell execution | npm install, pytest, build commands | High |
-| Git operations | Commit, branch, push | Medium |
-| Environment access | Read env vars, secrets | High |
+**Key insight:** Codex CLI has near-parity with Claude Code for slash commands. Prompts are standalone markdown files (no YAML frontmatter).
 
-**Deliverables:**
+#### Aider
 
-1. Research each tool's config format and document findings
-2. Create config generators for top 2-3 tools
+| Aspect | Details |
+|--------|---------|
+| Config location | `.aider.conf.yml` in project root |
+| AGENTS.md support | **Via config** — add `read: AGENTS.md` to config |
+| Slash commands | **No** — must paste prompts manually or use `--message-file` |
+| Workaround | `aider --message-file .claude/commands/phase-start.md` |
+
+**Example Aider config (`.aider.conf.yml`):**
+```yaml
+read:
+  - AGENTS.md
+  - EXECUTION_PLAN.md
+auto-commits: false
+model: claude-3-5-sonnet-20241022
+```
+
+**Key insight:** Aider requires manual prompt invocation but can auto-load context files.
+
+#### Summary: Tool Support Matrix
+
+| Tool | AGENTS.md | Slash Commands | Config Needed |
+|------|-----------|----------------|---------------|
+| Claude Code | Native | Native (`.claude/commands/`) | None |
+| Cursor | Native | Native (`.cursor/commands/`) | Minimal (copy commands) |
+| Codex CLI | Native | `/prompts:` system | Copy to `.codex/prompts/` |
+| Aider | Via `.aider.conf.yml` | Manual paste | Generate `.aider.conf.yml` |
+| Windsurf | TBD | TBD | TBD |
+| Continue | TBD | TBD | TBD |
+
+**Revised implementation approach:**
+
+1. **Minimal generation needed** for Cursor and Codex CLI (they read AGENTS.md natively)
+2. **Copy commands** to tool-specific directories:
+   - Cursor: `.cursor/commands/`
+   - Codex CLI: `.codex/prompts/` (strip YAML frontmatter)
+3. **Generate `.aider.conf.yml`** for Aider users with `read: AGENTS.md`
+4. **Defer Windsurf/Continue** until more research
+
+**Proposed `/setup` enhancement:**
+```bash
+/setup ~/my-project                    # Claude Code only (default)
+/setup ~/my-project --tool=cursor      # Also copy to .cursor/commands/
+/setup ~/my-project --tool=codex       # Also copy to .codex/prompts/
+/setup ~/my-project --tool=aider       # Generate .aider.conf.yml
+/setup ~/my-project --tool=all         # All supported tools
+```
+
+**Remaining work:**
+1. Create command copier that strips YAML frontmatter for Codex CLI
+2. Create `.aider.conf.yml` generator
 3. Add `--tool` flag to `/setup`
-4. Documentation for manual setup with unsupported tools
-5. Permission manifest in EXECUTION_PLAN.md (per-phase requirements)
+4. Test with each tool
 
 ### Address Claude Code Dependency
 
 Currently, the toolkit's slash commands (`.claude/commands/`) only work in Claude Code. This limits adoption for users of other tools.
 
-**Current state:**
+**Research Findings (January 2026):**
 
-| Component | Claude Code | Codex CLI | Other Tools |
-|-----------|-------------|-----------|-------------|
-| Slash commands (`/phase-start`, etc.) | ✅ Works | ❌ Not supported | ❌ Not supported |
-| Skills (`.claude/skills/`) | ✅ Works | ✅ Works (via `.codex/skills/`) | ❓ Manual reference |
-| Spec documents | ✅ Works | ✅ Works | ✅ Works |
-| AGENTS.md | ✅ Works | ✅ Works | ✅ Works |
-| Prompt files | ✅ Works | ✅ Manual paste | ✅ Manual paste |
+The dependency is **less severe than expected**. Most major tools now support similar mechanisms:
 
-**Problem:** The "magic" of the toolkit is in the slash commands. Without them, users must manually paste prompts and follow START_PROMPTS.md, losing much of the workflow automation.
+| Component | Claude Code | Codex CLI | Cursor | Aider |
+|-----------|-------------|-----------|--------|-------|
+| Slash commands | ✅ Native | ✅ `/prompts:` | ✅ Native | ❌ Manual |
+| AGENTS.md | ✅ Native | ✅ Native | ✅ Native | ✅ Via config |
+| Skills | ✅ `.claude/skills/` | ✅ `.codex/skills/` | ❓ TBD | ❌ N/A |
 
-**Options to address:**
+**Key finding:** Codex CLI supports `/prompts:commandname` syntax, making it nearly equivalent to Claude Code for slash commands. Cursor also has native command support.
 
-1. **Documentation-only approach**
-   - Clearly document that slash commands are Claude Code only
-   - Improve START_PROMPTS.md for manual usage
-   - Accept this as a limitation
+**Revised assessment:**
 
-2. **Tool-specific command equivalents**
-   - Research if Codex CLI has command/alias system
-   - Research Cursor's command palette integration
-   - Generate equivalent automation for each tool
+- **Claude Code + Codex CLI + Cursor** = Full experience (slash commands work)
+- **Aider** = Partial experience (manual prompt invocation, but AGENTS.md loads)
+- **Other tools** = Varies, likely manual
 
-3. **External CLI wrapper**
-   - Create a standalone CLI (`ai-toolkit`) that works outside Claude Code
-   - Wraps the prompts and invokes the user's preferred AI tool
-   - More work but truly tool-agnostic
+**Updated options:**
 
-**Questions to answer:**
+1. **Cross-tool setup (Recommended)**
+   - Implement `--tool` flag in `/setup` (see Cross-Tool Compatibility section)
+   - Copy commands to appropriate directories for each tool
+   - Document the `/prompts:` syntax for Codex CLI users
 
-1. Does Codex CLI have a slash command or alias equivalent?
-2. What percentage of users are on Claude Code vs other tools?
-3. Is the external CLI wrapper worth the maintenance burden?
-4. Should we just accept Claude Code as the "premium" experience?
+2. **Documentation improvements**
+   - Update README with tool-specific instructions
+   - Create "Getting Started with {Tool}" guides
+   - Show equivalent invocations: `/phase-start 1` vs `codex /prompts:phase-start 1`
+
+3. **External CLI wrapper (Deferred)**
+   - Not needed now that Codex CLI and Cursor have native support
+   - Reconsider if more tools emerge without command systems
 
 **Minimum viable action:**
 
-- Update README to clearly state slash commands are Claude Code specific
-- Improve documentation for manual usage with other tools
-- Defer tool-specific command generation to cross-tool compatibility work
+1. ✅ Document Codex CLI `/prompts:` equivalence in README
+2. Implement `--tool=codex` in `/setup` to copy commands to `.codex/prompts/`
+3. Implement `--tool=cursor` in `/setup` to copy commands to `.cursor/commands/`
+4. Test the workflow end-to-end with Codex CLI
