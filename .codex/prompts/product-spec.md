@@ -1,8 +1,3 @@
----
-description: Generate PRODUCT_SPEC.md through guided Q&A
-argument-hint: [target-directory]
-allowed-tools: Read, Write, AskUserQuestion
----
 
 Generate a product specification document for the project at `$1`.
 

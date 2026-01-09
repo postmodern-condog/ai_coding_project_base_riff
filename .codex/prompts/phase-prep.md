@@ -1,7 +1,3 @@
----
-description: Check prerequisites before starting a phase
-argument-hint: [phase-number]
----
 
 I want to execute Phase $1 from EXECUTION_PLAN.md. Before starting, read EXECUTION_PLAN.md and check:
 

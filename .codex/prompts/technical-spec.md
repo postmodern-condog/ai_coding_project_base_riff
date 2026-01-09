@@ -1,8 +1,3 @@
----
-description: Generate TECHNICAL_SPEC.md through guided Q&A
-argument-hint: [target-directory]
-allowed-tools: Read, Write, Edit, AskUserQuestion, Grep, Glob
----
 
 Generate a technical specification document for the project at `$1`.
 

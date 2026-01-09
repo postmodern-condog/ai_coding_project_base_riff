@@ -27,7 +27,7 @@ A three-phase workflow with reusable prompts:
 - **Security scanning** — Dependency audits, secrets detection, and static analysis integrated into checkpoints
 - **Git workflow** — One branch per phase, auto-commit per task, human reviews before push
 - **Stuck detection** — Agents escalate to humans when hitting repeated failures instead of spinning
-- **Tool agnostic** — Works with both Claude Code and Codex CLI via shared skill directories
+- **Cross-tool compatible** — Works with Claude Code and Codex CLI out of the box
 - **Two workflows** — Greenfield projects start from scratch; feature development integrates with existing code
 - **Brownfield support** — Feature workflow includes technical debt assessment and human decision markers for legacy codebases
 
@@ -40,35 +40,32 @@ your-project/
 ├── EXECUTION_PLAN.md        # Tasks with acceptance criteria
 ├── AGENTS.md                # Workflow rules for AI agents
 ├── .claude/
-│   ├── commands/            # Execution commands (copied from toolkit)
+│   ├── commands/            # Execution commands (Claude Code)
 │   └── skills/              # Code verification + security scanning
-├── .codex/skills/           # Same skills for Codex CLI
+├── .codex/
+│   ├── prompts/             # Execution commands (Codex CLI)
+│   └── skills/              # Code verification + security scanning
 └── [your code]
 ```
 
 These documents persist across sessions, enabling any AI agent to pick up where another left off.
 
-## Quick Start (Claude Code)
+## Quick Start
 
-### 1. Clone the Toolkit
+### Claude Code
+
 ```bash
+# 1. Clone the toolkit
 git clone https://github.com/yourusername/ai_coding_project_base.git
 cd ai_coding_project_base
-```
 
-### 2. Initialize & Generate (from toolkit directory)
+# 2. Initialize & Generate (from toolkit directory)
+/setup ~/Projects/my-new-app           # Copy execution commands + skills
+/product-spec ~/Projects/my-new-app    # Define what you're building
+/technical-spec ~/Projects/my-new-app  # Define how it's built
+/generate-plan ~/Projects/my-new-app   # Create EXECUTION_PLAN.md + AGENTS.md
 
-```bash
-# Still in ai_coding_project_base directory:
-/setup ~/Projects/my-new-app       # Copy execution commands + skills
-/product-spec ~/Projects/my-new-app       # Define what you're building
-/technical-spec ~/Projects/my-new-app     # Define how it's built
-/generate-plan ~/Projects/my-new-app      # Create EXECUTION_PLAN.md + AGENTS.md
-```
-
-### 3. Execute (from your project directory)
-
-```bash
+# 3. Execute (from your project directory)
 cd ~/Projects/my-new-app
 /fresh-start           # Orient to project, load context
 /phase-prep 1          # Check prerequisites for Phase 1
@@ -77,11 +74,56 @@ cd ~/Projects/my-new-app
 # Review changes, then: git push origin phase-1
 ```
 
-**For adding features to existing projects:**
+### Codex CLI
+
+```bash
+# 1. Clone the toolkit
+git clone https://github.com/yourusername/ai_coding_project_base.git
+cd ai_coding_project_base
+
+# 2. Initialize & Generate (from toolkit directory)
+# Use /prompts: prefix for Codex CLI
+codex /prompts:setup ~/Projects/my-new-app
+codex /prompts:product-spec ~/Projects/my-new-app
+codex /prompts:technical-spec ~/Projects/my-new-app
+codex /prompts:generate-plan ~/Projects/my-new-app
+
+# 3. Execute (from your project directory)
+cd ~/Projects/my-new-app
+codex /prompts:fresh-start
+codex /prompts:phase-prep 1
+codex /prompts:phase-start 1
+codex /prompts:phase-checkpoint 1
+# Review changes, then: git push origin phase-1
+```
+
+### Hybrid Workflow (Claude Code + Codex CLI)
+
+You can use Claude Code for spec generation and Codex CLI for implementation:
+
+```bash
+# 1. Generate specs in Claude Code (better for Q&A interaction)
+cd ai_coding_project_base
+/setup ~/Projects/my-new-app
+/product-spec ~/Projects/my-new-app
+/technical-spec ~/Projects/my-new-app
+/generate-plan ~/Projects/my-new-app
+
+# 2. Execute in Codex CLI
+cd ~/Projects/my-new-app
+codex /prompts:fresh-start
+codex /prompts:phase-prep 1
+codex /prompts:phase-start 1
+codex /prompts:phase-checkpoint 1
+```
+
+### Feature Development
+
+**Claude Code:**
 ```bash
 # From toolkit directory:
-/setup ~/Projects/existing-app            # Copy execution commands + skills
-/feature-spec ~/Projects/existing-app     # Define the feature
+/setup ~/Projects/existing-app
+/feature-spec ~/Projects/existing-app
 /feature-technical-spec ~/Projects/existing-app
 /feature-plan ~/Projects/existing-app
 
@@ -92,12 +134,49 @@ cd ~/Projects/existing-app
 /phase-prep 1
 /phase-start 1
 /phase-checkpoint 1
-# Review changes, then: git push origin phase-1
+```
+
+**Codex CLI:**
+```bash
+# From toolkit directory:
+codex /prompts:setup ~/Projects/existing-app
+codex /prompts:feature-spec ~/Projects/existing-app
+codex /prompts:feature-technical-spec ~/Projects/existing-app
+codex /prompts:feature-plan ~/Projects/existing-app
+
+# From your project:
+cd ~/Projects/existing-app
+# Merge AGENTS_ADDITIONS.md into AGENTS.md
+codex /prompts:fresh-start
+codex /prompts:phase-prep 1
+codex /prompts:phase-start 1
+codex /prompts:phase-checkpoint 1
 ```
 
 ### Alternative: Manual Setup
 
-If not using Claude Code, copy files manually and use `START_PROMPTS.md` for guidance.
+If not using Claude Code or Codex CLI, copy files manually and use `START_PROMPTS.md` for guidance.
+
+## Cross-Tool Compatibility
+
+The toolkit works with both **Claude Code** and **Codex CLI** out of the box.
+
+| Feature | Claude Code | Codex CLI |
+|---------|:-----------:|:---------:|
+| AGENTS.md auto-loading | ✅ Native | ✅ Native |
+| Slash commands | `/command` | `/prompts:command` |
+| Command location | `.claude/commands/` | `.codex/prompts/` |
+| Code verification | ✅ Full + Lite | ✅ Lite |
+| Security scanning | ✅ | ✅ |
+| `/compact` | ✅ | ✅ |
+| Sub-agents (parallel) | ✅ Up to 10 | ❌ |
+
+### Code Verification Versions
+
+- **Full version** (`.claude/skills/code-verification/`) — Uses sub-agents for parallel verification. Claude Code only.
+- **Lite version** (`.codex/skills/code-verification/`) — Single-agent inline verification. Works in both tools.
+
+The execution commands use the lite version by default for cross-tool compatibility.
 
 ## Workflow Overview
 
@@ -190,29 +269,29 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 
 ### Generation Commands (run from toolkit directory)
 
-| Command | Description |
-|---------|-------------|
-| `/setup [path]` | Copy execution commands + skills to target project |
-| `/product-spec [path]` | Generate PRODUCT_SPEC.md through Q&A |
-| `/technical-spec [path]` | Generate TECHNICAL_SPEC.md (requires PRODUCT_SPEC.md) + auto-verify |
-| `/generate-plan [path]` | Generate EXECUTION_PLAN.md + AGENTS.md + auto-verify |
-| `/feature-spec [path]` | Generate FEATURE_SPEC.md through Q&A |
-| `/feature-technical-spec [path]` | Generate FEATURE_TECHNICAL_SPEC.md + auto-verify |
-| `/feature-plan [path]` | Generate EXECUTION_PLAN.md + AGENTS_ADDITIONS.md + auto-verify |
-| `/verify-spec <type>` | Manually verify a spec document (technical-spec, execution-plan, etc.) |
+| Command | Claude Code | Codex CLI |
+|---------|-------------|-----------|
+| Initialize project | `/setup [path]` | `/prompts:setup [path]` |
+| Generate product spec | `/product-spec [path]` | `/prompts:product-spec [path]` |
+| Generate technical spec | `/technical-spec [path]` | `/prompts:technical-spec [path]` |
+| Generate execution plan | `/generate-plan [path]` | `/prompts:generate-plan [path]` |
+| Generate feature spec | `/feature-spec [path]` | `/prompts:feature-spec [path]` |
+| Generate feature tech spec | `/feature-technical-spec [path]` | `/prompts:feature-technical-spec [path]` |
+| Generate feature plan | `/feature-plan [path]` | `/prompts:feature-plan [path]` |
+| Verify spec document | `/verify-spec <type>` | `/prompts:verify-spec <type>` |
 
 ### Execution Commands (run from your project directory)
 
-| Command | Description |
-|---------|-------------|
-| `/fresh-start` | Orient to project structure, load context |
-| `/phase-prep N` | Check prerequisites before starting phase N |
-| `/phase-start N` | Execute all tasks in phase N autonomously |
-| `/phase-checkpoint N` | Run tests and verification after phase N |
-| `/verify-task X.Y.Z` | Run code-verification on a specific task |
-| `/security-scan` | Scan for security vulnerabilities in deps, code, and secrets |
-| `/list-todos` | Analyze and prioritize TODO items with implementation guidance |
-| `/progress` | Show progress through EXECUTION_PLAN.md |
+| Command | Claude Code | Codex CLI |
+|---------|-------------|-----------|
+| Orient to project | `/fresh-start` | `/prompts:fresh-start` |
+| Check prerequisites | `/phase-prep N` | `/prompts:phase-prep N` |
+| Execute phase | `/phase-start N` | `/prompts:phase-start N` |
+| Run checkpoint | `/phase-checkpoint N` | `/prompts:phase-checkpoint N` |
+| Verify specific task | `/verify-task X.Y.Z` | `/prompts:verify-task X.Y.Z` |
+| Security scan | `/security-scan` | `/prompts:security-scan` |
+| Prioritize TODOs | `/list-todos` | `/prompts:list-todos` |
+| Show progress | `/progress` | `/prompts:progress` |
 
 ## Output Documents
 
@@ -311,12 +390,18 @@ The toolkit includes integrated security scanning that runs automatically during
 
 ### Manual Scanning
 
+**Claude Code:**
 ```bash
 /security-scan              # Full scan (deps + secrets + code)
 /security-scan --deps       # Dependency vulnerabilities only
 /security-scan --secrets    # Secrets detection only
 /security-scan --code       # Static analysis only
 /security-scan --fix        # Auto-fix where possible
+```
+
+**Codex CLI:**
+```bash
+codex /prompts:security-scan
 ```
 
 ## Git Workflow
@@ -417,11 +502,17 @@ If your AGENTS.md grows too large, split project-specific rules into subdirector
 
 Run verification manually anytime:
 
+**Claude Code:**
 ```bash
 /verify-spec technical-spec      # Verify TECHNICAL_SPEC.md
 /verify-spec execution-plan      # Verify EXECUTION_PLAN.md
 /verify-spec feature-technical   # Verify FEATURE_TECHNICAL_SPEC.md
 /verify-spec feature-plan        # Verify feature EXECUTION_PLAN.md
+```
+
+**Codex CLI:**
+```bash
+codex /prompts:verify-spec technical-spec
 ```
 
 ## Using Web Interfaces (Claude, ChatGPT, etc.)
@@ -448,7 +539,7 @@ The slash commands optimize for **workflow integration and consistency**, but we
 
 ### Hybrid Workflow
 
-You can generate specs in a web interface and continue execution in Claude Code:
+You can generate specs in a web interface and continue execution in Claude Code or Codex CLI:
 
 **For greenfield projects:**
 ```bash
@@ -498,7 +589,7 @@ The raw prompts are available for copy-paste into any LLM:
 | FEATURE_SPEC.md | `FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md` |
 | FEATURE_TECHNICAL_SPEC.md | `FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md` |
 
-**Note:** EXECUTION_PLAN.md and AGENTS.md generation (`GENERATOR_PROMPT.md`) requires reading the spec files, so these are best done in Claude Code where file access is available.
+**Note:** EXECUTION_PLAN.md and AGENTS.md generation (`GENERATOR_PROMPT.md`) requires reading the spec files, so these are best done in Claude Code or Codex CLI where file access is available.
 
 ## File Structure
 
@@ -509,40 +600,59 @@ ai_coding_project_base/
 ├── GENERATOR_PROMPT.md              # Greenfield: Execution plan generator
 ├── START_PROMPTS.md                 # Execution prompts for all workflows
 ├── FEATURE_PROMPTS/                 # Feature development prompts
-│   ├── FEATURE_SPEC_PROMPT.md       # Feature: Product specification prompt
-│   ├── FEATURE_TECHNICAL_SPEC_PROMPT.md  # Feature: Technical specification prompt
-│   └── FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md  # Feature: Execution plan generator
+│   ├── FEATURE_SPEC_PROMPT.md
+│   ├── FEATURE_TECHNICAL_SPEC_PROMPT.md
+│   └── FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md
 ├── .claude/
-│   ├── commands/
-│   │   ├── setup.md                 # /setup — Initialize new project (toolkit only)
-│   │   ├── product-spec.md          # /product-spec — Generate product spec (toolkit only)
-│   │   ├── technical-spec.md        # /technical-spec — Generate tech spec (toolkit only)
-│   │   ├── generate-plan.md         # /generate-plan — Generate execution plan (toolkit only)
-│   │   ├── feature-spec.md          # /feature-spec — Generate feature spec (toolkit only)
-│   │   ├── feature-technical-spec.md # /feature-technical-spec (toolkit only)
-│   │   ├── feature-plan.md          # /feature-plan — Generate feature plan (toolkit only)
-│   │   ├── verify-spec.md           # /verify-spec — Verify spec document (toolkit only)
-│   │   ├── fresh-start.md           # /fresh-start — Orient to project (copied to target)
-│   │   ├── phase-prep.md            # /phase-prep N — Check prerequisites (copied to target)
-│   │   ├── phase-start.md           # /phase-start N — Execute phase (copied to target)
-│   │   ├── phase-checkpoint.md      # /phase-checkpoint N — Run checks (copied to target)
-│   │   ├── verify-task.md           # /verify-task X.Y.Z — Verify task (copied to target)
-│   │   ├── security-scan.md         # /security-scan — Security scanning (copied to target)
-│   │   ├── list-todos.md            # /list-todos — Prioritize TODOs (copied to target)
-│   │   └── progress.md              # /progress — Show progress (copied to target)
+│   ├── commands/                    # Claude Code commands (with YAML frontmatter)
+│   │   ├── setup.md
+│   │   ├── product-spec.md
+│   │   ├── technical-spec.md
+│   │   ├── generate-plan.md
+│   │   ├── feature-spec.md
+│   │   ├── feature-technical-spec.md
+│   │   ├── feature-plan.md
+│   │   ├── verify-spec.md
+│   │   ├── fresh-start.md
+│   │   ├── phase-prep.md
+│   │   ├── phase-start.md
+│   │   ├── phase-checkpoint.md
+│   │   ├── verify-task.md
+│   │   ├── security-scan.md
+│   │   ├── list-todos.md
+│   │   └── progress.md
 │   └── skills/
-│       ├── code-verification/
-│       │   └── SKILL.md             # Code verification skill (copied to target)
+│       ├── code-verification/       # Full version (sub-agents, Claude Code only)
+│       │   └── SKILL.md
+│       ├── code-verification-lite/  # Lite version (cross-tool compatible)
+│       │   └── SKILL.md
 │       ├── security-scan/
-│       │   └── SKILL.md             # Security scan skill (copied to target)
+│       │   └── SKILL.md
 │       └── spec-verification/
-│           └── SKILL.md             # Spec verification skill (toolkit only)
+│           └── SKILL.md
 ├── .codex/
+│   ├── prompts/                     # Codex CLI commands (no YAML frontmatter)
+│   │   ├── setup.md
+│   │   ├── product-spec.md
+│   │   ├── technical-spec.md
+│   │   ├── generate-plan.md
+│   │   ├── feature-spec.md
+│   │   ├── feature-technical-spec.md
+│   │   ├── feature-plan.md
+│   │   ├── verify-spec.md
+│   │   ├── fresh-start.md
+│   │   ├── phase-prep.md
+│   │   ├── phase-start.md
+│   │   ├── phase-checkpoint.md
+│   │   ├── verify-task.md
+│   │   ├── security-scan.md
+│   │   ├── list-todos.md
+│   │   └── progress.md
 │   └── skills/
-│       ├── code-verification/
-│       │   └── SKILL.md             # Code verification skill (copied to target)
+│       ├── code-verification/       # Lite version (cross-tool compatible)
+│       │   └── SKILL.md
 │       └── security-scan/
-│           └── SKILL.md             # Security scan skill (copied to target)
+│           └── SKILL.md
 ├── docs/                            # Additional documentation
 ├── deprecated/                      # Legacy prompts (kept for reference)
 ├── CLAUDE.md                        # Claude Code configuration

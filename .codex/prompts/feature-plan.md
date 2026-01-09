@@ -1,8 +1,3 @@
----
-description: Generate EXECUTION_PLAN.md and AGENTS_ADDITIONS.md for a feature
-argument-hint: [target-directory]
-allowed-tools: Read, Write, Edit, AskUserQuestion, Glob, Grep
----
 
 Generate the execution plan and agent additions for the project at `$1`.
 

@@ -1,11 +1,18 @@
 ---
-name: code-verification
+name: code-verification-lite
 description: Single-agent code verification workflow. Cross-tool compatible (works in Claude Code, Codex CLI, Cursor). Use when verifying code against requirements, acceptance criteria, or quality standards.
 ---
 
-# Code Verification
+# Code Verification Lite
 
-Verify code against requirements using a single-agent verify-fix loop. This version works across different AI coding tools without requiring sub-agents.
+Verify code against requirements using a single-agent verify-fix loop. This is a simplified version of code-verification that works across different AI coding tools.
+
+## When to Use This vs Full Verification
+
+| Version | Use When |
+|---------|----------|
+| **code-verification** (full) | Claude Code only, want context isolation, parallel verification |
+| **code-verification-lite** | Cross-tool compatibility, simpler workflow, smaller codebases |
 
 ## Workflow Overview
 
@@ -276,3 +283,13 @@ Execution:
 - **No repeated fixes** — Track attempts to avoid loops
 - **Early exit** — Don't waste attempts on unfixable issues
 - **Regression awareness** — Fixes shouldn't break other things
+
+## Differences from Full Version
+
+| Feature | Full (code-verification) | Lite (this) |
+|---------|--------------------------|-------------|
+| Sub-agents | Yes (context isolation) | No (inline) |
+| Parallel verification | Yes (up to 10) | No (sequential) |
+| Browser verification | Full protocol | Simplified/skippable |
+| Tool compatibility | Claude Code only | Claude Code, Codex CLI, Cursor |
+| Context accumulation | Isolated per check | Accumulates in main context |

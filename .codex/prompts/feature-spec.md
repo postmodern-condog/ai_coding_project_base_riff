@@ -1,8 +1,3 @@
----
-description: Generate FEATURE_SPEC.md through guided Q&A
-argument-hint: [target-directory]
-allowed-tools: Read, Write, AskUserQuestion
----
 
 Generate a feature specification document for the project at `$1`.
 

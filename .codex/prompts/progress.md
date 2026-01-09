@@ -1,7 +1,3 @@
----
-description: Show progress through EXECUTION_PLAN.md
-allowed-tools: Read, Grep
----
 
 Read EXECUTION_PLAN.md and show the current execution status.
 

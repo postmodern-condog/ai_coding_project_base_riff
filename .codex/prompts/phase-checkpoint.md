@@ -1,8 +1,3 @@
----
-description: Run checkpoint criteria after completing a phase
-argument-hint: [phase-number]
-allowed-tools: Bash, Read, Edit, Glob, Grep, AskUserQuestion
----
 
 Phase $1 is complete. Read EXECUTION_PLAN.md and run the checkpoint criteria.
 

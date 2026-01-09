@@ -1,7 +1,3 @@
----
-description: Run code-verification on a specific task
-argument-hint: [task-id]
----
 
 Verify Task $1 from EXECUTION_PLAN.md using the code verification workflow.
 

@@ -1,8 +1,3 @@
----
-description: Execute all tasks in a phase autonomously
-argument-hint: [phase-number]
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Task
----
 
 Execute all steps and tasks in Phase $1 from EXECUTION_PLAN.md.
 

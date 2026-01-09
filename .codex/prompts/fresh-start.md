@@ -1,6 +1,3 @@
----
-description: Orient to project structure and load context
----
 
 Read the following files to understand the structure and purpose of this project:
 
