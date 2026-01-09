@@ -5,7 +5,6 @@
 - [ ] Compare web vs CLI interface for generation workflow (see below)
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues)
 - [ ] Intro commands for each Step
-- [ ] Manual checks after each step, not each phase
 - [ ] Verify that the Chrome DevTools integration works
 - [ ] Add git worktrees support for parallel task execution
 - [x] Add `/list-todos` command (see below) — DONE
