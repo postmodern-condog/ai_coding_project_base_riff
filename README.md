@@ -24,8 +24,12 @@ A three-phase workflow with reusable prompts:
 - **Documents as contracts** — Specs and plans are artifacts AI agents execute against, not just notes
 - **Automatic spec verification** — After generating each document, the `spec-verification` skill checks for lost context and quality issues
 - **Code verification built in** — Every task has testable acceptance criteria; the `code-verification` skill enforces them
+- **Security scanning** — Dependency audits, secrets detection, and static analysis integrated into checkpoints
+- **Git workflow** — One branch per phase, auto-commit per task, human reviews before push
+- **Stuck detection** — Agents escalate to humans when hitting repeated failures instead of spinning
 - **Tool agnostic** — Works with both Claude Code and Codex CLI via shared skill directories
 - **Two workflows** — Greenfield projects start from scratch; feature development integrates with existing code
+- **Brownfield support** — Feature workflow includes technical debt assessment and human decision markers for legacy codebases
 
 ## What You End Up With
 
@@ -37,8 +41,8 @@ your-project/
 ├── AGENTS.md                # Workflow rules for AI agents
 ├── .claude/
 │   ├── commands/            # Execution commands (copied from toolkit)
-│   └── skills/              # Code verification skill
-├── .codex/skills/           # Code verification skill (Codex CLI)
+│   └── skills/              # Code verification + security scanning
+├── .codex/skills/           # Same skills for Codex CLI
 └── [your code]
 ```
 
@@ -66,9 +70,11 @@ cd ai_coding_project_base
 
 ```bash
 cd ~/Projects/my-new-app
-/fresh-start         # Orient to project, load context
-/phase-prep 1        # Check prerequisites for Phase 1
-/phase-start 1       # Execute Phase 1
+/fresh-start           # Orient to project, load context
+/phase-prep 1          # Check prerequisites for Phase 1
+/phase-start 1         # Execute Phase 1 (creates branch, commits per task)
+/phase-checkpoint 1    # Run tests, security scan, verify completion
+# Review changes, then: git push origin phase-1
 ```
 
 **For adding features to existing projects:**
@@ -85,6 +91,8 @@ cd ~/Projects/existing-app
 /fresh-start
 /phase-prep 1
 /phase-start 1
+/phase-checkpoint 1
+# Review changes, then: git push origin phase-1
 ```
 
 ### Alternative: Manual Setup
@@ -279,6 +287,130 @@ How would you like to resolve this?
 ```
 
 Fixes are applied automatically based on your choices, then re-verified.
+
+## Security Scanning
+
+The toolkit includes integrated security scanning that runs automatically during `/phase-checkpoint` and can be invoked manually via `/security-scan`.
+
+### What It Checks
+
+| Category | Examples | Severity |
+|----------|----------|----------|
+| **Dependency vulnerabilities** | Known CVEs in npm/pip/cargo packages | CRITICAL-LOW |
+| **Hardcoded secrets** | AWS keys, GitHub tokens, API keys, private keys | CRITICAL-HIGH |
+| **Insecure code patterns** | `eval()`, SQL concatenation, disabled SSL verification | HIGH-MEDIUM |
+
+### How It Works
+
+1. **Auto-detects tech stack** from package.json, requirements.txt, Cargo.toml, etc.
+2. **Runs appropriate tools** (`npm audit`, `pip-audit`, pattern matching)
+3. **Presents findings** with severity levels and fix suggestions
+4. **Offers resolution options** for each CRITICAL/HIGH issue
+5. **Blocks checkpoint** if unresolved CRITICAL/HIGH issues remain
+
+### Manual Scanning
+
+```bash
+/security-scan              # Full scan (deps + secrets + code)
+/security-scan --deps       # Dependency vulnerabilities only
+/security-scan --secrets    # Secrets detection only
+/security-scan --code       # Static analysis only
+/security-scan --fix        # Auto-fix where possible
+```
+
+## Git Workflow
+
+During execution, the toolkit follows a structured git workflow:
+
+### One Branch Per Phase
+
+```
+main
+  └── phase-1 (branch)
+        ├── task(1.1.A): Add user model       ← step 1.1
+        ├── task(1.1.B): Add user routes
+        ├── task(1.2.A): Add auth middleware   ← step 1.2 (continues on same branch)
+        └── task(1.2.B): Add login endpoint
+```
+
+- **One branch per phase** — Not per step or task
+- **One commit per task** — Immediately after task verification passes
+- **Sequential commits** — Each task builds on the previous
+- **No auto-push** — Human reviews at checkpoint before pushing
+
+### Why This Model
+
+- **Atomic rollback** — Can revert individual tasks via commit
+- **Clear history** — Task IDs in commit messages provide traceability
+- **Human control** — Push only after checkpoint verification passes
+- **Simple branches** — One branch to manage per phase, not per step
+
+## Stuck Detection
+
+Agents can get stuck in loops, repeatedly failing on the same issue. The toolkit detects this and escalates to human intervention.
+
+### Escalation Triggers
+
+| Trigger | Threshold | Action |
+|---------|-----------|--------|
+| Consecutive task failures | 3 tasks | Pause phase |
+| Same error pattern | 2 occurrences | Pause and report |
+| Verification loop | 5 attempts on same criterion | Mark task blocked |
+| Test flakiness | Same test passes then fails | Flag for review |
+
+### What Happens
+
+When stuck, the agent stops and presents:
+- Pattern description (what keeps failing)
+- Last 3 errors
+- Possible causes
+- Options: skip task, modify criteria, try different approach, abort phase
+
+This prevents agents from burning tokens on unfixable issues and ensures human judgment is applied where needed.
+
+## Brownfield / Legacy Support
+
+The feature development workflow (`/feature-spec`, `/feature-technical-spec`) includes special handling for legacy codebases.
+
+### Technical Debt Assessment
+
+When generating `FEATURE_TECHNICAL_SPEC.md`, the toolkit identifies:
+- Undocumented functions with unclear behavior
+- Tightly coupled components that resist change
+- Missing test coverage in affected areas
+- Deprecated patterns the feature must work around
+
+### Human Decision Markers
+
+For decisions requiring human judgment, specs include explicit markers:
+
+```
+⚠️ REQUIRES HUMAN DECISION: Database migration strategy
+Options:
+1. Online migration with dual-write — Lower risk, higher complexity
+2. Offline migration with downtime — Simpler, requires maintenance window
+Recommendation: Option 1 for production, Option 2 for staging
+```
+
+### Migration Risk Checklist
+
+Feature specs include a checklist:
+- [ ] Data migration required? Reversible?
+- [ ] Breaking changes to existing APIs?
+- [ ] Dependent services affected?
+- [ ] Feature flags needed for gradual rollout?
+- [ ] Rollback plan if deployment fails?
+
+## AGENTS.md Size Limit
+
+Research shows LLMs follow ~150 instructions consistently. Beyond this, instruction-following degrades.
+
+The toolkit enforces this:
+- **≤150 lines**: Optimal
+- **151-200 lines**: Warning with suggestion to split
+- **>200 lines**: Fails validation
+
+If your AGENTS.md grows too large, split project-specific rules into subdirectory `.claude/CLAUDE.md` files that load on-demand.
 
 ### Manual Verification
 
