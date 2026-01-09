@@ -26,6 +26,7 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    - `verify-task.md`
    - `progress.md`
    - `security-scan.md`
+   - `list-todos.md`
 
    Copy skills directories:
    - `.claude/skills/` → target's `.claude/skills/`

@@ -211,6 +211,7 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 | `/phase-checkpoint N` | Run tests and verification after phase N |
 | `/verify-task X.Y.Z` | Run code-verification on a specific task |
 | `/security-scan` | Scan for security vulnerabilities in deps, code, and secrets |
+| `/list-todos` | Analyze and prioritize TODO items with implementation guidance |
 | `/progress` | Show progress through EXECUTION_PLAN.md |
 
 ## Output Documents
@@ -527,6 +528,7 @@ ai_coding_project_base/
 │   │   ├── phase-checkpoint.md      # /phase-checkpoint N — Run checks (copied to target)
 │   │   ├── verify-task.md           # /verify-task X.Y.Z — Verify task (copied to target)
 │   │   ├── security-scan.md         # /security-scan — Security scanning (copied to target)
+│   │   ├── list-todos.md            # /list-todos — Prioritize TODOs (copied to target)
 │   │   └── progress.md              # /progress — Show progress (copied to target)
 │   └── skills/
 │       ├── code-verification/

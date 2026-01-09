@@ -8,9 +8,53 @@
 - [ ] Manual checks after each step, not each phase
 - [ ] Verify that the Chrome DevTools integration works
 - [ ] Add git worktrees support for parallel task execution
-- [ ] TODOS handling
+- [x] Add `/list-todos` command (see below) — DONE
 
 ## Future Concepts
+
+### `/list-todos` Command
+
+Add a command that reads TODOS.md and produces an AI-analyzed prioritized list.
+
+**Command:** `/list-todos`
+
+**Input:** Reads `TODOS.md` from project root
+
+**Output:** For each TODO item, produce:
+
+```markdown
+## 1. {TODO Title}
+
+**Priority Score:** {1-10}
+**Ranking Factors:**
+- Requirements Clarity: {Low|Medium|High} — {brief explanation}
+- Ease of Implementation: {Low|Medium|High} — {brief explanation}
+- Value to Project: {Low|Medium|High} — {brief explanation}
+
+**Implementation Notes:**
+{AI's assessment of how to implement this item, key steps, estimated complexity}
+
+**Open Questions:**
+- {Question that, if answered, would improve requirements clarity}
+- {Another question}
+
+**Suggested Next Action:** {What to do next: clarify requirements, implement, defer, or remove}
+
+---
+```
+
+**Sorting:** Items sorted by priority score (highest first), with ties broken by value to project.
+
+**Use cases:**
+- Sprint planning: Which TODOs to tackle next
+- Backlog grooming: Identify items needing clarification
+- Scope decisions: See effort vs value trade-offs
+
+**Implementation approach:**
+1. Create `.claude/commands/list-todos.md`
+2. Command reads TODOS.md
+3. For each item, AI analyzes based on project context (reads specs, codebase)
+4. Outputs prioritized markdown list
 
 ### Subagents (Claude Code only)
 
