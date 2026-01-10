@@ -117,7 +117,7 @@ Human must complete before starting:
 - [ ] {Another manual check}
 
 **Browser Verification (if applicable):**
-- [ ] All UI acceptance criteria verified via Chrome DevTools MCP
+- [ ] All UI acceptance criteria verified via Playwright MCP
 - [ ] No console errors on key pages
 - [ ] Screenshots captured for visual changes
 
@@ -179,23 +179,36 @@ AI AGENT (Claude Code or Codex CLI)
 ## Task Execution
 
 1. **Verify dependencies exist** — Check that prior tasks are merged and working
-2. **Write tests first** — One test per acceptance criterion
-3. **Implement** — Minimum code to pass tests
-4. **Run verification** — Use the code-verification skill against acceptance criteria
-   - The skill automatically detects UI/browser criteria and uses Chrome DevTools MCP
-5. **Update EXECUTION_PLAN.md** — When code-verification passes, check off the task's verification checkboxes in `EXECUTION_PLAN.md`
-6. **Commit** — Format: `task(1.1.A): brief description`
+
+2. **Explore before implementing** — Before writing any new code:
+   - Search for similar existing functionality (don't duplicate what exists)
+   - Identify patterns used elsewhere in the codebase for this type of work
+   - List reusable utilities, components, or helpers that could be leveraged
+   - Note the conventions used (naming, error handling, file organization)
+
+   This prevents the common AI failure mode of creating duplicate code or inconsistent patterns.
+
+3. **Write tests first** — One test per acceptance criterion
+
+4. **Implement** — Minimum code to pass tests, following patterns discovered in step 2
+
+5. **Run verification** — Use the code-verification skill against acceptance criteria
+   - The skill automatically detects UI/browser criteria and uses Playwright MCP
+
+6. **Update EXECUTION_PLAN.md** — When code-verification passes, check off the task's verification checkboxes in `EXECUTION_PLAN.md`
+
+7. **Commit** — Format: `task(1.1.A): brief description`
 
 ---
 
 ## Browser Verification Protocol
 
-When acceptance criteria involve UI/browser behavior (detected by keywords: UI, render, display, click, visual, DOM, style, console, network, accessibility, responsive), the code-verification skill will automatically use Chrome DevTools MCP.
+When acceptance criteria involve UI/browser behavior (detected by keywords: UI, render, display, click, visual, DOM, style, console, network, accessibility, responsive), the code-verification skill will automatically use Playwright MCP.
 
 ### Pre-Verification Setup
 1. **Start dev server** — Run the project's dev server command
 2. **Wait for ready** — Allow configured startup time
-3. **Confirm MCP availability** — Verify Chrome DevTools MCP is accessible
+3. **Confirm MCP availability** — Verify Playwright MCP is accessible
 
 ### Verification Types
 
@@ -218,8 +231,8 @@ Include in verification report:
 - Network request summary (if API behavior checked)
 
 ### Fallback When MCP Unavailable
-If Chrome DevTools MCP is not available:
-1. Log a warning: "Browser verification skipped - Chrome DevTools MCP unavailable"
+If Playwright MCP is not available:
+1. Log a warning: "Browser verification skipped - Playwright MCP unavailable"
 2. Mark browser-related criteria as BLOCKED (not FAIL)
 3. Continue with code-based verification
 4. Note in report: "Manual browser verification recommended"

@@ -2,16 +2,71 @@
 
 ## In Progress
 
+- [ ] Persistent learnings/patterns file for cross-task context (see below)
 - [ ] Compare web vs CLI interface for generation workflow (see below)
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues)
 - [ ] Intro commands for each Step
-- [ ] Verify that the Chrome DevTools integration works
+- [ ] Verify that the Playwright MCP integration works
 - [ ] Git worktrees for parallel task execution (see below)
 - [ ] Cross-tool compatibility with config generation (see below) — combines former "Cross-Tool Compatibility" and "Autonomous Execution Permissions"
 - [ ] Address Claude Code dependency — slash commands only work in Claude Code (see below)
+- [ ] Session logging for automation opportunity discovery (see below)
 - [x] Add `/list-todos` command (see below) — DONE
 
 ## Future Concepts
+
+### Persistent Learnings/Patterns File
+
+Address the context limitation where learning from task N doesn't transfer to task N+1 due to fresh context per task.
+
+**Problem:**
+- AI agents start each task with fresh context (by design, to avoid stale state)
+- But this means patterns discovered in Task 1.1.A are forgotten by Task 1.2.A
+- Research shows "Memory Bank files" improve AI coding outcomes (Made by Agents 2025)
+
+**Proposed Solution:**
+
+Create a `LEARNINGS.md` file that agents update as they discover project patterns:
+
+```markdown
+# Discovered Patterns
+
+> Auto-updated by AI agents during task execution.
+> Read this file at the start of each task.
+
+## Error Handling
+- Use `Result<T, Error>` pattern, not try/catch (Task 1.2.A)
+- All API errors return `{ error: { code, message } }` shape (Task 2.1.A)
+
+## Testing
+- Mock auth using `createMockUser()` from test-utils (Task 1.3.B)
+- Use `vi.mock()` not `jest.mock()` — this is a Vitest project (Task 1.1.A)
+
+## Conventions
+- API endpoints return `{ data, error, meta }` shape (Task 2.1.A)
+- Use `snake_case` for DB columns, `camelCase` for JS (Task 1.4.A)
+
+## Gotchas
+- `user.permissions` is lazy-loaded, always await it (Task 2.3.B)
+- The `config` module has side effects on import (Task 1.5.A)
+```
+
+**Implementation approach:**
+
+1. Add `LEARNINGS.md` to `/fresh-start` context loading
+2. Update task execution protocol to:
+   - Read LEARNINGS.md before starting
+   - Append new discoveries to LEARNINGS.md after task completion
+3. Define what qualifies as a "learning":
+   - Non-obvious patterns that differ from common defaults
+   - Project-specific conventions
+   - Gotchas that caused debugging time
+4. Keep file under ~100 lines (summarize/dedupe periodically)
+
+**Questions to answer:**
+- Should this be auto-generated or human-curated?
+- How to prevent the file from growing unbounded?
+- Should learnings be categorized by phase or topic?
 
 ### `/list-todos` Command
 
@@ -423,3 +478,99 @@ The dependency is **less severe than expected**. Most major tools now support si
 2. Implement `--tool=codex` in `/setup` to copy commands to `.codex/prompts/`
 3. Implement `--tool=cursor` in `/setup` to copy commands to `.cursor/commands/`
 4. Test the workflow end-to-end with Codex CLI
+
+### Session Logging for Automation Opportunity Discovery
+
+Capture session summaries to identify manual steps and patterns that could be automated with new skills or slash commands.
+
+**Problem:**
+- We don't have visibility into what manual interventions happen during sessions
+- Patterns that repeat across sessions are candidates for automation
+- No feedback loop from usage → improvements
+
+**Proposed Solution:**
+
+Use Claude Code's `SessionEnd` hook to log session data, then analyze logs to find automation opportunities.
+
+**Implementation approach:**
+
+1. **Create `SessionEnd` hook** (`.claude/hooks/session-end.sh`):
+   ```bash
+   #!/bin/bash
+   # Receives JSON via stdin: {session_id, transcript_path, cwd, hook_event_name}
+   SESSION_DATA=$(cat)
+   SESSION_ID=$(echo "$SESSION_DATA" | jq -r '.session_id')
+   TRANSCRIPT_PATH=$(echo "$SESSION_DATA" | jq -r '.transcript_path')
+
+   mkdir -p "${CLAUDE_PROJECT_DIR}/.claude/logs"
+
+   # Extract patterns from transcript
+   # - Tasks completed (TodoWrite calls)
+   # - Questions asked (AskUserQuestion calls)
+   # - Manual verifications mentioned
+   # - Errors encountered
+
+   cat >> "${CLAUDE_PROJECT_DIR}/.claude/logs/sessions.jsonl" << EOF
+   {"session_id": "$SESSION_ID", "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)", ...}
+   EOF
+   ```
+
+2. **Configure hook in `.claude/settings.json`:**
+   ```json
+   {
+     "hooks": {
+       "SessionEnd": {
+         "type": "command",
+         "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session-end.sh\"",
+         "timeout": 30000
+       }
+     }
+   }
+   ```
+
+3. **Create `/session-notes` skill** for manual context:
+   - Prompts user/agent to summarize what was done
+   - Captures info the hook can't extract (e.g., "had to manually restart the dev server")
+   - Appends to `.claude/logs/session-notes.jsonl`
+
+4. **Create `/analyze-sessions` skill** for pattern analysis:
+   - Reads `.claude/logs/sessions.jsonl`
+   - Identifies: repeated manual steps, common blockers, frequent questions
+   - Outputs: "Automation opportunities" report
+
+5. **Propagate to generated projects:**
+   - Update `/setup` to copy hook configuration
+   - Both this toolkit repo and generated projects get logging
+   - Central aggregation possible (optional)
+
+**What to capture:**
+
+| Data Point | Source | Automation Signal |
+|------------|--------|-------------------|
+| Tasks completed | TodoWrite tool calls | Which task types are common |
+| Questions asked | AskUserQuestion calls | Ambiguous requirements to clarify in specs |
+| Manual verifications | Transcript text parsing | Steps to add to phase-checkpoint |
+| Errors/blockers | Transcript text parsing | Common issues to add to LEARNINGS.md |
+| Tool usage patterns | Tool call frequency | Workflow optimizations |
+
+**Two deployment contexts:**
+
+1. **This toolkit repo** — Track generation/development sessions
+2. **Generated projects** — Track execution sessions (copy hook during `/setup`)
+
+**Feedback loop:**
+
+```
+Sessions → Logs → /analyze-sessions → New skills/commands → Better sessions
+```
+
+**Questions to answer:**
+- How much can we extract automatically vs needing manual `/session-notes`?
+- Should logs be per-project or aggregated centrally?
+- Privacy considerations for transcript data?
+- How often to run `/analyze-sessions`? Weekly? Per-phase?
+
+**Resources:**
+- [Claude Code Hooks documentation](https://code.claude.com/docs/en/hooks)
+- `SessionEnd` hook receives: `session_id`, `transcript_path`, `cwd`, `permission_mode`
+- Hooks run with 60s timeout (configurable)

@@ -18,7 +18,7 @@ I want to execute Phase $1 from EXECUTION_PLAN.md. Before starting, read EXECUTI
 
 3. **Permissions** — Review the tasks in Phase $1:
    - Identify any tools or permissions needed for autonomous execution
-   - Check if any tasks require browser verification (Chrome DevTools MCP)
+   - Check if any tasks require browser verification (Playwright MCP)
 
 ## Report
 

@@ -28,16 +28,16 @@ Extract each verification instruction into a discrete, testable item:
 - **Instruction**: The requirement text
 - **Test approach**: How to verify (file inspection, run tests, lint, type check, etc.)
 - **Files involved**: Which files to examine
-- **Requires Browser**: Whether the instruction needs Chrome DevTools MCP verification
+- **Requires Browser**: Whether the instruction needs Playwright MCP verification
   - Auto-detect from keywords: UI, render, display, visible, hidden, show, hide, click, hover, focus, blur, scroll, DOM, element, component, layout, responsive, style, CSS, color, font, screenshot, visual, appearance, console, error, warning, log, network, request, response, accessibility, a11y, ARIA, animation, transition, loading, performance
   - Mark as: `browser: true` or `browser: false`
 - **Browser Verification Type** (if `browser: true`):
-  - `DOM_INSPECTION` - Element presence, visibility, content, computed styles
+  - `DOM_INSPECTION` - Element presence, visibility, content via accessibility tree snapshots
   - `SCREENSHOT` - Visual appearance, layout verification
   - `CONSOLE` - Browser console errors, warnings, logs
-  - `NETWORK` - API requests, responses, status codes
-  - `PERFORMANCE` - Load times, Core Web Vitals
-  - `ACCESSIBILITY` - ARIA attributes, semantic HTML, color contrast
+  - `NETWORK` - API requests, responses, status codes (via network interception)
+  - `PERFORMANCE` - Load times, Core Web Vitals (via tracing)
+  - `ACCESSIBILITY` - ARIA attributes, semantic HTML, accessibility tree analysis
 
 ## Step 2: Pre-flight Validation
 
@@ -53,9 +53,9 @@ Flag untestable instructions immediately rather than attempting verification.
 
 For instructions with `browser: true`:
 
-1. **Check Chrome DevTools MCP availability**
-   - If unavailable, mark instruction as BLOCKED with reason: "Chrome DevTools MCP not available"
-   - Suggest: "Ensure Chrome DevTools MCP server is running and accessible"
+1. **Check Playwright MCP availability**
+   - If unavailable, mark instruction as BLOCKED with reason: "Playwright MCP not available"
+   - Suggest: "Ensure Playwright MCP server is running (npx @playwright/mcp@latest)"
 
 2. **Verify dev server is running**
    - Check if configured dev server URL responds (e.g., `http://localhost:3000`)
@@ -64,7 +64,7 @@ For instructions with `browser: true`:
    - If unable to start, mark as BLOCKED: "Dev server not accessible at {URL}"
 
 3. **Confirm target route exists**
-   - Navigate to the page specified in the instruction
+   - Navigate to the page specified in the instruction using `browser_navigate`
    - If 404 or error, mark as BLOCKED: "Target route not found: {route}"
 
 ## Step 3: Sub-Agent Verification Protocol
@@ -91,7 +91,7 @@ Sub-agent rules:
 
 ### Browser-Enhanced Verification Output
 
-For instructions with `browser: true`, the sub-agent MUST use Chrome DevTools MCP and return this extended format:
+For instructions with `browser: true`, the sub-agent MUST use Playwright MCP and return this extended format:
 
 ```
 BROWSER VERIFICATION RESULT
@@ -145,12 +145,12 @@ Suggested Fix: [Specific fix recommendation]
 #### Browser Sub-Agent Rules
 
 In addition to standard sub-agent rules, browser verification sub-agents MUST:
-- Start with a screenshot of the initial state
-- Use stable selectors (prefer `data-testid` over complex CSS paths)
-- Wait for dynamic content to load before inspecting DOM
+- Start with an accessibility tree snapshot (`browser_snapshot`) of the initial state
+- Use stable selectors (prefer `data-testid` over complex CSS paths, or use accessibility tree element refs)
+- Wait for dynamic content to load before inspecting (`browser_wait_for_text` or `browser_wait`)
 - Capture console output before and after actions
-- Take "after" screenshots when verifying interactive behavior
-- Test at default viewport unless criterion specifies responsive/mobile
+- Take screenshots (`browser_screenshot`) when verifying visual appearance
+- Test at default viewport unless criterion specifies responsive/mobile (use `browser_resize` to change)
 
 ## Step 4: Main Agent Fix Protocol
 
@@ -292,7 +292,7 @@ Total Browser Checks: [N]
 Browser Checks Passed: [N] ✅
 Browser Checks Failed: [N] ❌
 Browser Checks Blocked: [N] ⚠️
-Chrome DevTools MCP Status: Available | Unavailable
+Playwright MCP Status: Available | Unavailable
 Dev Server Status: Running at [URL] | Not Running
 
 Screenshots Captured:

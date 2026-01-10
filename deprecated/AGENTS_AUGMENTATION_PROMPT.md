@@ -49,8 +49,8 @@ If the project has a frontend, web UI, or browser-based components, add:
   - Local URL where the app runs (e.g., `http://localhost:3000`)
   - Startup time needed before server is ready (in seconds)
 
-- **Chrome DevTools MCP integration**:
-  - Confirm Chrome DevTools MCP server is available in the agent's environment
+- **Playwright MCP integration**:
+  - Confirm Playwright MCP server is available in the agent's environment
   - List pages/routes that should be tested
   - Specify any authentication requirements for testing protected pages
   - Note any browser-specific requirements (viewport sizes, cookies, etc.)
@@ -70,7 +70,7 @@ Example section for a React/Vite app:
 - **URL**: `http://localhost:5173`
 - **Startup wait**: 5 seconds
 
-### Chrome DevTools MCP
+### Playwright MCP
 - Use for all acceptance criteria involving: UI, render, display, click, visual, DOM, style, console, network
 - Target elements using `data-testid` attributes
 - Capture screenshots for visual verification items

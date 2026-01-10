@@ -129,7 +129,7 @@ Human must complete before starting:
 - [ ] {Another manual check}
 
 **Browser Verification (if applicable):**
-- [ ] All UI acceptance criteria verified via Chrome DevTools MCP
+- [ ] All UI acceptance criteria verified via Playwright MCP
 - [ ] No console errors on key pages
 - [ ] Screenshots captured for visual changes
 
