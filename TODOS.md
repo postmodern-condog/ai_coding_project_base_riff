@@ -8,8 +8,6 @@
 - [ ] Intro commands for each Step
 - [ ] Verify that the Playwright MCP integration works
 - [ ] Git worktrees for parallel task execution (see below)
-- [ ] Cross-tool compatibility with config generation (see below) — combines former "Cross-Tool Compatibility" and "Autonomous Execution Permissions"
-- [ ] Address Claude Code dependency — slash commands only work in Claude Code (see below)
 - [ ] Session logging for automation opportunity discovery (see below)
 - [x] Add `/list-todos` command (see below) — DONE
 
@@ -128,8 +126,6 @@ Add pre-built subagents in `.claude/agents/` for specialized tasks with isolated
 - Parallel execution — multiple subagents can work simultaneously
 - Different tool permissions — e.g., read-only reviewer vs writer
 - Self-contained tasks — returns result and is done
-
-**Note:** Subagents are Claude Code-specific. Codex CLI does not support `.codex/agents/`.
 
 ### GitHub Actions Integration
 
@@ -281,11 +277,11 @@ step-1.1/
 
 | Approach | Max Concurrency | Isolation | Complexity |
 |----------|-----------------|-----------|------------|
-| Claude Code Task Tool | 10 subagents | Shared filesystem | Low |
+| Task Tool | 10 subagents | Shared filesystem | Low |
 | Git worktrees | Unlimited | Full directory isolation | Medium |
 | Docker containers | Unlimited | Full process isolation | High |
 
-**Claude Code Task Tool (Recommended for most cases):**
+**Task Tool (Recommended for most cases):**
 - Supports up to 10 concurrent subagents via `subagent_type` parameter
 - Subagents share filesystem but have isolated context
 - Good for tasks that don't touch the same files
@@ -338,146 +334,6 @@ step-1.1/
 2. Update GENERATOR_PROMPT.md to emit parallel flags
 3. Create `/parallel-step` command using Task Tool
 4. (Optional) Add git worktree support for full isolation
-
-### Cross-Tool Compatibility with Config Generation
-
-Generate tool-specific configuration files to make the toolkit work with AI coding tools beyond Claude Code.
-
-**Goal:** When running `/setup`, generate configs for the user's preferred tool(s) so the workflow works across different AI assistants.
-
-**Research Findings (January 2026):**
-
-#### Cursor
-
-| Aspect | Details |
-|--------|---------|
-| Config location | `.cursor/rules/*.mdc` (MDC = Markdown Components) |
-| AGENTS.md support | **Native** — Cursor automatically reads AGENTS.md |
-| Slash commands | `.cursor/commands/*.md` — similar to Claude Code |
-| Rule format | Frontmatter with `globs` pattern, then markdown instructions |
-
-**Example Cursor rule (`.cursor/rules/testing.mdc`):**
-```mdc
----
-globs: ["**/*.test.ts", "**/*.spec.ts"]
----
-When writing tests:
-- Use vitest for unit tests
-- Follow AAA pattern (Arrange, Act, Assert)
-```
-
-**Key insight:** Cursor's native AGENTS.md support means minimal config generation needed.
-
-#### Codex CLI
-
-| Aspect | Details |
-|--------|---------|
-| Config location | `~/.codex/prompts/*.md` (user-level) or `.codex/prompts/*.md` (project) |
-| AGENTS.md support | **Native** — Codex CLI reads AGENTS.md automatically |
-| Slash commands | **Yes** — `/prompts:commandname` syntax |
-| Invocation | `codex /prompts:phase-start 1` |
-
-**Key insight:** Codex CLI has near-parity with Claude Code for slash commands. Prompts are standalone markdown files (no YAML frontmatter).
-
-#### Aider
-
-| Aspect | Details |
-|--------|---------|
-| Config location | `.aider.conf.yml` in project root |
-| AGENTS.md support | **Via config** — add `read: AGENTS.md` to config |
-| Slash commands | **No** — must paste prompts manually or use `--message-file` |
-| Workaround | `aider --message-file .claude/commands/phase-start.md` |
-
-**Example Aider config (`.aider.conf.yml`):**
-```yaml
-read:
-  - AGENTS.md
-  - EXECUTION_PLAN.md
-auto-commits: false
-model: claude-3-5-sonnet-20241022
-```
-
-**Key insight:** Aider requires manual prompt invocation but can auto-load context files.
-
-#### Summary: Tool Support Matrix
-
-| Tool | AGENTS.md | Slash Commands | Config Needed |
-|------|-----------|----------------|---------------|
-| Claude Code | Native | Native (`.claude/commands/`) | None |
-| Cursor | Native | Native (`.cursor/commands/`) | Minimal (copy commands) |
-| Codex CLI | Native | `/prompts:` system | Copy to `.codex/prompts/` |
-| Aider | Via `.aider.conf.yml` | Manual paste | Generate `.aider.conf.yml` |
-| Windsurf | TBD | TBD | TBD |
-| Continue | TBD | TBD | TBD |
-
-**Revised implementation approach:**
-
-1. **Minimal generation needed** for Cursor and Codex CLI (they read AGENTS.md natively)
-2. **Copy commands** to tool-specific directories:
-   - Cursor: `.cursor/commands/`
-   - Codex CLI: `.codex/prompts/` (strip YAML frontmatter)
-3. **Generate `.aider.conf.yml`** for Aider users with `read: AGENTS.md`
-4. **Defer Windsurf/Continue** until more research
-
-**Proposed `/setup` enhancement:**
-```bash
-/setup ~/my-project                    # Claude Code only (default)
-/setup ~/my-project --tool=cursor      # Also copy to .cursor/commands/
-/setup ~/my-project --tool=codex       # Also copy to .codex/prompts/
-/setup ~/my-project --tool=aider       # Generate .aider.conf.yml
-/setup ~/my-project --tool=all         # All supported tools
-```
-
-**Remaining work:**
-1. Create command copier that strips YAML frontmatter for Codex CLI
-2. Create `.aider.conf.yml` generator
-3. Add `--tool` flag to `/setup`
-4. Test with each tool
-
-### Address Claude Code Dependency
-
-Currently, the toolkit's slash commands (`.claude/commands/`) only work in Claude Code. This limits adoption for users of other tools.
-
-**Research Findings (January 2026):**
-
-The dependency is **less severe than expected**. Most major tools now support similar mechanisms:
-
-| Component | Claude Code | Codex CLI | Cursor | Aider |
-|-----------|-------------|-----------|--------|-------|
-| Slash commands | ✅ Native | ✅ `/prompts:` | ✅ Native | ❌ Manual |
-| AGENTS.md | ✅ Native | ✅ Native | ✅ Native | ✅ Via config |
-| Skills | ✅ `.claude/skills/` | ✅ `.codex/skills/` | ❓ TBD | ❌ N/A |
-
-**Key finding:** Codex CLI supports `/prompts:commandname` syntax, making it nearly equivalent to Claude Code for slash commands. Cursor also has native command support.
-
-**Revised assessment:**
-
-- **Claude Code + Codex CLI + Cursor** = Full experience (slash commands work)
-- **Aider** = Partial experience (manual prompt invocation, but AGENTS.md loads)
-- **Other tools** = Varies, likely manual
-
-**Updated options:**
-
-1. **Cross-tool setup (Recommended)**
-   - Implement `--tool` flag in `/setup` (see Cross-Tool Compatibility section)
-   - Copy commands to appropriate directories for each tool
-   - Document the `/prompts:` syntax for Codex CLI users
-
-2. **Documentation improvements**
-   - Update README with tool-specific instructions
-   - Create "Getting Started with {Tool}" guides
-   - Show equivalent invocations: `/phase-start 1` vs `codex /prompts:phase-start 1`
-
-3. **External CLI wrapper (Deferred)**
-   - Not needed now that Codex CLI and Cursor have native support
-   - Reconsider if more tools emerge without command systems
-
-**Minimum viable action:**
-
-1. ✅ Document Codex CLI `/prompts:` equivalence in README
-2. Implement `--tool=codex` in `/setup` to copy commands to `.codex/prompts/`
-3. Implement `--tool=cursor` in `/setup` to copy commands to `.cursor/commands/`
-4. Test the workflow end-to-end with Codex CLI
 
 ### Session Logging for Automation Opportunity Discovery
 

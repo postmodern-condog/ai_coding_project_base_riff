@@ -149,7 +149,7 @@ HUMAN (Orchestrator)
 ├── Reviews completed tasks before assigning the next
 └── Reviews at phase checkpoints
 
-AI AGENT (Claude Code or Codex CLI)
+AI AGENT (Claude Code)
 ├── Executes ONE task at a time
 ├── Works on a single branch
 ├── Follows TDD: tests first, then implementation

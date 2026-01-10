@@ -6,6 +6,18 @@ allowed-tools: Bash, Read, Edit, Glob, Grep, AskUserQuestion
 
 Phase $1 is complete. Read EXECUTION_PLAN.md and run the checkpoint criteria.
 
+## Tool Availability Check
+
+Before running checks, detect which optional tools are available. Track results for the final report.
+
+| Tool | Check Method | If Unavailable |
+|------|--------------|----------------|
+| Chrome DevTools MCP | Try `mcp__chrome-devtools__list_pages` | Browser verification → manual |
+| code-simplifier | Check if agent type available | Skip code simplification |
+| Trigger.dev MCP | Try `mcp__trigger__list_projects` | Skip Trigger.dev checks |
+
+Note which tools are available/unavailable for the report.
+
 ## Automated Checks
 
 Run these commands and report results:
@@ -42,36 +54,7 @@ Run these commands and report results:
 
    Security scan blocks checkpoint if CRITICAL or HIGH issues remain unresolved.
 
-5. **Technical Debt Check**
-
-   Follow the instructions in `.claude/skills/tech-debt-check/SKILL.md`:
-   - Run duplication analysis
-   - Run complexity analysis
-   - Check file sizes
-   - Detect AI code smells
-
-   Report findings with severity levels. Tech debt check is informational (does not block) unless CRITICAL thresholds are exceeded.
-
-6. **Code Simplification**
-
-   Run the `code-simplifier` agent on files modified during this phase:
-   - Identify files changed: `git diff --name-only HEAD~{commits-in-phase}`
-   - For each modified code file, apply simplification refinements
-   - Focus on: reducing complexity, improving naming, eliminating redundant code
-   - Preserve all functionality — only improve clarity and consistency
-
-   This step uses the code-simplifier plugin (installed via `/setup`). If not available, skip this step.
-
-   Present a summary of simplifications applied:
-   ```
-   CODE SIMPLIFICATION
-   -------------------
-   Files reviewed: {N}
-   Files modified: {N}
-   Changes: {brief description of improvements}
-   ```
-
-7. **Code Quality Metrics**
+5. **Code Quality Metrics**
 
    Collect and report these metrics for the phase:
 
@@ -90,6 +73,47 @@ Run these commands and report results:
    - Python: `pytest --cov`
 
    Flag if coverage dropped compared to before the phase.
+
+## Optional Enhanced Checks
+
+These checks run only if the required tools are available (detected above).
+
+6. **Code Simplification** (requires: code-simplifier plugin)
+
+   If code-simplifier is available:
+   - Identify files changed in this phase: `git diff --name-only HEAD~{commits-in-phase}`
+   - Run code-simplifier agent on modified code files
+   - Focus on: reducing complexity, improving naming, eliminating redundancy
+   - Preserve all functionality — only improve clarity
+
+   Report:
+   ```
+   CODE SIMPLIFICATION
+   -------------------
+   Status: APPLIED | SKIPPED (plugin not available)
+   Files reviewed: {N}
+   Files modified: {N}
+   Changes: {brief description}
+   ```
+
+7. **Browser Verification** (requires: Chrome DevTools MCP)
+
+   If Chrome DevTools MCP is available and phase includes UI work:
+   - Run any browser-based acceptance criteria checks
+   - Take snapshots for verification
+
+   If unavailable:
+   - Add browser checks to Manual Verification section instead
+
+8. **Technical Debt Check** (optional)
+
+   If `.claude/skills/tech-debt-check/SKILL.md` exists:
+   - Run duplication analysis
+   - Run complexity analysis
+   - Check file sizes
+   - Detect AI code smells
+
+   Report findings with severity levels. Informational only (does not block).
 
 ## Manual Verification
 
@@ -129,25 +153,36 @@ This is a quick sanity check to catch "works but wrong approach" issues before t
 Phase $1 Checkpoint Results
 ===========================
 
+Tool Availability:
+- Chrome DevTools MCP: {✓ Available | ✗ Not configured}
+- code-simplifier: {✓ Available | ✗ Not installed}
+- Trigger.dev MCP: {✓ Available | ✗ Not configured | N/A}
+
 Automated Checks:
 - [ ] Tests: PASSED/FAILED
 - [ ] Type Check: PASSED/FAILED/SKIPPED
 - [ ] Linting: PASSED/FAILED/SKIPPED
 - [ ] Security: PASSED/FAILED/PASSED WITH NOTES
-- [ ] Tech Debt: PASSED/PASSED WITH NOTES/FAILED
-- [ ] Code Simplification: APPLIED/SKIPPED
 - [ ] Coverage: {X}% (target: 80%)
 
+Optional Enhanced Checks:
+- [ ] Code Simplification: APPLIED/SKIPPED (reason)
+- [ ] Browser Verification: PASSED/SKIPPED (reason)
+- [ ] Tech Debt Check: PASSED/PASSED WITH NOTES/SKIPPED
+
 Security Summary: X critical, Y high, Z medium (if applicable)
-Tech Debt Summary: X duplicate blocks, Y complex functions, Z large files
-Simplification Summary: X files reviewed, Y files improved
+Tech Debt Summary: {findings or "Not checked"}
 
 Manual Verification Required:
 - [ ] {item from EXECUTION_PLAN.md}
 - [ ] {item from EXECUTION_PLAN.md}
+{If browser checks skipped: - [ ] Manual browser verification needed}
 
 Approach Review Required:
 - [ ] Human has reviewed implementation approach (see checklist above)
+
+Skipped Due to Missing Tools:
+{List any checks skipped and why, or "None"}
 
 Overall: Ready to proceed to Phase {next} | Issues to address
 ```

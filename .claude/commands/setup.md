@@ -28,15 +28,8 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    - `security-scan.md`
    - `list-todos.md`
 
-   Copy skills directories:
+   Copy skills directory:
    - `.claude/skills/` → target's `.claude/skills/`
-   - `.codex/skills/` → target's `.codex/skills/`
-
-   **Install required plugins:**
-   ```bash
-   claude plugin install code-simplifier
-   ```
-   This installs at user scope and is idempotent (safe to run if already installed).
 
    **Do NOT copy:**
    - Generation commands (setup.md, product-spec.md, etc.) — these run from the toolkit
