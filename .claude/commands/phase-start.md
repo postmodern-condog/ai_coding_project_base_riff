@@ -55,8 +55,13 @@ Before starting, read these files:
 
 2. **Task Execution** (for each task)
    - Read the task definition and acceptance criteria
+   - **Explore before implementing:**
+     - Search for similar existing functionality (don't duplicate)
+     - Identify patterns used elsewhere in codebase
+     - List reusable utilities/components to leverage
+     - Note conventions (naming, error handling, structure)
    - Write tests first (one per acceptance criterion)
-   - Implement minimum code to pass tests
+   - Implement minimum code to pass tests, following discovered patterns
    - Run verification using /verify-task
    - Update checkboxes in EXECUTION_PLAN.md: `- [ ]` → `- [x]`
    - **Commit immediately** (see Git Workflow above)

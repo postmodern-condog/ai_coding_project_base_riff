@@ -20,12 +20,57 @@ Generate a feature technical specification document for the project at `$1`.
 Read FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md from this toolkit directory and follow its instructions exactly:
 
 1. Read `$1/FEATURE_SPEC.md` as input
-2. Explore the existing codebase at `$1` to understand patterns and architecture
+
+2. **Perform Existing Code Analysis** (REQUIRED before any design):
+
+   a. **Similar Functionality Audit**
+      - Search for existing code that does something similar to what the feature needs
+      - List any utilities, helpers, or patterns that could be reused
+      - Flag if creating new code when existing code could be extended
+      - Output:
+        ```
+        SIMILAR FUNCTIONALITY FOUND
+        ---------------------------
+        - {file}: {description of similar functionality}
+        - {file}: {reusable utility/helper}
+
+        Recommendation: {extend existing | create new | hybrid approach}
+        ```
+
+   b. **Pattern Compliance Check**
+      - Identify how similar features are implemented in the codebase
+      - Note naming conventions, file organization, error handling patterns
+      - Document the "house style" for this type of feature
+      - Output:
+        ```
+        EXISTING PATTERNS
+        -----------------
+        File organization: {pattern}
+        Naming convention: {pattern}
+        Error handling: {pattern}
+        Testing approach: {pattern}
+        ```
+
+   c. **Integration Point Mapping**
+      - List every existing file/module the feature will touch
+      - For each, assess: complexity, test coverage, documentation quality
+      - Flag high-risk integration points
+      - Output:
+        ```
+        INTEGRATION POINTS
+        ------------------
+        | File | Risk | Coverage | Notes |
+        |------|------|----------|-------|
+        | {file} | High/Med/Low | X% | {concerns} |
+        ```
+
 3. **Assess codebase maturity** — Is this a legacy/brownfield codebase?
    - Look for: outdated dependencies, missing tests, undocumented code, deprecated patterns
    - If legacy indicators found, explicitly address technical debt, undocumented behavior, and human decision points
+
 4. Work through integration analysis, regression risks, and migration strategy
-5. Generate the final FEATURE_TECHNICAL_SPEC.md document
+
+5. Generate the final FEATURE_TECHNICAL_SPEC.md document, incorporating findings from step 2
 
 ## Output
 

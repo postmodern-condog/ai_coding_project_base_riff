@@ -40,20 +40,27 @@ We will ultimately pass this document on to the next stage of the workflow, whic
 
 Once we have enough to generate a strong technical specification document, tell the user you're ready. Generate `FEATURE_TECHNICAL_SPEC.md` that:
 
-1. Addresses these required topics:
+1. **Starts with Existing Code Analysis** (REQUIRED):
+   - **Similar Functionality Audit** — What existing code does something similar? What can be reused vs. created new?
+   - **Pattern Compliance** — What patterns does this codebase use for similar features? (file organization, naming, error handling, testing)
+   - **Integration Point Map** — Every file this feature touches, with risk assessment and test coverage status
+
+   This section prevents the common AI failure of duplicating functionality or creating inconsistent patterns.
+
+2. Addresses these required topics:
    - **Integration analysis** — what files to modify, what files to create, what existing patterns to follow
    - **Data model changes** — new entities, modified entities, migration needs
    - **Regression risk assessment** — what could break and how to mitigate
    - **Implementation sequence** — what to build first and why, considering dependencies on existing code
 
-2. Addresses these topics where relevant:
+3. Addresses these topics where relevant:
    - API changes (new and modified endpoints)
    - State management integration
    - New dependencies
    - Migration strategy and rollback plan
    - Edge cases specific to this feature
 
-3. **For legacy/brownfield codebases**, additionally address:
+4. **For legacy/brownfield codebases**, additionally address:
 
    - **Technical debt assessment** — Identify code that must be touched but is problematic:
      - Undocumented functions with unclear behavior
@@ -84,7 +91,7 @@ Once we have enough to generate a strong technical specification document, tell 
      - [ ] Feature flags needed for gradual rollout?
      - [ ] Rollback plan if deployment fails?
 
-4. Is structured in whatever way best communicates this specific feature's integration
+5. Is structured in whatever way best communicates this specific feature's integration
 
 You have latitude to organize the document as appropriate for the feature. A database schema change needs different detail than a UI-only feature. Use your judgment to create a document that gives an AI coding agent everything it needs to implement the feature while maintaining consistency with the existing codebase.
 ```
