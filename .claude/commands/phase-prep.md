@@ -6,6 +6,14 @@ allowed-tools: Bash, Read, Glob, Grep, AskUserQuestion
 
 I want to execute Phase $1 from EXECUTION_PLAN.md. Before starting, read EXECUTION_PLAN.md and check:
 
+## Directory Guard (Wrong Directory Check)
+
+Before starting, confirm `EXECUTION_PLAN.md` exists in the current working directory.
+
+- If it does not exist, **STOP** and tell the user:
+  - They are likely in the toolkit repo (or the wrong folder)
+  - They should `cd` into their project directory (the one containing `EXECUTION_PLAN.md`) and re-run `/phase-prep $1`
+
 ## Pre-Flight Checks
 
 1. **Pre-Phase Setup** — Check the "Pre-Phase Setup" section for Phase $1:

@@ -13,6 +13,14 @@ Generate a technical specification document for the project at `$1`.
 - Check that `$1/PRODUCT_SPEC.md` exists. If not:
   "PRODUCT_SPEC.md not found at $1. Run /product-spec $1 first."
 
+## Directory Guard (Wrong Directory Check)
+
+Before starting, confirm you're in the toolkit directory by reading `TECHNICAL_SPEC_PROMPT.md` from the current working directory.
+
+- If `TECHNICAL_SPEC_PROMPT.md` is not present, **STOP** and tell the user:
+  - They're likely in their target project directory (or another repo)
+  - They should `cd` into the `ai_coding_project_base` toolkit repo and re-run `/technical-spec $1`
+
 ## Process
 
 Read TECHNICAL_SPEC_PROMPT.md from this toolkit directory and follow its instructions exactly:

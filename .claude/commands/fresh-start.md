@@ -1,8 +1,48 @@
 ---
 description: Orient to project structure and load context
+argument-hint: [project-directory]
+allowed-tools: Read, Glob, Grep, Bash, AskUserQuestion
 ---
 
-Read the following files to understand the structure and purpose of this project:
+Orient to a project directory and load context for execution.
+
+## Project Directory
+
+Use the current working directory by default.
+
+If `$1` is provided, treat `$1` as the project directory and read files under `$1` instead.
+
+## Directory Guard (Wrong Directory Check)
+
+Confirm the project directory contains `AGENTS.md` and `EXECUTION_PLAN.md`.
+
+- If either is missing:
+  - Tell the user this project is not ready for execution yet
+  - If they are in the toolkit repo (e.g., `GENERATOR_PROMPT.md` exists), instruct them to:
+    1. Run `/generate-plan <project-path>` from the toolkit repo (or feature equivalents)
+    2. `cd` into the project directory
+    3. Re-run `/fresh-start`
+  - Otherwise, ask the user for the correct project directory path and re-run `/fresh-start <project-path>`
+
+## Git Initialization (First Run)
+
+In the project directory:
+
+1. Check whether this is already a git repo (`.git/` exists).
+2. If not a git repo:
+   - Ask: "Initialize git in this project now?" (recommended)
+   - If yes:
+     ```bash
+     git init
+     git branch -M main
+     ```
+3. If it is a git repo but has no commits yet:
+   - Ask: "Create an initial commit of the current project state now?" (recommended)
+   - If yes:
+     ```bash
+     git add -A
+     git commit -m "chore: initial commit"
+     ```
 
 ## Required Context
 

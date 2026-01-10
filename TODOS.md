@@ -3,6 +3,7 @@
 ## In Progress
 
 - [ ] **[P0 / High]** Make workflow portable across CLIs/models without breaking Claude Code “clone-and-go” sharing
+- [ ] **[P1 / Medium]** Add optional path arguments to execution commands to reduce wrong-directory friction
 - [ ] Persistent learnings/patterns file for cross-task context (see below)
 - [ ] Compare web vs CLI interface for generation workflow (see below)
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues)

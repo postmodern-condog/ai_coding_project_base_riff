@@ -54,6 +54,8 @@ These documents persist across sessions, enabling any AI agent to pick up where 
 git clone https://github.com/yourusername/ai_coding_project_base.git
 cd ai_coding_project_base
 
+# Open this folder in Claude Code to use the slash commands in .claude/commands/
+
 # 2. Initialize & Generate (from toolkit directory)
 /setup ~/Projects/my-new-app           # Copy execution commands + skills
 /product-spec ~/Projects/my-new-app    # Define what you're building

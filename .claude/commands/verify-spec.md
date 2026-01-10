@@ -1,6 +1,6 @@
 ---
 description: Verify a specification document for context preservation and quality issues
-argument-hint: <document-type>
+argument-hint: <document-type> [project-directory]
 allowed-tools: Read, Edit, Grep, Glob, AskUserQuestion
 ---
 
@@ -18,10 +18,22 @@ Verify a specification document for context preservation (nothing important lost
 
 If `$1` is empty, ask the user which document to verify.
 
+## Project Directory
+
+By default, verify documents in the current working directory.
+
+If `$2` is provided, treat `$2` as the project directory and verify documents under `$2` instead.
+
 ## Prerequisites
 
-- The target document must exist in the current directory
+- The target document must exist in the project directory (current directory, or `$2` if provided)
 - For context preservation checks, the upstream document must also exist
+
+## Directory Guard (Wrong Directory Check)
+
+If `$2` is not provided and the expected documents are not present in the current directory:
+- Ask the user for the correct project directory path
+- Tell them to `cd` into that directory (recommended), or re-run as `/verify-spec <type> <project-directory>`
 
 ## Process
 

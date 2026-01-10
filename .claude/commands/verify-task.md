@@ -1,9 +1,16 @@
 ---
 description: Run code-verification on a specific task
 argument-hint: [task-id]
+allowed-tools: Read, Edit, Bash, Grep, Glob, AskUserQuestion
 ---
 
 Verify Task $1 from EXECUTION_PLAN.md using the code verification workflow.
+
+## Directory Guard (Wrong Directory Check)
+
+Before starting, confirm `EXECUTION_PLAN.md` exists in the current working directory.
+
+- If it does not exist, **STOP** and tell the user to `cd` into their project directory (the one containing `EXECUTION_PLAN.md`) and re-run `/verify-task $1`.
 
 ## Task Context
 

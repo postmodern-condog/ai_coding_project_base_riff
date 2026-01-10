@@ -17,6 +17,14 @@ Generate the execution plan and agent additions for the project at `$1`.
 - Check that `$1/AGENTS.md` exists. If not:
   "AGENTS.md not found at $1. Feature development requires an existing AGENTS.md."
 
+## Directory Guard (Wrong Directory Check)
+
+Before starting, confirm you're in the toolkit directory by reading `FEATURE_PROMPTS/FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md` from the current working directory.
+
+- If `FEATURE_PROMPTS/FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md` is not present, **STOP** and tell the user:
+  - They're likely in their target project directory (or another repo)
+  - They should `cd` into the `ai_coding_project_base` toolkit repo and re-run `/feature-plan $1`
+
 ## Process
 
 Read FEATURE_PROMPTS/FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md from this toolkit directory and follow its instructions exactly:

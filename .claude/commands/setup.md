@@ -8,6 +8,10 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
 
 ## Steps
 
+0. **Directory guard (must run from toolkit repo)**
+   - Confirm `START_PROMPTS.md` and `GENERATOR_PROMPT.md` exist in the current working directory
+   - If either is missing, **STOP** and tell the user to `cd` into the `ai_coding_project_base` toolkit repo and re-run `/setup $1`
+
 1. **Validate target directory**
    - If `$1` is empty, ask the user for the target directory path
    - Check if the directory exists; if not, offer to create it

@@ -12,6 +12,12 @@ Before starting, read these files:
 - **AGENTS.md** — Follow all workflow conventions
 - **EXECUTION_PLAN.md** — Task definitions and acceptance criteria
 
+## Directory Guard (Wrong Directory Check)
+
+Before starting, confirm `AGENTS.md` and `EXECUTION_PLAN.md` exist in the current working directory.
+
+- If either is missing, **STOP** and tell the user to `cd` into their project directory (the one containing these files) and re-run `/phase-start $1`.
+
 ## Execution Rules
 
 1. **Git Workflow (Auto-Commit)**

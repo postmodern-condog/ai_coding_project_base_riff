@@ -15,6 +15,14 @@ Generate the execution plan and agent guidelines for the project at `$1`.
 - Check that `$1/TECHNICAL_SPEC.md` exists. If not:
   "TECHNICAL_SPEC.md not found at $1. Run /technical-spec $1 first."
 
+## Directory Guard (Wrong Directory Check)
+
+Before starting, confirm you're in the toolkit directory by reading `GENERATOR_PROMPT.md` from the current working directory.
+
+- If `GENERATOR_PROMPT.md` is not present, **STOP** and tell the user:
+  - They're likely in their target project directory (or another repo)
+  - They should `cd` into the `ai_coding_project_base` toolkit repo and re-run `/generate-plan $1`
+
 ## Process
 
 Read GENERATOR_PROMPT.md from this toolkit directory and follow its instructions exactly:

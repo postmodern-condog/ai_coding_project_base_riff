@@ -5,6 +5,12 @@ allowed-tools: Read, Glob, Grep
 
 Analyze the TODO items in TODOS.md and produce a prioritized list with implementation guidance.
 
+## Directory Guard (Wrong Directory Check)
+
+Before starting:
+- If the current directory appears to be the toolkit repo (e.g., `GENERATOR_PROMPT.md` exists), **STOP** and tell the user to run `/list-todos` from their project directory instead.
+- Confirm `TODOS.md` exists in the current working directory. If it does not exist, **STOP** and ask the user where their project TODOs live.
+
 ## Process
 
 1. **Read TODOS.md** from the project root

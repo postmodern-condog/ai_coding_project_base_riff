@@ -6,6 +6,11 @@ allowed-tools: Bash, Read, Edit, Grep, Glob, AskUserQuestion
 
 Scan the codebase for security vulnerabilities.
 
+## Directory Guard (Wrong Directory Check)
+
+Before starting:
+- If the current directory appears to be the toolkit repo (e.g., `GENERATOR_PROMPT.md` exists), **STOP** and tell the user to run `/security-scan` from their project directory instead.
+
 ## Arguments
 
 `$1` = Optional flag to limit scan scope:

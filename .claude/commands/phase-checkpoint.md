@@ -6,6 +6,12 @@ allowed-tools: Bash, Read, Edit, Glob, Grep, AskUserQuestion
 
 Phase $1 is complete. Read EXECUTION_PLAN.md and run the checkpoint criteria.
 
+## Directory Guard (Wrong Directory Check)
+
+Before starting, confirm `EXECUTION_PLAN.md` exists in the current working directory.
+
+- If it does not exist, **STOP** and tell the user to `cd` into their project directory (the one containing `EXECUTION_PLAN.md`) and re-run `/phase-checkpoint $1`.
+
 ## Tool Availability Check
 
 Before running checks, detect which optional tools are available by attempting a harmless call:
