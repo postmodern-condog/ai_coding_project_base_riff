@@ -46,6 +46,7 @@ Run these commands and report results:
 
 From the "Phase $1 Checkpoint" section in EXECUTION_PLAN.md:
 - List each manual verification item
+- For each item, provide step-by-step instructions explaining how to verify it
 - Indicate what I need to verify before proceeding
 
 ## Regression Check (if feature work)
