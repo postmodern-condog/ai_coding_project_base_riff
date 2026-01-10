@@ -25,7 +25,7 @@ I want to execute Phase $1 from EXECUTION_PLAN.md. Before starting, read EXECUTI
 
    | Tool | Check | If Unavailable |
    |------|-------|----------------|
-   | Chrome DevTools MCP | `mcp__chrome-devtools__list_pages` | Manual browser verification |
+   | Playwright MCP | Attempt a harmless Playwright MCP call (e.g., list pages) | Manual browser verification |
    | code-simplifier | Check agent type available | Skip code simplification |
    | Trigger.dev MCP | `mcp__trigger__list_projects` | Skip Trigger.dev features |
 
@@ -55,7 +55,7 @@ Environment:
 - {env vars or "None required"}
 
 Tools:
-- Chrome DevTools MCP: ✓ | ✗
+- Playwright MCP: ✓ | ✗
 - code-simplifier: ✓ | ✗
 - Trigger.dev MCP: ✓ | ✗ | N/A
 

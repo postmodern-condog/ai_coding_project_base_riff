@@ -67,6 +67,14 @@ cd ~/Projects/my-new-app
 # Review changes, then: git push origin phase-1
 ```
 
+### Optional: Local Claude Code Settings
+
+If you use local (machine-specific) Claude Code permissions, copy:
+
+- `.claude/settings.local.example.json` → `.claude/settings.local.json`
+
+The `.claude/settings.local.json` file is intentionally ignored by git.
+
 ### Feature Development
 
 ```bash

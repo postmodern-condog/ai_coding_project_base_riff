@@ -12,7 +12,7 @@ Before running checks, detect which optional tools are available by attempting a
 
 | Tool | Check Method | Fallback |
 |------|--------------|----------|
-| Chrome DevTools MCP | `mcp__chrome-devtools__list_pages` | Manual browser verification |
+| Playwright MCP | Attempt a harmless Playwright MCP call (e.g., list pages) | Manual browser verification |
 | code-simplifier | Check if agent type available | Skip code simplification |
 | Trigger.dev MCP | `mcp__trigger__list_projects` | Skip Trigger.dev checks |
 
@@ -85,9 +85,9 @@ These checks run only if the required tools are available (detected above).
 
    Focus: reduce complexity, improve naming, eliminate redundancy. Preserve all functionality.
 
-7. **Browser Verification** (requires: Chrome DevTools MCP)
+7. **Browser Verification** (requires: Playwright MCP)
 
-   If Chrome DevTools MCP is available and phase includes UI work:
+   If Playwright MCP is available and phase includes UI work:
    - Run any browser-based acceptance criteria checks
    - Take snapshots for verification
 
@@ -143,7 +143,7 @@ Phase $1 Checkpoint Results
 ===========================
 
 Tool Availability:
-- Chrome DevTools MCP: ✓ | ✗
+- Playwright MCP: ✓ | ✗
 - code-simplifier: ✓ | ✗
 - Trigger.dev MCP: ✓ | ✗ | N/A
 
