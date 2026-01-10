@@ -2,6 +2,7 @@
 
 ## In Progress
 
+- [ ] **[P0 / High]** Make workflow portable across CLIs/models without breaking Claude Code “clone-and-go” sharing
 - [ ] Persistent learnings/patterns file for cross-task context (see below)
 - [ ] Compare web vs CLI interface for generation workflow (see below)
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues)
@@ -12,6 +13,18 @@
 - [x] Add `/list-todos` command (see below) — DONE
 
 ## Future Concepts
+
+### Portable Workflow Kit (Adapters + Model Router)
+
+Create a single source of truth for skills/prompts/commands/rules while supporting multiple “hosts” (e.g. Claude Code today, other CLIs later) and swappable models/providers.
+
+**Key requirement:** Preserve the current Claude Code experience for sharing (no mandatory build step; keep repo root layout as-is), with portability features as optional “sidecar” adapters.
+
+**Proposed approach:**
+- Define tool-agnostic workflow assets (skills, slash command specs, prompt templates, policies)
+- Add thin host adapters that render/mount those assets into each host’s required format/layout
+- Add a capability-based model router config (task type → required capabilities → preferred model list) so models/providers can be swapped without rewriting skills/prompts
+- Add a drift guard (CI or pre-commit) only if adapter outputs are generated/committed
 
 ### Persistent Learnings/Patterns File
 
