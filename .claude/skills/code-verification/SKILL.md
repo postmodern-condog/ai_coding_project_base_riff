@@ -91,53 +91,26 @@ Sub-agent rules:
 
 ### Browser-Enhanced Verification Output
 
-For instructions with `browser: true`, the sub-agent MUST use Playwright MCP and return this extended format:
+For instructions with `browser: true`, the sub-agent MUST use Playwright MCP and return:
 
 ```
 BROWSER VERIFICATION RESULT
 ---------------------------
 Instruction ID: [ID]
 Status: PASS | FAIL | BLOCKED
-Verification Type: DOM | VISUAL | CONSOLE | NETWORK | PERFORMANCE | ACCESSIBILITY
-URL Tested: [URL navigated to]
-Viewport: [width]x[height]
+Type: DOM | VISUAL | CONSOLE | NETWORK | PERFORMANCE | ACCESSIBILITY
+URL: [URL] | Viewport: [width]x[height]
 
-Finding: [What was observed in the browser]
+Finding: [What was observed]
 Expected: [What was expected]
 
---- DOM Details (if DOM inspection) ---
-Selector: [CSS selector or data-testid used]
-Element Found: Yes | No
-Element Visible: Yes | No | N/A
-Element Content: [text content or "N/A"]
-Computed Styles: [relevant CSS properties if checking styles]
-
---- Screenshot (if visual check) ---
-Screenshot Path: [path to captured screenshot]
-Visual Description: [description of what's shown]
-
---- Console (if console check) ---
-Errors: [count and messages]
-Warnings: [count and messages]
-Relevant Logs: [any logs matching the criterion]
-
---- Network (if network check) ---
-Request URL: [API endpoint called]
-Method: [GET/POST/etc]
-Status: [response status code]
-Response Summary: [brief response description]
-
---- Performance (if timing check) ---
-Page Load Time: [ms]
-LCP: [Largest Contentful Paint in ms]
-FID: [First Input Delay in ms]
-CLS: [Cumulative Layout Shift score]
-
---- Accessibility (if a11y check) ---
-ARIA Attributes: [present/missing]
-Semantic HTML: [proper usage assessment]
-Color Contrast: [pass/fail]
-Keyboard Navigation: [accessible/issues found]
+Details: [Type-specific information]
+  - DOM: selector, found, visible, content
+  - Visual: screenshot path, description
+  - Console: errors, warnings, logs
+  - Network: endpoint, method, status, response summary
+  - Performance: load time, LCP, FID, CLS
+  - Accessibility: ARIA, semantic HTML, contrast, keyboard nav
 
 Suggested Fix: [Specific fix recommendation]
 ```
@@ -183,43 +156,14 @@ If the same failure pattern repeats twice, explicitly try a different strategy.
 
 ### Browser-Specific Fix Strategies
 
-When fixing browser verification failures:
-
-**DOM/Visibility failures:**
-- Check for conditional rendering logic
-- Verify CSS display/visibility properties
-- Check for z-index issues
-- Verify data is being passed to component
-
-**Console error failures:**
-- Address JavaScript exceptions first
-- Check for missing API mocks in tests
-- Verify environment variables are set
-- Check for CORS issues in development
-
-**Network failures:**
-- Verify API endpoints are correct
-- Check authentication headers
-- Verify request payload format
-- Check for CORS configuration
-
-**Visual/Screenshot failures:**
-- Compare with baseline if available
-- Check for CSS cascade issues
-- Verify responsive breakpoints
-- Check for font loading issues
-
-**Performance failures:**
-- Look for large bundle sizes
-- Check for unoptimized images
-- Verify lazy loading is working
-- Check for render-blocking resources
-
-**Accessibility failures:**
-- Add missing ARIA attributes
-- Fix color contrast issues
-- Ensure proper heading hierarchy
-- Add keyboard event handlers
+| Failure Type | Common Fixes |
+|--------------|--------------|
+| **DOM/Visibility** | Conditional rendering, CSS display/visibility, z-index, prop passing |
+| **Console errors** | JS exceptions, missing mocks, env vars, CORS |
+| **Network** | Endpoint URLs, auth headers, payload format, CORS config |
+| **Visual** | CSS cascade, responsive breakpoints, font loading |
+| **Performance** | Bundle size, image optimization, lazy loading, render-blocking |
+| **Accessibility** | ARIA attributes, color contrast, heading hierarchy, keyboard handlers |
 
 ## Step 5: Exit Conditions
 
@@ -244,17 +188,7 @@ If a fix breaks something else, revert and note the conflict.
 
 ### Browser Regression Checks
 
-After each browser-related fix:
-
-1. **Console regression**: Verify no new console errors introduced
-2. **Visual regression**: Re-capture screenshots of affected pages
-3. **Performance regression**: Re-check page load metrics if relevant
-4. **Accessibility regression**: Re-run accessibility checks on modified components
-
-If browser regression detected:
-- Capture screenshots of before/after state
-- Log the specific regression in the fix log
-- Consider whether fix scope was too broad
+After each browser-related fix, verify no regressions in: console errors, visual appearance, performance metrics, accessibility. If regression detected, capture before/after state and log in fix history.
 
 ## Step 7: Generate Verification Report
 
@@ -286,29 +220,16 @@ AUDIT TRAIL
 [Timestamp] V-002: Attempt 2 - Changed Y → FAIL
 ...
 
-BROWSER VERIFICATION SUMMARY (if applicable)
---------------------------------------------
-Total Browser Checks: [N]
-Browser Checks Passed: [N] ✅
-Browser Checks Failed: [N] ❌
-Browser Checks Blocked: [N] ⚠️
-Playwright MCP Status: Available | Unavailable
-Dev Server Status: Running at [URL] | Not Running
+BROWSER VERIFICATION (if applicable)
+------------------------------------
+Browser Checks: [passed]/[total] | Blocked: [N]
+Playwright: Available | Unavailable
+Dev Server: [URL] | Not Running
 
-Screenshots Captured:
-- [V-001] screenshot-v001-initial.png
-- [V-001] screenshot-v001-after-click.png
-- [V-003] screenshot-v003-mobile-view.png
+Issues Found:
+- [V-XXX] {type}: {description}
 
-Console Issues Found:
-- [V-002] Error: "Cannot read property 'map' of undefined" (app.js:45)
-
-Network Issues Found:
-- [V-004] 404 on GET /api/users
-
-Performance Metrics:
-- Page Load: 1.2s (target: <2s) ✅
-- LCP: 0.8s (target: <2.5s) ✅
+Screenshots: [list of captured files]
 ```
 
 ## Example

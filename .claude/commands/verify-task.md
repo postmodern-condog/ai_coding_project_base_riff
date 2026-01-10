@@ -34,7 +34,45 @@ Confirm each criterion is testable:
 
 Flag untestable criteria immediately.
 
-### Step 3: Verify Each Criterion
+### Step 3: TDD Compliance Check
+
+Verify that Test-Driven Development was followed:
+
+1. **Test existence check** — For each acceptance criterion:
+   - Locate the corresponding test(s)
+   - Record test file and test name
+   - If no test exists → FAIL with "Missing test for criterion"
+
+2. **Test-first check** (if git history available):
+   ```bash
+   # Check if test file was committed before/with implementation
+   git log --oneline --follow -- "path/to/test/file"
+   git log --oneline --follow -- "path/to/impl/file"
+   ```
+   - Tests committed before or same commit as implementation → PASS
+   - Tests committed after implementation → WARNING (note in report)
+   - Unable to determine → SKIP (note in report)
+
+3. **Test effectiveness check** — For each test:
+   - Test should fail if implementation is broken/removed
+   - Test name should describe expected behavior
+   - Test should have meaningful assertions (not just "no errors")
+
+**TDD Compliance Report:**
+```
+TDD COMPLIANCE: Task $1
+-----------------------
+Tests Found: X/Y criteria covered
+Test-First: PASS | WARNING | UNABLE TO VERIFY
+Issues:
+- [Criterion] Missing test
+- [Criterion] Test added after implementation
+- [Criterion] Test has no meaningful assertions
+```
+
+If tests are missing for any criterion, stop and write tests before proceeding.
+
+### Step 4: Verify Each Criterion
 
 For each criterion:
 
@@ -52,27 +90,37 @@ For each criterion:
 3. **If FAIL**: Attempt fix, then re-verify (up to 5 attempts)
 4. **Track attempts** to avoid repeating failed fixes
 
-### Step 4: Exit Conditions
+### Step 5: Exit Conditions
 
 Stop verification loop when:
 - PASS: Criterion met
 - 5 attempts exhausted: Mark failed
 - Same failure 3+ times: Flag for human review
 
-### Step 5: Report
+### Step 6: Report
 
 ```
 TASK VERIFICATION: $1
 =====================
-Criteria: N total
-Passed: X
-Failed: Y
-Skipped: Z
 
+TDD Compliance:
+- Tests Found: X/Y criteria covered
+- Test-First: PASS | WARNING | UNABLE TO VERIFY
+
+Criteria Verification:
+- Total: N
+- Passed: X
+- Failed: Y
+- Skipped: Z
+
+Details:
 [V-001] PASS — Criterion summary
 [V-002] FAIL — Criterion summary
   - Attempts: 3
   - Blocker: Description
+
+TDD Issues (if any):
+- [Criterion] {issue description}
 ```
 
 ## On Success

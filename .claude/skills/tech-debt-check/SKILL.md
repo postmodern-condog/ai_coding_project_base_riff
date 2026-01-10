@@ -27,6 +27,20 @@ This skill catches these issues before they compound.
 6. Generate report with actionable items
 ```
 
+## Thresholds Reference
+
+| Category | Metric | Good | Warning | Critical |
+|----------|--------|------|---------|----------|
+| **Duplication** | Duplicate % | <3% | 3-7% | >7% |
+| | Duplicate blocks | <5 | 5-15 | >15 |
+| | Lines per block | <10 | 10-20 | >20 |
+| **Complexity** | Avg complexity | <5 | 5-10 | >10 |
+| | Max complexity | <15 | 15-25 | >25 |
+| | Functions >10 | 0 | 1-3 | >3 |
+| **File Size** | Max file lines | <300 | 300-500 | >500 |
+| | Avg file lines | <150 | 150-250 | >250 |
+| | Files >300 lines | 0 | 1-3 | >3 |
+
 ## Step 1: Detect Project Type
 
 Identify the project's primary language and available tooling:
@@ -54,27 +68,11 @@ npm list -g jscpd || npm install -g jscpd
 jscpd src/ --min-lines 5 --min-tokens 50 --reporters json --output .tech-debt-report/
 ```
 
-Parse output for:
-- Total duplicate lines
-- Duplicate percentage
-- Specific duplicate blocks (file, start line, end line)
+Parse output for total duplicate lines, percentage, and specific blocks (file, start line, end line).
 
 ### Manual detection (fallback)
 
-If jscpd unavailable, use grep-based detection:
-
-```bash
-# Find repeated 5+ line blocks
-# This is approximate but catches obvious duplication
-```
-
-### Thresholds
-
-| Metric | Good | Warning | Critical |
-|--------|------|---------|----------|
-| Duplicate % | <3% | 3-7% | >7% |
-| Duplicate blocks | <5 | 5-15 | >15 |
-| Lines per block | <10 | 10-20 | >20 |
+If jscpd unavailable, use grep-based pattern matching for repeated code blocks.
 
 ## Step 3: Complexity Analysis
 
@@ -105,61 +103,27 @@ Or use pylint:
 pylint src/ --disable=all --enable=R0912,R0915 --output-format=json
 ```
 
-### Thresholds
-
-| Metric | Good | Warning | Critical |
-|--------|------|---------|----------|
-| Avg complexity | <5 | 5-10 | >10 |
-| Max complexity | <15 | 15-25 | >25 |
-| Functions >10 complexity | 0 | 1-3 | >3 |
-
 ## Step 4: File Size Analysis
 
-Large files often indicate poor separation of concerns.
+Large files often indicate poor separation of concerns. Find files exceeding thresholds:
 
 ```bash
-# Find files over threshold
-find src/ -name "*.ts" -o -name "*.js" -o -name "*.py" | while read f; do
-  lines=$(wc -l < "$f")
-  if [ "$lines" -gt 300 ]; then
-    echo "$f: $lines lines"
-  fi
-done
+find src/ -name "*.ts" -o -name "*.js" -o -name "*.py" | xargs wc -l | sort -rn | head -20
 ```
-
-### Thresholds
-
-| Metric | Good | Warning | Critical |
-|--------|------|---------|----------|
-| Max file lines | <300 | 300-500 | >500 |
-| Avg file lines | <150 | 150-250 | >250 |
-| Files >300 lines | 0 | 1-3 | >3 |
 
 ## Step 5: AI Code Smell Detection
 
-Check for patterns commonly produced by AI that indicate tech debt:
+Check for patterns commonly produced by AI:
 
-### 5.1 Verbose Error Handling
+### 5.1 Excessive Error Handling
 
-AI often generates overly defensive code:
-
-```
-# Pattern: try/catch around every operation
-# Pattern: excessive null checks
-# Pattern: redundant type assertions
-```
-
-Search for:
 ```bash
-# Excessive try-catch density
-grep -r "try {" src/ | wc -l
-grep -r "catch" src/ | wc -l
-# Ratio > 1:1 suggests over-defensive coding
+# Check try-catch density (ratio > 1:1 suggests over-defensive code)
+echo "try blocks: $(grep -r 'try {' src/ | wc -l)"
+echo "catch blocks: $(grep -r 'catch' src/ | wc -l)"
 ```
 
 ### 5.2 Unused Code
-
-AI sometimes generates unused functions or imports:
 
 ```bash
 # TypeScript/JavaScript
@@ -169,37 +133,18 @@ npx eslint src/ --rule '{"no-unused-vars": "error"}' --format json
 pylint src/ --disable=all --enable=W0611,W0612 --output-format=json
 ```
 
-### 5.3 Similar But Different Patterns
+### 5.3 Inconsistent Patterns
 
-AI may solve the same problem differently in different places:
+Look for multiple implementations of the same concern (date formatting, HTTP clients, validation):
 
-```
-# Look for multiple implementations of:
-# - Date formatting
-# - Error response shaping
-# - Validation logic
-# - API client setup
-```
-
-Search patterns:
 ```bash
-# Multiple date formatting approaches
 grep -r "new Date\|moment\|dayjs\|date-fns" src/ | cut -d: -f1 | sort | uniq -c
-
-# Multiple HTTP clients
 grep -r "fetch\|axios\|got\|request" src/ | cut -d: -f1 | sort | uniq -c
 ```
 
-### 5.4 Comment-to-Code Ratio
+### 5.4 Comment Ratio
 
-AI tends to over-comment or under-comment:
-
-```bash
-# Count comments vs code lines
-comment_lines=$(grep -r "^\s*//" src/ | wc -l)
-total_lines=$(find src/ -name "*.ts" -o -name "*.js" | xargs wc -l | tail -1 | awk '{print $1}')
-# Healthy ratio: 10-20%
-```
+Healthy ratio is 10-20%. AI tends to over-comment or under-comment.
 
 ## Step 6: Generate Report
 

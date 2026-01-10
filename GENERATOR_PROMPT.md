@@ -272,6 +272,101 @@ Context pollution degrades response quality. Follow these rules:
 
 ---
 
+## Test Quality Standards
+
+### Test Structure
+
+Use the **AAA pattern** for all tests:
+1. **Arrange** — Set up test data and preconditions
+2. **Act** — Execute the code under test
+3. **Assert** — Verify the expected outcome
+
+```
+// Example structure
+test('should return user when valid ID provided', () => {
+  // Arrange
+  const userId = 'user-123';
+  const mockUser = { id: userId, name: 'Test User' };
+  mockDatabase.users.set(userId, mockUser);
+
+  // Act
+  const result = getUser(userId);
+
+  // Assert
+  expect(result).toEqual(mockUser);
+});
+```
+
+### Test Naming
+
+Use descriptive names that explain the expected behavior:
+- Format: `should {expected behavior} when {condition}`
+- Examples:
+  - `should return empty array when no items exist`
+  - `should throw ValidationError when email is invalid`
+  - `should redirect to login when session expires`
+
+### What to Test
+
+| Category | Examples |
+|----------|----------|
+| **Happy path** | Valid inputs produce expected outputs |
+| **Edge cases** | Empty inputs, boundary values, null/undefined |
+| **Error cases** | Invalid inputs produce appropriate errors |
+| **State changes** | Before/after mutations are correct |
+
+### What NOT to Test
+
+- Private/internal implementation details
+- Framework or library code
+- Trivial getters/setters without logic
+- Code you don't own
+
+### Test Independence
+
+- Each test must be independent — no shared mutable state
+- Tests must pass when run individually or in any order
+- Use `beforeEach`/`afterEach` for setup and cleanup
+
+---
+
+## Mocking Policy
+
+### What to Mock
+
+| Dependency Type | Mock Strategy |
+|-----------------|---------------|
+| External APIs | Mock HTTP client or use MSW/nock |
+| Database | Use test database or in-memory alternative |
+| File system | Use temp directories, clean up after test |
+| Time/dates | Use fixed timestamps (`jest.useFakeTimers()`, `freezegun`) |
+| Random values | Use seeded generators or fixed values |
+| Environment variables | Set in test setup, restore after |
+
+### What NOT to Mock
+
+- The code under test itself
+- Pure functions with no side effects
+- Data structures and types
+- Simple utility functions
+
+### Mock Hygiene
+
+- Reset mocks between tests (`jest.clearAllMocks()`, `vi.clearAllMocks()`)
+- Prefer dependency injection over global mocks
+- Mock at the boundary, not deep in the call stack
+- Verify mock interactions when behavior matters
+
+### Integration Tests
+
+For tests that need real external services:
+- Mark as integration tests (separate test command or file pattern)
+- Skip gracefully when credentials unavailable
+- Use dedicated test accounts/environments
+- Clean up test data after runs
+
+---
+
 ## Verification
 
 After implementing each task, verify all acceptance criteria are met.
@@ -475,6 +570,8 @@ Generate:
 - [ ] Workflow section present
 - [ ] Context management section present
 - [ ] Testing policy present
+- [ ] Test quality standards present (AAA pattern, naming, what to test)
+- [ ] Mocking policy present (what to mock, mock hygiene)
 - [ ] "When to stop" triggers present
 - [ ] Git conventions present
 - [ ] Guardrails present

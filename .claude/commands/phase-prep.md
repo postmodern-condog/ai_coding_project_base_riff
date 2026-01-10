@@ -21,31 +21,15 @@ I want to execute Phase $1 from EXECUTION_PLAN.md. Before starting, read EXECUTI
    - Run `git status` to verify clean working tree (or understand current state)
    - Note the current branch
 
-4. **Tool Availability** — Check optional tools that enhance this phase:
+4. **Tool Availability** — Check optional tools by attempting a harmless call:
 
-   **Required tools** (blocking if unavailable):
-   - Bash, Read, Edit, Write, Glob, Grep — Core tools (always available)
+   | Tool | Check | If Unavailable |
+   |------|-------|----------------|
+   | Chrome DevTools MCP | `mcp__chrome-devtools__list_pages` | Manual browser verification |
+   | code-simplifier | Check agent type available | Skip code simplification |
+   | Trigger.dev MCP | `mcp__trigger__list_projects` | Skip Trigger.dev features |
 
-   **Optional tools** (graceful degradation if unavailable):
-
-   To check MCP availability, attempt a harmless call and check for errors:
-
-   a. **Chrome DevTools MCP** — For browser-based verification
-      - Try: `mcp__chrome-devtools__list_pages`
-      - If unavailable: Browser tests will require manual verification
-      - Setup: Add chrome-devtools MCP to Claude settings
-
-   b. **code-simplifier plugin** — For automated code cleanup at checkpoints
-      - Try: Check if the code-simplifier agent type is available
-      - If unavailable: Code simplification step will be skipped
-      - Setup: `claude plugin install code-simplifier`
-
-   c. **Trigger.dev MCP** — For background task management (if project uses it)
-      - Try: `mcp__trigger__list_projects`
-      - If unavailable: Trigger.dev features will be skipped
-      - Setup: Add trigger MCP to Claude settings
-
-   Note: Only check tools relevant to this project's tech stack.
+   Only check tools relevant to this project's tech stack.
 
 5. **Permissions** — Review the tasks in Phase $1:
    - Identify any tools or permissions needed for autonomous execution
@@ -58,27 +42,23 @@ PHASE $1 PREREQUISITES
 ======================
 
 Documents:
-- [ ] EXECUTION_PLAN.md exists and readable
-- [ ] AGENTS.md exists and readable
-- [ ] Prior phases complete (if applicable)
+- EXECUTION_PLAN.md: ✓ | ✗
+- AGENTS.md: ✓ | ✗
+- Prior phases: Complete | N/A
 
-Git Status:
-- Branch: {current branch}
-- Working tree: {clean/dirty}
+Git: {branch}, {clean | dirty}
 
 Pre-Phase Setup:
-- [ ] {item from EXECUTION_PLAN.md or "None required"}
+- {items or "None required"}
 
 Environment:
-- [ ] {required env vars or "None required"}
+- {env vars or "None required"}
 
-Tool Availability:
-- Core tools: ✓ Available
-- Chrome DevTools MCP: {✓ Available | ✗ Not configured}
-- code-simplifier: {✓ Available | ✗ Not installed}
-- Trigger.dev MCP: {✓ Available | ✗ Not configured | N/A}
+Tools:
+- Chrome DevTools MCP: ✓ | ✗
+- code-simplifier: ✓ | ✗
+- Trigger.dev MCP: ✓ | ✗ | N/A
 
-Status: {READY | BLOCKED | READY WITH NOTES}
-{If READY WITH NOTES: explain what optional features are unavailable}
-{If BLOCKED: list what must be resolved}
+Status: READY | BLOCKED | READY WITH NOTES
+{Details if not READY}
 ```

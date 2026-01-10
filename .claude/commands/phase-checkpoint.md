@@ -8,15 +8,13 @@ Phase $1 is complete. Read EXECUTION_PLAN.md and run the checkpoint criteria.
 
 ## Tool Availability Check
 
-Before running checks, detect which optional tools are available. Track results for the final report.
+Before running checks, detect which optional tools are available by attempting a harmless call:
 
-| Tool | Check Method | If Unavailable |
-|------|--------------|----------------|
-| Chrome DevTools MCP | Try `mcp__chrome-devtools__list_pages` | Browser verification → manual |
+| Tool | Check Method | Fallback |
+|------|--------------|----------|
+| Chrome DevTools MCP | `mcp__chrome-devtools__list_pages` | Manual browser verification |
 | code-simplifier | Check if agent type available | Skip code simplification |
-| Trigger.dev MCP | Try `mcp__trigger__list_projects` | Skip Trigger.dev checks |
-
-Note which tools are available/unavailable for the report.
+| Trigger.dev MCP | `mcp__trigger__list_projects` | Skip Trigger.dev checks |
 
 ## Automated Checks
 
@@ -80,21 +78,12 @@ These checks run only if the required tools are available (detected above).
 
 6. **Code Simplification** (requires: code-simplifier plugin)
 
-   If code-simplifier is available:
-   - Identify files changed in this phase: `git diff --name-only HEAD~{commits-in-phase}`
-   - Run code-simplifier agent on modified code files
-   - Focus on: reducing complexity, improving naming, eliminating redundancy
-   - Preserve all functionality — only improve clarity
+   If available, run code-simplifier on files changed in this phase:
+   ```bash
+   git diff --name-only HEAD~{commits-in-phase}
+   ```
 
-   Report:
-   ```
-   CODE SIMPLIFICATION
-   -------------------
-   Status: APPLIED | SKIPPED (plugin not available)
-   Files reviewed: {N}
-   Files modified: {N}
-   Changes: {brief description}
-   ```
+   Focus: reduce complexity, improve naming, eliminate redundancy. Preserve all functionality.
 
 7. **Browser Verification** (requires: Chrome DevTools MCP)
 
@@ -154,35 +143,27 @@ Phase $1 Checkpoint Results
 ===========================
 
 Tool Availability:
-- Chrome DevTools MCP: {✓ Available | ✗ Not configured}
-- code-simplifier: {✓ Available | ✗ Not installed}
-- Trigger.dev MCP: {✓ Available | ✗ Not configured | N/A}
+- Chrome DevTools MCP: ✓ | ✗
+- code-simplifier: ✓ | ✗
+- Trigger.dev MCP: ✓ | ✗ | N/A
 
 Automated Checks:
-- [ ] Tests: PASSED/FAILED
-- [ ] Type Check: PASSED/FAILED/SKIPPED
-- [ ] Linting: PASSED/FAILED/SKIPPED
-- [ ] Security: PASSED/FAILED/PASSED WITH NOTES
-- [ ] Coverage: {X}% (target: 80%)
+- Tests: PASSED | FAILED
+- Type Check: PASSED | FAILED | SKIPPED
+- Linting: PASSED | FAILED | SKIPPED
+- Security: PASSED | FAILED | X critical, Y high
+- Coverage: {X}% (target: 80%)
 
-Optional Enhanced Checks:
-- [ ] Code Simplification: APPLIED/SKIPPED (reason)
-- [ ] Browser Verification: PASSED/SKIPPED (reason)
-- [ ] Tech Debt Check: PASSED/PASSED WITH NOTES/SKIPPED
+Optional Checks:
+- Code Simplification: APPLIED | SKIPPED
+- Browser Verification: PASSED | SKIPPED
+- Tech Debt: PASSED | NOTES | SKIPPED
 
-Security Summary: X critical, Y high, Z medium (if applicable)
-Tech Debt Summary: {findings or "Not checked"}
+Manual Verification:
+- [ ] {items from EXECUTION_PLAN.md checkpoint section}
 
-Manual Verification Required:
-- [ ] {item from EXECUTION_PLAN.md}
-- [ ] {item from EXECUTION_PLAN.md}
-{If browser checks skipped: - [ ] Manual browser verification needed}
+Approach Review:
+- [ ] Human reviewed implementation approach
 
-Approach Review Required:
-- [ ] Human has reviewed implementation approach (see checklist above)
-
-Skipped Due to Missing Tools:
-{List any checks skipped and why, or "None"}
-
-Overall: Ready to proceed to Phase {next} | Issues to address
+Overall: Ready to proceed | Issues to address
 ```

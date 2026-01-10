@@ -406,6 +406,52 @@ When modifying existing code:
 - Document any intentional behavior changes
 ```
 
+**Test Quality Standards** — Recommended if AGENTS.md lacks testing guidance
+```
+## Test Quality Standards
+
+### Test Structure
+Use the AAA pattern for all tests:
+1. **Arrange** — Set up test data and preconditions
+2. **Act** — Execute the code under test
+3. **Assert** — Verify the expected outcome
+
+### Test Naming
+Use descriptive names: `should {expected behavior} when {condition}`
+
+### What to Test
+- Happy path (valid inputs → expected outputs)
+- Edge cases (empty, null, boundary values)
+- Error cases (invalid inputs → appropriate errors)
+
+### What NOT to Test
+- Private implementation details
+- Framework/library code
+- Trivial getters/setters without logic
+```
+
+**Mocking Policy** — If feature involves external dependencies
+```
+## Mocking Policy
+
+### What to Mock
+| Dependency Type | Mock Strategy |
+|-----------------|---------------|
+| External APIs | Mock HTTP client or use MSW/nock |
+| Database | Use test database or in-memory alternative |
+| File system | Use temp directories, clean up after test |
+| Time/dates | Use fixed timestamps |
+
+### What NOT to Mock
+- The code under test itself
+- Pure functions with no side effects
+
+### Mock Hygiene
+- Reset mocks between tests
+- Prefer dependency injection over global mocks
+- Mock at the boundary, not deep in the call stack
+```
+
 **Database Migration Workflow** — If feature includes schema changes
 ```
 ## Database Migrations
@@ -521,6 +567,8 @@ AGENTS.md Compatibility
 □ If browser verification is used, AGENTS.md has browser verification workflow
 □ If regression checks are needed, AGENTS.md has regression testing policy
 □ If migrations are needed, AGENTS.md has database migration workflow
+□ If external dependencies involved, AGENTS.md has mocking policy
+□ If testing guidance sparse, suggest Test Quality Standards addition
 □ Suggested additions provided for any workflow gaps identified
 ```
 
