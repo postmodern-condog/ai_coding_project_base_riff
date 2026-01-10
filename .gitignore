@@ -1,7 +1,1 @@
-.DS_Store
-
-# Local Claude Code settings (machine/user-specific)
-.claude/settings.local.json
-
-# Ad-hoc tool outputs
-.tech-debt-report/
+node_modules/
