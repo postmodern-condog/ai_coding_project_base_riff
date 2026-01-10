@@ -37,6 +37,16 @@ Run these commands and report results:
 
    Security scan blocks checkpoint if CRITICAL or HIGH issues remain unresolved.
 
+5. **Code Simplification (Claude Code only)**
+
+   If using Claude Code, run the `code-simplifier` agent on files modified during this phase:
+   - Identify files changed: `git diff --name-only HEAD~{commits-in-phase}`
+   - For each modified code file, apply simplification refinements
+   - Focus on: reducing complexity, improving naming, eliminating redundant code
+   - Preserve all functionality — only improve clarity and consistency
+
+   This step uses the code-simplifier plugin (installed via setup). Skip if not available.
+
 ## Manual Verification
 
 From the "Phase $1 Checkpoint" section in EXECUTION_PLAN.md:
@@ -59,8 +69,10 @@ Automated Checks:
 - [ ] Type Check: PASSED/FAILED/SKIPPED
 - [ ] Linting: PASSED/FAILED/SKIPPED
 - [ ] Security: PASSED/FAILED/PASSED WITH NOTES
+- [ ] Code Simplification: APPLIED/SKIPPED
 
 Security Summary: X critical, Y high, Z medium (if applicable)
+Simplification Summary: X files reviewed, Y files improved (if applied)
 
 Manual Verification Required:
 - [ ] {item from EXECUTION_PLAN.md}

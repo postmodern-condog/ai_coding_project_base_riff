@@ -27,6 +27,13 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    - `.claude/skills/` → target's `.claude/skills/`
    - `.codex/skills/` → target's `.codex/skills/`
 
+   **Install required plugins (Claude Code only):**
+   ```bash
+   claude plugin install code-simplifier
+   ```
+   This installs at user scope and is idempotent (safe to run if already installed).
+   Note: Plugin installation requires Claude Code CLI. Skip if using Codex CLI.
+
    **Do NOT copy:**
    - Generation commands (setup.md, product-spec.md, etc.) — these run from the toolkit
    - Prompt files — these stay in the toolkit

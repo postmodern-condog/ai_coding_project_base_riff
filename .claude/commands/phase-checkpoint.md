@@ -52,7 +52,26 @@ Run these commands and report results:
 
    Report findings with severity levels. Tech debt check is informational (does not block) unless CRITICAL thresholds are exceeded.
 
-6. **Code Quality Metrics**
+6. **Code Simplification**
+
+   Run the `code-simplifier` agent on files modified during this phase:
+   - Identify files changed: `git diff --name-only HEAD~{commits-in-phase}`
+   - For each modified code file, apply simplification refinements
+   - Focus on: reducing complexity, improving naming, eliminating redundant code
+   - Preserve all functionality — only improve clarity and consistency
+
+   This step uses the code-simplifier plugin (installed via `/setup`). If not available, skip this step.
+
+   Present a summary of simplifications applied:
+   ```
+   CODE SIMPLIFICATION
+   -------------------
+   Files reviewed: {N}
+   Files modified: {N}
+   Changes: {brief description of improvements}
+   ```
+
+7. **Code Quality Metrics**
 
    Collect and report these metrics for the phase:
 
@@ -116,10 +135,12 @@ Automated Checks:
 - [ ] Linting: PASSED/FAILED/SKIPPED
 - [ ] Security: PASSED/FAILED/PASSED WITH NOTES
 - [ ] Tech Debt: PASSED/PASSED WITH NOTES/FAILED
+- [ ] Code Simplification: APPLIED/SKIPPED
 - [ ] Coverage: {X}% (target: 80%)
 
 Security Summary: X critical, Y high, Z medium (if applicable)
 Tech Debt Summary: X duplicate blocks, Y complex functions, Z large files
+Simplification Summary: X files reviewed, Y files improved
 
 Manual Verification Required:
 - [ ] {item from EXECUTION_PLAN.md}
