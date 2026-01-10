@@ -23,11 +23,13 @@ A three-phase workflow with reusable prompts:
 - **Documents as contracts** — Specs and plans are artifacts AI agents execute against, not just notes
 - **Automatic spec verification** — After generating each document, the `spec-verification` skill checks for lost context and quality issues
 - **Code verification built in** — Every task has testable acceptance criteria; the `code-verification` skill enforces them
+- **TDD enforcement** — Verification checks that tests exist, were written before implementation, and have meaningful assertions
 - **Security scanning** — Dependency audits, secrets detection, and static analysis integrated into checkpoints
 - **Git workflow** — One branch per phase, auto-commit per task, human reviews before push
 - **Stuck detection** — Agents escalate to humans when hitting repeated failures instead of spinning
 - **Two workflows** — Greenfield projects start from scratch; feature development integrates with existing code
 - **Brownfield support** — Feature workflow includes technical debt assessment and human decision markers for legacy codebases
+- **MCP tool detection** — Commands automatically detect available MCP servers and adapt behavior accordingly
 
 ## What You End Up With
 
@@ -260,7 +262,7 @@ claude plugin install code-simplifier
 | `PRODUCT_SPEC.md` | Defines *what* you're building and *why* |
 | `TECHNICAL_SPEC.md` | Defines *how* it will be built technically |
 | `EXECUTION_PLAN.md` | Breaks work into phases, steps, and tasks with acceptance criteria |
-| `AGENTS.md` | Workflow guidelines for AI agents (TDD policy, context management, guardrails) |
+| `AGENTS.md` | Workflow guidelines for AI agents (TDD policy, test quality standards, mocking policy, context management, guardrails) |
 
 ### Feature Development
 
@@ -355,6 +357,59 @@ The toolkit includes integrated security scanning that runs automatically during
 /security-scan --code       # Static analysis only
 /security-scan --fix        # Auto-fix where possible
 ```
+
+## TDD Enforcement
+
+The toolkit enforces Test-Driven Development through the `/verify-task` command, which includes a TDD compliance check.
+
+### What It Verifies
+
+| Check | Description |
+|-------|-------------|
+| **Test existence** | Every acceptance criterion has a corresponding test |
+| **Test-first** | Tests were committed before or with implementation (via git history) |
+| **Test effectiveness** | Tests have meaningful assertions and descriptive names |
+
+### TDD Compliance Report
+
+When running `/verify-task`, you'll see:
+
+```
+TDD COMPLIANCE: Task 1.2.A
+-----------------------
+Tests Found: 3/3 criteria covered
+Test-First: PASS
+Issues: None
+```
+
+If tests are missing or were written after implementation, the report flags the issue:
+
+```
+TDD COMPLIANCE: Task 1.2.A
+-----------------------
+Tests Found: 2/3 criteria covered
+Test-First: WARNING
+Issues:
+- [Criterion 3] Missing test
+- [Criterion 1] Test added after implementation
+```
+
+### Test Quality Standards
+
+The generated `AGENTS.md` includes test quality standards that agents follow:
+
+- **AAA Pattern** — Tests use Arrange-Act-Assert structure
+- **Naming** — Tests use `should {behavior} when {condition}` format
+- **Coverage** — Happy path, edge cases, error cases, state changes
+- **Independence** — No shared mutable state between tests
+
+### Mocking Policy
+
+`AGENTS.md` also includes mocking guidelines:
+
+- **What to mock** — External APIs, databases, file system, time, random values
+- **What not to mock** — Code under test, pure functions
+- **Mock hygiene** — Reset between tests, prefer dependency injection
 
 ## Git Workflow
 
@@ -537,6 +592,25 @@ The raw prompts are available for copy-paste into any LLM:
 
 **Note:** EXECUTION_PLAN.md and AGENTS.md generation (`GENERATOR_PROMPT.md`) requires reading the spec files, so these are best done in Claude Code where file access is available.
 
+## Development
+
+### Markdown Linting
+
+The toolkit includes markdown linting to maintain documentation quality:
+
+```bash
+npm run lint      # Check for issues
+npm run lint:fix  # Auto-fix where possible
+```
+
+The `.markdownlint.json` config is tuned for prompt template files, disabling rules that cause false positives when code blocks contain markdown examples.
+
+**Rules enforced:**
+- Line length (max 300 chars, excluding code blocks and tables)
+- Consistent list markers (dashes)
+- Trailing whitespace and newlines
+- Duplicate sibling headings
+
 ## File Structure
 
 ```
@@ -578,6 +652,9 @@ ai_coding_project_base/
 │           └── SKILL.md
 ├── docs/                            # Additional documentation
 ├── deprecated/                      # Legacy prompts (kept for reference)
+├── package.json                     # npm scripts for linting
+├── .markdownlint.json               # Markdown lint configuration
+├── .gitignore                       # Excludes node_modules
 ├── CLAUDE.md                        # Claude Code configuration
 └── TODOS.md                         # Task tracking
 ```
