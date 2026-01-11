@@ -52,7 +52,22 @@ Before starting, confirm the required files exist:
    ```bash
    # Commit any dirty files first (preserves user work)
    git add -A && git diff --cached --quiet || git commit -m "wip: uncommitted changes before phase-$1"
+   ```
 
+   **Check for unpushed commits before branching:**
+   ```bash
+   # Get current branch and check if ahead of remote
+   CURRENT_BRANCH=$(git branch --show-current)
+   UNPUSHED=$(git rev-list --count @{upstream}..HEAD 2>/dev/null || echo "no-upstream")
+   ```
+
+   - If `UNPUSHED` is a number > 0:
+     - Ask: "You have {UNPUSHED} unpushed commit(s) on `{CURRENT_BRANCH}`. Push before creating phase branch? (recommended)"
+     - If yes: `git push`
+     - If no: Continue (user accepts branching from unpushed state)
+   - If `UNPUSHED` is "no-upstream" or 0: Continue without prompting
+
+   ```bash
    # Create phase branch from current HEAD
    git checkout -b phase-$1
    ```

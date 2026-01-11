@@ -282,29 +282,71 @@ If you can't provide files, describe:
 - Regression risk assessment
 
 ═══════════════════════════════════════════════════════════════════
-PART 6: AGENTS.md ADDITIONS FORMAT
+PART 6: AGENTS_ADDITIONS.md FORMAT
 ═══════════════════════════════════════════════════════════════════
+
+AGENTS.md contains **workflow and process instructions** for AI agents—HOW to work.
+It does NOT contain feature-specific business logic, domain rules, or implementation details—WHAT to build.
+
+### What Belongs in AGENTS.md (and additions)
+- Workflow procedures (how to run tests, migrations, deployments)
+- Process policies (commit formats, branch strategies, verification steps)
+- Tool usage patterns (MCP tools, CLI commands, dev server setup)
+- Quality standards (testing policy, error handling conventions)
+
+### What Does NOT Belong in AGENTS.md
+- Business logic ("price threshold is ±5%", "filter by MLS area")
+- Domain-specific rules (these belong in specs)
+- Feature-specific commit examples (commit FORMAT is ok, specific commits are not)
+- Acceptance criteria details (these belong in EXECUTION_PLAN.md)
+- Implementation details for this specific feature
+
+---
+
+### When NO Additions Are Needed
+
+If the existing AGENTS.md already covers all required workflows, output:
+
+```markdown
+# AGENTS_ADDITIONS.md
+
+No additions required. The existing AGENTS.md covers all workflows needed for this feature:
+- [x] {workflow 1}
+- [x] {workflow 2}
+- ...
+```
+
+Do NOT add "feature context notes" or "testing notes" as filler—this is noise that doesn't belong in AGENTS.md.
+
+---
+
+### When Additions ARE Needed
 
 If the feature requires workflow elements not present in the existing AGENTS.md,
 output suggested additions in this format:
 
-## Suggested AGENTS.md Additions
+```markdown
+# AGENTS_ADDITIONS.md
 
-### Reason for additions
-{Brief explanation of why these additions are needed for this feature}
+## Additions Required
 
-### New sections to add
+### {Section Name}
 
-#### {Section Name}
-```
-{Content to add to AGENTS.md}
-```
+**Why needed:** {One sentence explaining the workflow gap}
+
+**Content to add:**
+\`\`\`markdown
+{Actual content to merge into AGENTS.md}
+\`\`\`
 
 **Where to add:** {After which existing section}
+```
 
 ---
 
-Common additions to consider:
+### Common Workflow Additions
+
+Only add these if they're MISSING from the existing AGENTS.md:
 
 **Git Branch Strategy** — If not already defined in AGENTS.md
 ```
@@ -562,14 +604,21 @@ EXECUTION_PLAN.md
 □ Existing test suites accounted for in checkpoints
 □ Rollback/feature flag considerations documented (if applicable)
 
-AGENTS.md Compatibility
+AGENTS_ADDITIONS.md Quality
+□ Contains ONLY workflow/process additions (not business logic or domain rules)
+□ If no gaps found, outputs minimal "No additions required" format
+□ Does NOT include feature-specific commit examples
+□ Does NOT include acceptance criteria details (those are in EXECUTION_PLAN.md)
+□ Does NOT include implementation details or domain knowledge
+
+AGENTS.md Compatibility (check for gaps)
 □ All verification methods in EXECUTION_PLAN.md are defined in AGENTS.md
 □ If browser verification is used, AGENTS.md has browser verification workflow
 □ If regression checks are needed, AGENTS.md has regression testing policy
 □ If migrations are needed, AGENTS.md has database migration workflow
 □ If external dependencies involved, AGENTS.md has mocking policy
 □ If testing guidance sparse, suggest Test Quality Standards addition
-□ Suggested additions provided for any workflow gaps identified
+□ Suggested additions provided ONLY for actual workflow gaps identified
 ```
 
 ---

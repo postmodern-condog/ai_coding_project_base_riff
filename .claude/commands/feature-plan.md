@@ -87,9 +87,7 @@ Verification: PASSED | PASSED WITH NOTES | NEEDS REVIEW
 
 Next steps:
 1. cd $1  (the feature directory)
-2. /fresh-start
+2. /fresh-start  (will offer to merge AGENTS_ADDITIONS.md if needed)
 3. /phase-prep 1
 4. /phase-start 1
-
-After phase completion, merge $1/AGENTS_ADDITIONS.md into PROJECT_ROOT/AGENTS.md
 ```

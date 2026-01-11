@@ -131,21 +131,18 @@ From the "Phase $1 Checkpoint" section in EXECUTION_PLAN.md:
 
 ## Approach Review (Human)
 
-Present this checklist for human review of the phase's implementation approach:
+Ask the human to review the phase's implementation approach against these criteria:
 
-```
-APPROACH REVIEW
----------------
-For each task completed in Phase $1, briefly consider:
+- Solutions use appropriate abstractions (not over/under-engineered)
+- New code follows existing codebase patterns and conventions
+- No unnecessary dependencies were added
+- Error handling is consistent with rest of codebase
+- Any "almost correct" AI solutions that need refinement?
 
-- [ ] Solutions use appropriate abstractions (not over/under-engineered)
-- [ ] New code follows existing codebase patterns and conventions
-- [ ] No unnecessary dependencies were added
-- [ ] Error handling is consistent with rest of codebase
-- [ ] Any "almost correct" AI solutions that need refinement?
-
-Notes: {space for human to add observations}
-```
+**Reporting format:**
+- Only list items that have issues or need attention
+- If all criteria pass, report: "Approach Review: No issues noted"
+- If issues exist, report each one briefly with context
 
 This is a quick sanity check to catch "works but wrong approach" issues before they compound.
 
@@ -180,8 +177,7 @@ Optional Checks:
 Manual Verification:
 - [ ] {items from EXECUTION_PLAN.md checkpoint section}
 
-Approach Review:
-- [ ] Human reviewed implementation approach
+Approach Review: No issues noted | {list specific issues}
 
 Overall: Ready to proceed | Issues to address
 ```

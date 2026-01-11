@@ -1,7 +1,7 @@
 ---
 description: Orient to project structure and load context
 argument-hint: [project-directory]
-allowed-tools: Read, Glob, Grep, Bash, AskUserQuestion
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 ---
 
 Orient to a project directory and load context for execution.
@@ -48,7 +48,11 @@ Confirm the required files exist:
 
 In PROJECT_ROOT (not the feature directory):
 
-1. Check whether this is already a git repo (`.git/` exists).
+1. Check whether this is already a git repo by running:
+   ```bash
+   git -C PROJECT_ROOT rev-parse --is-inside-work-tree 2>/dev/null
+   ```
+   If this returns "true", it's already a git repo.
 2. If not a git repo:
    - Ask: "Initialize git in this project now?" (recommended)
    - If yes:
@@ -87,6 +91,45 @@ If MODE = "feature", create an isolated branch for this feature work:
    ```
 
 5. Report: "Created branch `feature/FEATURE_NAME` for isolated feature development"
+
+## AGENTS_ADDITIONS Merge (Feature Mode Only)
+
+If MODE = "feature", check for and offer to merge workflow additions:
+
+1. Check if `FEATURE_DIR/AGENTS_ADDITIONS.md` exists
+   - If not, skip this section
+
+2. Read AGENTS_ADDITIONS.md and determine if merge is needed:
+   - If it contains "No additions required" or similar, report: "No AGENTS.md additions needed for this feature" and skip
+   - If it contains actual additions, continue to step 3
+
+3. Summarize the additions for the user:
+   ```
+   AGENTS_ADDITIONS.md proposes workflow additions:
+
+   - {Section Name 1}: {one-line summary of why it's needed}
+   - {Section Name 2}: {one-line summary of why it's needed}
+   ...
+   ```
+
+4. Ask: "Apply these workflow additions to AGENTS.md now? (recommended before starting work)"
+
+5. If user approves:
+   - Read current PROJECT_ROOT/AGENTS.md
+   - Use AGENTS_ADDITIONS.md as instructions to edit AGENTS.md:
+     - Extract the "Content to add" blocks
+     - Insert each block at the location specified in "Where to add"
+     - If location is unclear, append to end of AGENTS.md
+   - Add a comment marker where content was added: `<!-- Added for FEATURE_NAME -->`
+   - Prepend a header to AGENTS_ADDITIONS.md indicating merge is complete:
+     ```
+     <!-- MERGED into PROJECT_ROOT/AGENTS.md on YYYY-MM-DD -->
+     ```
+   - Report: "Applied workflow additions to AGENTS.md"
+
+6. If user declines:
+   - Report: "Skipped. You can manually apply AGENTS_ADDITIONS.md changes later."
+   - Continue with fresh-start (don't block)
 
 ## Required Context
 
