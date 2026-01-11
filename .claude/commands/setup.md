@@ -20,6 +20,13 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    - Greenfield: Starting a new project from scratch
    - Feature: Adding a feature to an existing project
 
+2a. **For Feature type: Ask feature name and create directory**
+    - Prompt: "What should this feature be called? (used as folder name, e.g., 'analytics-dashboard')"
+    - Validate: lowercase, hyphens and underscores allowed, no spaces or special characters
+    - Create `$1/features/` directory if it doesn't exist
+    - Create `$1/features/<feature-name>/` directory
+    - Store the feature path as `FEATURE_PATH` = `$1/features/<feature-name>`
+
 3. **Copy execution commands and skills**
 
    Copy only the execution-phase commands to the target's `.claude/commands/`:
@@ -67,18 +74,20 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    For Feature:
    ```
    Toolkit initialized at $1
+   Feature directory created at FEATURE_PATH
 
    Next steps (run from THIS toolkit directory):
-   1. /feature-spec $1
-   2. /feature-technical-spec $1
-   3. /feature-plan $1
+   1. /feature-spec FEATURE_PATH
+   2. /feature-technical-spec FEATURE_PATH
+   3. /feature-plan FEATURE_PATH
 
-   Then switch to your project:
-   4. cd $1
-   5. Merge AGENTS_ADDITIONS.md into AGENTS.md
-   6. /fresh-start
-   7. /phase-prep 1
-   8. /phase-start 1
+   Then switch to your feature directory:
+   4. cd FEATURE_PATH
+   5. /fresh-start
+   6. /phase-prep 1
+   7. /phase-start 1
+
+   After phase completion, merge AGENTS_ADDITIONS.md into $1/AGENTS.md
    ```
 
 ## Important

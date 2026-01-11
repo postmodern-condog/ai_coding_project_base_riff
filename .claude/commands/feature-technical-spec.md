@@ -12,8 +12,9 @@ Generate a feature technical specification document for the project at `$1`.
 - If `$1` is empty, ask the user for the target directory path
 - Check that `$1/FEATURE_SPEC.md` exists. If not:
   "FEATURE_SPEC.md not found at $1. Run /feature-spec $1 first."
-- Check that `$1/AGENTS.md` exists (indicates an existing project). If not, warn:
-  "AGENTS.md not found at $1. Feature development assumes an existing project. Did you mean to run /product-spec for a new project?"
+- Check that `PROJECT_ROOT/AGENTS.md` exists (indicates an existing project). If not, warn:
+  "AGENTS.md not found at PROJECT_ROOT. Feature development assumes an existing project. Did you mean to run /product-spec for a new project?"
+  (See Project Root Detection section below for how PROJECT_ROOT is derived)
 
 ## Directory Guard (Wrong Directory Check)
 
@@ -23,6 +24,31 @@ Before starting, confirm you're in the toolkit directory by reading `FEATURE_PRO
   - They're likely in their target project directory (or another repo)
   - They should `cd` into the `ai_coding_project_base` toolkit repo and re-run `/feature-technical-spec $1`
 
+## Project Root Detection
+
+Derive project root from the target directory:
+
+1. If `$1` matches pattern `*/features/*` (contains `/features/` followed by a feature name):
+   - PROJECT_ROOT = parent of parent of $1 (e.g., `/project/features/foo` → `/project`)
+   - FEATURE_NAME = basename of $1
+
+2. Validate PROJECT_ROOT:
+   - Check `PROJECT_ROOT/AGENTS.md` exists
+   - If missing: "Could not find AGENTS.md at PROJECT_ROOT. Is this a valid project with the features/ structure?"
+
+3. If `$1` does NOT match the `*/features/*` pattern:
+   - Warn: "`$1` doesn't appear to be a feature directory (expected path like `/project/features/feature-name`)"
+   - Ask if they want to continue anyway
+
+4. Use PROJECT_ROOT for:
+   - Reading AGENTS.md
+   - Codebase analysis and pattern detection (steps 2-3 below)
+   - Existing code searches
+
+5. Use $1 (feature directory) for:
+   - Reading FEATURE_SPEC.md
+   - Writing FEATURE_TECHNICAL_SPEC.md
+
 ## Process
 
 Read FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md from this toolkit directory and follow its instructions exactly:
@@ -31,8 +57,10 @@ Read FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md from this toolkit director
 
 2. **Perform Existing Code Analysis** (REQUIRED before any design):
 
+   **Note:** All code analysis should be performed on PROJECT_ROOT, not the feature directory.
+
    a. **Similar Functionality Audit**
-      - Search for existing code that does something similar to what the feature needs
+      - Search PROJECT_ROOT for existing code that does something similar to what the feature needs
       - List any utilities, helpers, or patterns that could be reused
       - Flag if creating new code when existing code could be extended
       - Output:

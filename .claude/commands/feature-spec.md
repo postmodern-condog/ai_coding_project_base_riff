@@ -19,6 +19,22 @@ Before starting, confirm you're in the toolkit directory by reading `FEATURE_PRO
   - They're likely in their target project directory (or another repo)
   - They should `cd` into the `ai_coding_project_base` toolkit repo and re-run `/feature-spec $1`
 
+## Project Root Detection
+
+Derive project root from the target directory:
+
+1. If `$1` matches pattern `*/features/*` (contains `/features/` followed by a feature name):
+   - PROJECT_ROOT = parent of parent of $1 (e.g., `/project/features/foo` → `/project`)
+   - FEATURE_NAME = basename of $1
+
+2. Validate PROJECT_ROOT:
+   - Check `PROJECT_ROOT/AGENTS.md` exists
+   - If missing: "Could not find AGENTS.md at PROJECT_ROOT. Is this a valid project with the features/ structure?"
+
+3. If `$1` does NOT match the `*/features/*` pattern:
+   - Warn: "`$1` doesn't appear to be a feature directory (expected path like `/project/features/feature-name`)"
+   - Ask if they want to continue anyway (may indicate `/setup` was not run for Feature type)
+
 ## Process
 
 Read FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md from this toolkit directory and follow its instructions exactly:

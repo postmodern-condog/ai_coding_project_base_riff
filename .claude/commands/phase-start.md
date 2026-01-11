@@ -6,17 +6,31 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Task
 
 Execute all steps and tasks in Phase $1 from EXECUTION_PLAN.md.
 
+## Context Detection
+
+Determine working context:
+
+1. If current working directory matches pattern `*/features/*`:
+   - PROJECT_ROOT = parent of parent of CWD (e.g., `/project/features/foo` → `/project`)
+   - MODE = "feature"
+
+2. Otherwise:
+   - PROJECT_ROOT = current working directory
+   - MODE = "greenfield"
+
 ## Context
 
 Before starting, read these files:
-- **AGENTS.md** — Follow all workflow conventions
-- **EXECUTION_PLAN.md** — Task definitions and acceptance criteria
+- **PROJECT_ROOT/AGENTS.md** — Follow all workflow conventions
+- **EXECUTION_PLAN.md** — Task definitions and acceptance criteria (from CWD)
 
 ## Directory Guard (Wrong Directory Check)
 
-Before starting, confirm `AGENTS.md` and `EXECUTION_PLAN.md` exist in the current working directory.
+Before starting, confirm the required files exist:
+- `EXECUTION_PLAN.md` exists in the current working directory
+- `PROJECT_ROOT/AGENTS.md` exists
 
-- If either is missing, **STOP** and tell the user to `cd` into their project directory (the one containing these files) and re-run `/phase-start $1`.
+- If either is missing, **STOP** and tell the user to `cd` into their project/feature directory (the one containing `EXECUTION_PLAN.md`) and re-run `/phase-start $1`.
 
 ## Execution Rules
 

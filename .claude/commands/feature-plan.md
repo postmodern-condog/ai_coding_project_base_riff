@@ -14,8 +14,9 @@ Generate the execution plan and agent additions for the project at `$1`.
   "FEATURE_SPEC.md not found at $1. Run /feature-spec $1 first."
 - Check that `$1/FEATURE_TECHNICAL_SPEC.md` exists. If not:
   "FEATURE_TECHNICAL_SPEC.md not found at $1. Run /feature-technical-spec $1 first."
-- Check that `$1/AGENTS.md` exists. If not:
-  "AGENTS.md not found at $1. Feature development requires an existing AGENTS.md."
+- Check that `PROJECT_ROOT/AGENTS.md` exists. If not:
+  "AGENTS.md not found at PROJECT_ROOT. Feature development requires an existing AGENTS.md."
+  (See Project Root Detection section below for how PROJECT_ROOT is derived)
 
 ## Directory Guard (Wrong Directory Check)
 
@@ -25,12 +26,35 @@ Before starting, confirm you're in the toolkit directory by reading `FEATURE_PRO
   - They're likely in their target project directory (or another repo)
   - They should `cd` into the `ai_coding_project_base` toolkit repo and re-run `/feature-plan $1`
 
+## Project Root Detection
+
+Derive project root from the target directory:
+
+1. If `$1` matches pattern `*/features/*` (contains `/features/` followed by a feature name):
+   - PROJECT_ROOT = parent of parent of $1 (e.g., `/project/features/foo` → `/project`)
+   - FEATURE_NAME = basename of $1
+
+2. Validate PROJECT_ROOT:
+   - Check `PROJECT_ROOT/AGENTS.md` exists
+   - If missing: "Could not find AGENTS.md at PROJECT_ROOT. Is this a valid project with the features/ structure?"
+
+3. If `$1` does NOT match the `*/features/*` pattern:
+   - Warn: "`$1` doesn't appear to be a feature directory (expected path like `/project/features/feature-name`)"
+   - Ask if they want to continue anyway
+
+4. Use PROJECT_ROOT for:
+   - Reading AGENTS.md
+
+5. Use $1 (feature directory) for:
+   - Reading FEATURE_SPEC.md and FEATURE_TECHNICAL_SPEC.md
+   - Writing EXECUTION_PLAN.md and AGENTS_ADDITIONS.md
+
 ## Process
 
 Read FEATURE_PROMPTS/FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md from this toolkit directory and follow its instructions exactly:
 
 1. Read `$1/FEATURE_SPEC.md` and `$1/FEATURE_TECHNICAL_SPEC.md` as inputs
-2. Read existing `$1/AGENTS.md` to understand current conventions
+2. Read existing `PROJECT_ROOT/AGENTS.md` to understand current conventions
 3. Generate EXECUTION_PLAN.md with phases, steps, and tasks for the feature
 4. Generate AGENTS_ADDITIONS.md with any additional workflow guidelines
 
@@ -62,9 +86,10 @@ EXECUTION_PLAN.md and AGENTS_ADDITIONS.md created and verified at $1
 Verification: PASSED | PASSED WITH NOTES | NEEDS REVIEW
 
 Next steps:
-1. cd $1
-2. Merge AGENTS_ADDITIONS.md into AGENTS.md
-3. /fresh-start
-4. /phase-prep 1
-5. /phase-start 1
+1. cd $1  (the feature directory)
+2. /fresh-start
+3. /phase-prep 1
+4. /phase-start 1
+
+After phase completion, merge $1/AGENTS_ADDITIONS.md into PROJECT_ROOT/AGENTS.md
 ```

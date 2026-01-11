@@ -6,13 +6,27 @@ allowed-tools: Bash, Read, Glob, Grep, AskUserQuestion
 
 I want to execute Phase $1 from EXECUTION_PLAN.md. Before starting, read EXECUTION_PLAN.md and check:
 
+## Context Detection
+
+Determine working context:
+
+1. If current working directory matches pattern `*/features/*`:
+   - PROJECT_ROOT = parent of parent of CWD (e.g., `/project/features/foo` → `/project`)
+   - MODE = "feature"
+
+2. Otherwise:
+   - PROJECT_ROOT = current working directory
+   - MODE = "greenfield"
+
 ## Directory Guard (Wrong Directory Check)
 
-Before starting, confirm `EXECUTION_PLAN.md` exists in the current working directory.
+Before starting, confirm the required files exist:
+- `EXECUTION_PLAN.md` exists in the current working directory
+- `PROJECT_ROOT/AGENTS.md` exists
 
-- If it does not exist, **STOP** and tell the user:
+- If either does not exist, **STOP** and tell the user:
   - They are likely in the toolkit repo (or the wrong folder)
-  - They should `cd` into their project directory (the one containing `EXECUTION_PLAN.md`) and re-run `/phase-prep $1`
+  - They should `cd` into their project/feature directory (the one containing `EXECUTION_PLAN.md`) and re-run `/phase-prep $1`
 
 ## Pre-Flight Checks
 
@@ -51,7 +65,7 @@ PHASE $1 PREREQUISITES
 
 Documents:
 - EXECUTION_PLAN.md: ✓ | ✗
-- AGENTS.md: ✓ | ✗
+- AGENTS.md (at PROJECT_ROOT): ✓ | ✗
 - Prior phases: Complete | N/A
 
 Git: {branch}, {clean | dirty}
