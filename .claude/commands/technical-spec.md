@@ -21,6 +21,16 @@ Before starting, confirm you're in the toolkit directory by reading `TECHNICAL_S
   - They're likely in their target project directory (or another repo)
   - They should `cd` into the `ai_coding_project_base` toolkit repo and re-run `/technical-spec $1`
 
+## Existing File Guard (Prevent Overwrite)
+
+Before asking any questions, check whether `$1/TECHNICAL_SPEC.md` already exists.
+
+- If it does not exist: continue normally.
+- If it exists: **STOP** and ask the user what to do:
+  1. **Backup then overwrite (recommended)**: read the existing file and write it to `$1/TECHNICAL_SPEC.md.bak.YYYYMMDD-HHMMSS`, then write the new document to `$1/TECHNICAL_SPEC.md`
+  2. **Overwrite**: replace `$1/TECHNICAL_SPEC.md` with the new document
+  3. **Abort**: do not write anything; suggest they rename/move the existing file first
+
 ## Process
 
 Read TECHNICAL_SPEC_PROMPT.md from this toolkit directory and follow its instructions exactly:

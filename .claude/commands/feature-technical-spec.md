@@ -24,6 +24,16 @@ Before starting, confirm you're in the toolkit directory by reading `FEATURE_PRO
   - They're likely in their target project directory (or another repo)
   - They should `cd` into the `ai_coding_project_base` toolkit repo and re-run `/feature-technical-spec $1`
 
+## Existing File Guard (Prevent Overwrite)
+
+Before asking any questions, check whether `$1/FEATURE_TECHNICAL_SPEC.md` already exists.
+
+- If it does not exist: continue normally.
+- If it exists: **STOP** and ask the user what to do:
+  1. **Backup then overwrite (recommended)**: read the existing file and write it to `$1/FEATURE_TECHNICAL_SPEC.md.bak.YYYYMMDD-HHMMSS`, then write the new document to `$1/FEATURE_TECHNICAL_SPEC.md`
+  2. **Overwrite**: replace `$1/FEATURE_TECHNICAL_SPEC.md` with the new document
+  3. **Abort**: do not write anything; suggest they rename/move the existing file first
+
 ## Project Root Detection
 
 Derive project root from the target directory:

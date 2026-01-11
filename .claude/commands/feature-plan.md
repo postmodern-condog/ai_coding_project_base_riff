@@ -26,6 +26,18 @@ Before starting, confirm you're in the toolkit directory by reading `FEATURE_PRO
   - They're likely in their target project directory (or another repo)
   - They should `cd` into the `ai_coding_project_base` toolkit repo and re-run `/feature-plan $1`
 
+## Existing File Guard (Prevent Overwrite)
+
+Before generating anything, check whether either output file already exists:
+- `$1/EXECUTION_PLAN.md`
+- `$1/AGENTS_ADDITIONS.md`
+
+- If neither exists: continue normally.
+- If one or both exist: **STOP** and ask the user what to do for the existing file(s):
+  1. **Backup then overwrite (recommended)**: for each existing file, read it and write it to `{path}.bak.YYYYMMDD-HHMMSS`, then write the new document(s) to the original path(s)
+  2. **Overwrite**: replace the existing file(s) with the new document(s)
+  3. **Abort**: do not write anything; suggest they rename/move the existing file(s) first
+
 ## Project Root Detection
 
 Derive project root from the target directory:

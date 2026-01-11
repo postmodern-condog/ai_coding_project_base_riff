@@ -35,10 +35,16 @@ A three-phase workflow with reusable prompts:
 
 ```
 your-project/
-├── PRODUCT_SPEC.md          # What you're building
-├── TECHNICAL_SPEC.md        # How it's built
-├── EXECUTION_PLAN.md        # Tasks with acceptance criteria
+├── PRODUCT_SPEC.md          # What you're building (greenfield)
+├── TECHNICAL_SPEC.md        # How it's built (greenfield)
+├── EXECUTION_PLAN.md        # Tasks with acceptance criteria (greenfield)
 ├── AGENTS.md                # Workflow rules for AI agents
+├── features/                # Feature development (optional)
+│   └── analytics/           # Each feature in its own directory
+│       ├── FEATURE_SPEC.md
+│       ├── FEATURE_TECHNICAL_SPEC.md
+│       ├── EXECUTION_PLAN.md
+│       └── AGENTS_ADDITIONS.md
 ├── .claude/
 │   ├── commands/            # Execution commands
 │   └── skills/              # Code verification + security scanning
@@ -62,6 +68,9 @@ cd ai_coding_project_base
 /technical-spec ~/Projects/my-new-app  # Define how it's built
 /generate-plan ~/Projects/my-new-app   # Create EXECUTION_PLAN.md + AGENTS.md
 
+# If any of these output files already exist, do not overwrite them blindly:
+# prefer making a backup (or committing to git) before replacing.
+
 # 3. Execute (from your project directory)
 cd ~/Projects/my-new-app
 /fresh-start           # Orient to project, load context
@@ -81,21 +90,24 @@ The `.claude/settings.local.json` file is intentionally ignored by git.
 
 ### Feature Development
 
+Features are isolated in their own directories under `features/<name>/`:
+
 ```bash
 # From toolkit directory:
-/setup ~/Projects/existing-app
-/feature-spec ~/Projects/existing-app
-/feature-technical-spec ~/Projects/existing-app
-/feature-plan ~/Projects/existing-app
+/setup ~/Projects/existing-app           # Prompts for feature name, creates features/<name>/
+/feature-spec ~/Projects/existing-app/features/analytics
+/feature-technical-spec ~/Projects/existing-app/features/analytics
+/feature-plan ~/Projects/existing-app/features/analytics
 
-# From your project:
-cd ~/Projects/existing-app
-# Merge AGENTS_ADDITIONS.md into AGENTS.md
-/fresh-start
+# From your feature directory:
+cd ~/Projects/existing-app/features/analytics
+/fresh-start             # Detects feature mode, creates feature/analytics branch
 /phase-prep 1
 /phase-start 1
 /phase-checkpoint 1
 ```
+
+This enables multiple concurrent features without document overwrites. Each feature has its own EXECUTION_PLAN.md while sharing the project's AGENTS.md.
 
 ### Alternative: Manual Setup
 
@@ -432,6 +444,18 @@ main
 - **One commit per task** — Immediately after task verification passes
 - **Sequential commits** — Each task builds on the previous
 - **No auto-push** — Human reviews at checkpoint before pushing
+- **Unpushed commits check** — Before creating a phase branch, prompts if current branch has unpushed commits
+
+### Feature Branches
+
+For feature development, `/fresh-start` creates a `feature/<name>` branch:
+
+```
+main
+  └── feature/analytics (branch)
+        └── phase-1 (branch)
+              ├── task(1.1.A): ...
+```
 
 ### Why This Model
 
@@ -439,6 +463,7 @@ main
 - **Clear history** — Task IDs in commit messages provide traceability
 - **Human control** — Push only after checkpoint verification passes
 - **Simple branches** — One branch to manage per phase, not per step
+- **Isolated features** — Feature work branches off main, phase branches off feature
 
 ## Stuck Detection
 
