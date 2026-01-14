@@ -2,7 +2,7 @@
 
 ## In Progress
 
-- [ ] **[P0 / High]** Make workflow portable across CLIs/models without breaking Claude Code “clone-and-go” sharing
+- [ ] **[P0 / High]** Make workflow portable across CLIs/models without breaking Claude Code "clone-and-go" sharing
 - [ ] **[P1 / Medium]** Add optional path arguments to execution commands to reduce wrong-directory friction
 - [ ] Persistent learnings/patterns file for cross-task context (see below)
 - [ ] Compare web vs CLI interface for generation workflow (see below)
@@ -11,7 +11,11 @@
 - [ ] Verify that the Playwright MCP integration works
 - [ ] Git worktrees for parallel task execution (see below)
 - [ ] Session logging for automation opportunity discovery (see below)
+- [ ] **[P1 / High]** Parallel Agent Orchestration (see below)
+- [ ] **[P2 / Medium]** Spec Diffing and Plan Regeneration (see below)
+- [ ] **[P2 / Medium]** Human Review Queue (see below)
 - [x] Add `/list-todos` command (see below) — DONE
+- [x] Recovery & Rollback Commands — DONE (phase-rollback, task-retry, phase-analyze)
 
 ## Future Concepts
 
@@ -444,3 +448,212 @@ Sessions → Logs → /analyze-sessions → New skills/commands → Better sessi
 - [Claude Code Hooks documentation](https://code.claude.com/docs/en/hooks)
 - `SessionEnd` hook receives: `session_id`, `transcript_path`, `cwd`, `permission_mode`
 - Hooks run with 60s timeout (configurable)
+
+### Parallel Agent Orchestration
+
+Enable parallel execution of independent tasks to dramatically speed up phase completion.
+
+**Context:**
+- Boris Cherny (Claude Code creator) runs 5-10 Claude instances simultaneously
+- The EXECUTION_PLAN.md already marks tasks within steps as potentially parallelizable
+- Current workflow executes tasks sequentially even when independent
+
+**Proposed Implementation:**
+
+1. **`/phase-start-parallel N`** command:
+   - Parse EXECUTION_PLAN.md to identify independent tasks within each step
+   - Spawn parallel Claude instances via Task tool (up to 10 subagents)
+   - Each agent works in isolation on its assigned task
+   - Orchestrator waits for all tasks in step to complete before proceeding
+   - Merge results and handle any conflicts
+
+2. **Parallelization detection:**
+   - Tasks with `Depends On: None` or only depending on prior steps = parallelizable
+   - Tasks depending on other tasks in same step = must wait
+   - Add explicit `parallel: true/false` flag to EXECUTION_PLAN.md format
+
+3. **Conflict handling:**
+   - Pre-analyze file lists from EXECUTION_PLAN.md
+   - Flag overlapping files as sequential-only
+   - For unavoidable conflicts: git worktrees for full isolation
+
+**Example execution:**
+```
+Step 1.1 (sequential):
+  Task 1.1.A → Task 1.1.B (1.1.B depends on 1.1.A)
+
+Step 1.2 (parallel):
+  ┌── Task 1.2.A (Agent 1) ──┐
+  ├── Task 1.2.B (Agent 2) ──┼── Wait for all → Merge → Step 1.3
+  └── Task 1.2.C (Agent 3) ──┘
+```
+
+**Benefits:**
+- 2-5x speedup for phases with many independent tasks
+- Matches how experienced developers parallelize work
+- Utilizes available compute capacity
+
+**Implementation phases:**
+1. Add `parallel: true/false` to GENERATOR_PROMPT.md output
+2. Create `/step-parallel` command using Task tool
+3. Add orchestration logic for waiting and merging
+4. (Optional) Git worktree support for file-conflict cases
+
+### Spec Diffing and Plan Regeneration
+
+Handle mid-project spec changes gracefully without losing progress.
+
+**Problem:**
+- Specs often change during development (scope changes, clarifications, pivots)
+- Currently no way to see what changed or assess impact
+- No way to regenerate only affected parts of EXECUTION_PLAN.md
+
+**Proposed Commands:**
+
+1. **`/spec-diff`** — Show what changed in specs
+   ```bash
+   /spec-diff                    # Diff all specs against last committed version
+   /spec-diff TECHNICAL_SPEC.md  # Diff specific file
+   /spec-diff --from HEAD~5      # Diff against specific commit
+   ```
+
+   Output:
+   ```
+   SPEC CHANGES
+   ============
+
+   TECHNICAL_SPEC.md:
+   + Added: Section "Caching Layer" (new requirement)
+   ~ Modified: Section "API Endpoints" (changed response format)
+   - Removed: Section "Legacy Migration" (descoped)
+
+   PRODUCT_SPEC.md:
+   ~ Modified: MVP Features (removed "social sharing")
+   ```
+
+2. **`/plan-impact`** — Assess which tasks are affected by spec changes
+   ```bash
+   /plan-impact
+   ```
+
+   Output:
+   ```
+   IMPACT ANALYSIS
+   ===============
+
+   Affected by "Caching Layer" addition:
+   - NEW: Need to add caching tasks (suggest Phase 2, Step 2.3)
+
+   Affected by "API Endpoints" change:
+   - Task 2.1.A: Update response format (acceptance criteria outdated)
+   - Task 2.1.B: Modify client calls (depends on 2.1.A)
+   - Task 3.2.A: Update tests (uses old response shape)
+
+   Affected by "Legacy Migration" removal:
+   - Task 4.1.A: Can be deleted (no longer needed)
+   - Task 4.1.B: Can be deleted (no longer needed)
+
+   Summary: 2 tasks outdated, 2 tasks deletable, 1 new area needed
+   ```
+
+3. **`/plan-regenerate`** — Regenerate affected portions of the plan
+   ```bash
+   /plan-regenerate --from 2       # Regenerate from Phase 2 onward
+   /plan-regenerate --tasks 2.1.A,2.1.B  # Regenerate specific tasks only
+   /plan-regenerate --preview      # Show what would change without applying
+   ```
+
+   Behavior:
+   - Preserves completed tasks (marked `[x]`)
+   - Updates outdated acceptance criteria
+   - Adds new tasks for new requirements
+   - Removes tasks for descoped features
+   - Shows diff before applying
+
+**Implementation approach:**
+1. Store spec hashes in `.claude/spec-versions.json` for change detection
+2. Create semantic diffing (not just text diff) for structured analysis
+3. Map spec sections to EXECUTION_PLAN.md tasks via `Spec Reference` field
+4. Integrate with GENERATOR_PROMPT.md for partial regeneration
+
+### Human Review Queue
+
+Aggregate items awaiting human attention for team workflows.
+
+**Problem:**
+- Multiple agents may be working on different tasks
+- Items needing human review are scattered across:
+  - Blocked tasks in EXECUTION_PLAN.md
+  - Items in TODOS.md
+  - Checkpoint approvals pending
+  - Spec ambiguities flagged
+- No single view of "what needs my attention"
+
+**Proposed Command:**
+
+**`/review-queue`** — Show all items awaiting human action
+
+```
+REVIEW QUEUE
+============
+
+## Blocking (must resolve to continue)
+
+1. **Task 2.1.A Blocked**
+   - Issue: Missing API credentials for payment service
+   - Blocked since: 2h ago
+   - Action: Provide STRIPE_API_KEY in .env
+
+2. **Phase 2 Checkpoint Pending**
+   - Waiting since: 30m ago
+   - Manual checks: 3 items to verify
+   - Action: Run /phase-checkpoint 2
+
+## Decisions Needed
+
+3. **Spec Ambiguity: Authentication Method**
+   - Source: Task 1.3.A
+   - Options: JWT vs Session cookies
+   - Flagged: TECHNICAL_SPEC.md Section 4
+   - Action: Clarify preference
+
+4. **Alternative Approach Selection**
+   - Source: /task-retry 2.2.B --alternative
+   - Options: 3 approaches proposed
+   - Action: Choose approach to try
+
+## Review Requested
+
+5. **Code Review: Phase 1 Implementation**
+   - Files changed: 12
+   - Tests: All passing
+   - Action: Review before push
+
+## Informational
+
+6. **TODOS.md Items: 5 pending**
+   - High priority: 2
+   - Action: /list-todos for details
+
+---
+Total items: 6 | Blocking: 2 | Decisions: 2 | Reviews: 1
+```
+
+**Features:**
+- Aggregates from multiple sources (EXECUTION_PLAN.md, TODOS.md, git state)
+- Prioritizes by urgency (blocking > decisions > reviews > info)
+- Shows time waiting for each item
+- Provides direct action command for each item
+- Updates in real-time as items are resolved
+
+**Integration points:**
+- `/phase-start` adds blocked tasks to queue
+- `/task-retry --alternative` adds decision items
+- `/phase-checkpoint` adds pending reviews
+- Spec verification adds ambiguity flags
+
+**Implementation approach:**
+1. Create `.claude/review-queue.json` to track pending items
+2. Hook into existing commands to add/remove items
+3. Build `/review-queue` command to aggregate and display
+4. Add notifications when queue grows (optional)

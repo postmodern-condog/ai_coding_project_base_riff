@@ -145,6 +145,22 @@ TDD Issues (if any):
 ## On Success
 
 - Check off completed criteria in EXECUTION_PLAN.md: `- [ ]` → `- [x]`
+- Update `.claude/phase-state.json` task entry:
+  ```json
+  {
+    "tasks": {
+      "$1": {
+        "status": "COMPLETE",
+        "completed_at": "{ISO timestamp}",
+        "verification": {
+          "passed": true,
+          "criteria_met": "X/X",
+          "tdd_compliant": true
+        }
+      }
+    }
+  }
+  ```
 - Report: Task $1 verified, all criteria met
 
 ## On Failure
@@ -152,3 +168,20 @@ TDD Issues (if any):
 - Report which criteria failed
 - Provide fix recommendations
 - Do not check off incomplete criteria
+- Update `.claude/phase-state.json` task entry:
+  ```json
+  {
+    "tasks": {
+      "$1": {
+        "status": "IN_PROGRESS",
+        "verification": {
+          "passed": false,
+          "criteria_met": "X/Y",
+          "last_attempt": "{ISO timestamp}",
+          "attempts": N,
+          "failing_criteria": ["V-001", "V-003"]
+        }
+      }
+    }
+  }
+  ```

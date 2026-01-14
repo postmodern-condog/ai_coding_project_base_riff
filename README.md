@@ -228,6 +228,14 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 | `/list-todos` | Analyze and prioritize TODO items |
 | `/progress` | Show progress through execution plan |
 
+### Recovery Commands (run from your project directory)
+
+| Command | Description |
+|---------|-------------|
+| `/phase-analyze N` | Analyze what went wrong in phase N |
+| `/phase-rollback N` | Rollback to end of phase N (or task ID) |
+| `/task-retry X.Y.Z` | Retry a failed task with fresh context |
+
 ## Optional Ad-Hoc Tools
 
 These tools are available for on-demand use but are **not part of the standard workflow**. Use them when you have a specific need.

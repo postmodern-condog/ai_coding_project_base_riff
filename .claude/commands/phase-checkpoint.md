@@ -151,6 +151,38 @@ This is a quick sanity check to catch "works but wrong approach" issues before t
 - Confirm existing tests still pass
 - Note any changes to existing functionality
 
+## State Update
+
+After checkpoint passes, update `.claude/phase-state.json`:
+
+1. Set phase status to `CHECKPOINTED`
+2. Add `completed_at` timestamp
+3. Record checkpoint results
+
+```json
+{
+  "phases": [
+    {
+      "number": 1,
+      "status": "CHECKPOINTED",
+      "completed_at": "{ISO timestamp}",
+      "checkpoint": {
+        "tests_passed": true,
+        "type_check_passed": true,
+        "lint_passed": true,
+        "security_passed": true,
+        "coverage_percent": 85,
+        "manual_verified": true
+      }
+    }
+  ]
+}
+```
+
+If checkpoint fails, keep status as `IN_PROGRESS` and add `checkpoint_failed` with details.
+
+---
+
 ## Report
 
 ```

@@ -138,7 +138,56 @@ Report results and confirm ready to proceed to Phase {N+1}.
 
 ## Recovery Prompts
 
-Use these when execution is interrupted or blocked.
+Use these when execution is interrupted or blocked. These are also available as slash commands.
+
+### Analyze Phase Problems
+
+Use `/phase-analyze` to understand what went wrong in a phase before deciding how to proceed.
+
+```bash
+/phase-analyze 2    # Analyze Phase 2
+/phase-analyze      # Analyze current/most recent phase
+```
+
+This generates a comprehensive report including:
+- Task completion status
+- Failure patterns detected
+- High-churn files (rework indicators)
+- Spec alignment issues
+- Root cause analysis
+- Recommended next steps
+
+### Rollback to Clean State
+
+Use `/phase-rollback` when you need to undo work and start fresh.
+
+```bash
+/phase-rollback 1       # Rollback to end of Phase 1
+/phase-rollback 2.1.A   # Rollback to just after Task 2.1.A
+/phase-rollback --last  # Undo only the most recent task commit
+```
+
+The command will:
+- Show what commits will be removed
+- Ask for confirmation before proceeding
+- Update EXECUTION_PLAN.md checkboxes
+- Provide recovery instructions if needed
+
+### Retry Failed Task
+
+Use `/task-retry` when a specific task failed and needs another attempt.
+
+```bash
+/task-retry 2.1.A              # Retry with fresh context
+/task-retry 2.1.A --fresh      # Explicitly start clean
+/task-retry 2.1.A --alternative # Try a different approach
+```
+
+The `--alternative` flag is useful when the standard approach keeps failing. It will:
+- Document what was tried before
+- Generate alternative approaches
+- Let you choose which to try
+- Add constraints to avoid repeating mistakes
 
 ### Resume After Blocker
 
@@ -160,21 +209,6 @@ Use this when new work is discovered that's outside the current task scope.
 While working on Task {X.Y.Z}, I discovered: {description of issue or opportunity}
 
 Add this to TODOS.md with appropriate context and priority, then continue with the current task scope. Do not expand scope without approval.
-```
-
-### Retry Failed Task
-
-Use this when a task failed and you want to retry with fresh context.
-
-```
-Task {X.Y.Z} failed previously. Error context: {brief description of what went wrong}
-
-Start fresh on Task {X.Y.Z}:
-1. Re-read the task definition and acceptance criteria
-2. Review what was attempted before
-3. Take a different approach to avoid the previous failure
-
-Do not repeat the same failing approach.
 ```
 
 ### Skip to Specific Task

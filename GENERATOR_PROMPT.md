@@ -415,7 +415,24 @@ BLOCKED: Task {id}
 Issue: {what's wrong}
 Tried: {what you attempted}
 Need: {what would unblock}
+Type: user-action | dependency | external-service | unclear-requirements
 ```
+
+**Also update `.claude/phase-state.json`** with the blocker:
+```json
+{
+  "tasks": {
+    "{id}": {
+      "status": "BLOCKED",
+      "blocker": "{what's wrong}",
+      "blocker_type": "{type}",
+      "since": "{ISO timestamp}"
+    }
+  }
+}
+```
+
+This ensures the orchestrator can detect blockers without parsing conversation history.
 
 ---
 

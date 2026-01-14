@@ -147,6 +147,70 @@ Before starting, confirm the required files exist:
 5. **Context Hygiene**
    - Summarize progress between steps if context grows large
 
+## State Tracking
+
+Maintain `.claude/phase-state.json` throughout execution:
+
+1. **At phase start**, update state:
+   ```bash
+   mkdir -p .claude
+   ```
+
+   Set phase status to `IN_PROGRESS` with `started_at` timestamp.
+
+2. **After each task completion**, update the task entry:
+   ```json
+   {
+     "tasks": {
+       "{task_id}": {
+         "status": "COMPLETE",
+         "completed_at": "{ISO timestamp}"
+       }
+     }
+   }
+   ```
+
+3. **If task is blocked**, record the blocker:
+   ```json
+   {
+     "tasks": {
+       "{task_id}": {
+         "status": "BLOCKED",
+         "blocker": "{description}",
+         "blocker_type": "user-action|dependency|external-service|unclear-requirements",
+         "since": "{ISO timestamp}"
+       }
+     }
+   }
+   ```
+
+4. **State file format** (create if missing):
+   ```json
+   {
+     "schema_version": "1.0",
+     "project_name": "{directory name}",
+     "last_updated": "{ISO timestamp}",
+     "main": {
+       "current_phase": 1,
+       "total_phases": 6,
+       "status": "IN_PROGRESS",
+       "phases": [
+         {
+           "number": 1,
+           "name": "{Phase Name}",
+           "status": "IN_PROGRESS",
+           "started_at": "{ISO timestamp}",
+           "tasks": {}
+         }
+       ]
+     }
+   }
+   ```
+
+If `.claude/phase-state.json` doesn't exist, run `/populate-state` first to initialize it.
+
+---
+
 ## Completion
 
 Do not check back until Phase $1 is complete, unless blocked or stuck.
