@@ -2,6 +2,7 @@
 
 ## In Progress
 
+- [ ] **[P0 / High]** Deep audit of automation verification — ensure all components needed for human-free verification are present (see below)
 - [ ] **[P0 / High]** Make workflow portable across CLIs/models without breaking Claude Code "clone-and-go" sharing
 - [ ] **[P1 / Medium]** Add optional path arguments to execution commands to reduce wrong-directory friction
 - [ ] Persistent learnings/patterns file for cross-task context (see below)
@@ -18,6 +19,75 @@
 - [x] Recovery & Rollback Commands — DONE (phase-rollback, task-retry, phase-analyze)
 
 ## Future Concepts
+
+### Deep Audit of Automation Verification
+
+Comprehensive review of the toolkit's verification system to ensure fully autonomous operation without human intervention.
+
+**Problem:**
+- The orchestrator revealed that progress tracking has gaps
+- Verification results aren't always persisted
+- Some checks require human judgment that could be codified
+- No guarantee that all acceptance criteria are machine-verifiable
+
+**Audit Scope:**
+
+1. **Acceptance Criteria Auditability**
+   - Can every acceptance criterion type be verified automatically?
+   - What criteria patterns require human judgment?
+   - Should GENERATOR_PROMPT.md enforce "machine-verifiable" criteria only?
+   - Categorize criteria types: CODE (file exists, exports), TEST (passes), LINT, TYPE, BUILD, BROWSER, MANUAL
+
+2. **Verification Tool Coverage**
+   - What verification tools exist? (tests, type-check, lint, security scan)
+   - What's missing? (visual regression, accessibility, performance)
+   - For each criterion type, what tool verifies it?
+   - Gap analysis: criteria types with no automated verification
+
+3. **State Persistence Completeness**
+   - Does every verification result get persisted to phase-state.json?
+   - Are verification timestamps recorded?
+   - Is there an audit trail of what was verified and when?
+   - Can the orchestrator reconstruct verification history?
+
+4. **Pre-Phase Setup Verification**
+   - Can pre-phase requirements (env vars, services) be verified automatically?
+   - What checks can confirm environment is ready?
+   - Should `/phase-prep` block if requirements aren't met?
+
+5. **Checkpoint Automation**
+   - Which "Manual Verification" items could be automated?
+   - What MCP tools (Playwright, etc.) would enable automation?
+   - Should checkpoints fail-closed if manual items can't be verified?
+
+6. **Browser/UI Verification**
+   - Is Playwright MCP integration complete and tested?
+   - What UI acceptance criteria patterns are supported?
+   - Visual regression testing: is it integrated?
+
+7. **Test Quality Verification**
+   - Is TDD compliance actually enforced or just reported?
+   - Can we verify tests are meaningful (not just "no errors")?
+   - Should failing TDD compliance block task completion?
+
+8. **Blocker Detection & Resolution**
+   - Are all blocker types detectable automatically?
+   - Can some blockers be resolved without human intervention?
+   - What's the escalation path for truly-human-required blockers?
+
+**Deliverables:**
+
+1. **Gap Analysis Document** — What can't be verified automatically today
+2. **Verification Matrix** — Criterion type → verification tool → automation status
+3. **Recommended Enhancements** — Prioritized list of improvements
+4. **GENERATOR_PROMPT.md Updates** — Enforce verifiable criteria patterns
+5. **New Commands/Skills** — Fill verification gaps
+
+**Success Criteria:**
+- Every acceptance criterion in EXECUTION_PLAN.md has an automated verification path
+- `/phase-checkpoint` can run fully unattended (or explicitly flags what needs human)
+- Orchestrator can determine project health without parsing conversations
+- Clear separation between "automation-ready" and "human-required" verification
 
 ### Portable Workflow Kit (Adapters + Model Router)
 
