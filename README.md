@@ -4,15 +4,24 @@ A structured prompt framework for building software with AI coding assistants. I
 
 ## TL;DR
 
-**What is this?** A prompt generator that creates structured workflows for AI coding projects. Not an application — a framework that produces executable specifications.
+**What is this?** A framework for AI agents to build software autonomously — with verification, guardrails, and human oversight built in.
 
 **How does it work?** Three phases:
 
 1. **Specify** — Guided Q&A produces `PRODUCT_SPEC.md` and `TECHNICAL_SPEC.md`
-2. **Plan** — Generator creates `EXECUTION_PLAN.md` (tasks with acceptance criteria) and `AGENTS.md` (workflow rules)
-3. **Execute** — AI agents work autonomously with human checkpoints between phases
+2. **Plan** — Generator creates `EXECUTION_PLAN.md` (tasks with testable acceptance criteria) and `AGENTS.md` (workflow rules)
+3. **Execute** — AI agents work task-by-task with automatic verification after each one
 
-**Who is it for?** Developers using AI coding assistants who want structured, repeatable workflows instead of ad-hoc prompting.
+**What makes execution robust?**
+
+- **Code verification** — Multi-agent system checks each task against its acceptance criteria
+- **TDD enforcement** — Verifies tests exist, were written first, and have meaningful assertions
+- **Security scanning** — Dependency audits, secrets detection, and static analysis at checkpoints
+- **Stuck detection** — Agents escalate to humans instead of spinning on failures
+- **Recovery commands** — Analyze failures, rollback phases, retry tasks with fresh context
+- **Git workflow** — One branch per phase, one commit per task, human review before push
+
+**Who is it for?** Developers who want AI agents to write code reliably, not just occasionally.
 
 ## Prerequisites
 
