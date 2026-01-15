@@ -533,6 +533,11 @@
             transition: all 0.2s;
         }
 
+        .quickstart-tab:hover {
+            color: #cdd6f4;
+            background: #232334;
+        }
+
         .quickstart-tab.active {
             background: #313244;
             color: #cdd6f4;
@@ -838,12 +843,12 @@
             <div class="quickstart">
                 <div class="quickstart-header">
                     <div class="quickstart-tabs">
-                        <button class="quickstart-tab active">Greenfield</button>
-                        <button class="quickstart-tab">Feature</button>
+                        <button class="quickstart-tab active" data-tab="greenfield">Greenfield</button>
+                        <button class="quickstart-tab" data-tab="feature">Feature</button>
                     </div>
                 </div>
                 <div class="quickstart-body">
-                    <div class="code-block">
+                    <div class="code-block" id="greenfield-code">
                         <div><span class="code-comment"># Clone and set up</span></div>
                         <div><span class="code-command">git clone</span> <span class="code-path">https://github.com/benjaminshoemaker/ai_coding_project_base.git</span></div>
                         <div><span class="code-command">cd</span> <span class="code-path">ai_coding_project_base</span></div>
@@ -860,10 +865,38 @@
                         <div><span class="code-flag">/phase-start</span> <span class="code-command">1</span></div>
                         <div><span class="code-flag">/phase-checkpoint</span> <span class="code-command">1</span></div>
                     </div>
+                    <div class="code-block" id="feature-code" style="display: none;">
+                        <div><span class="code-comment"># From toolkit directory, set up feature in existing project</span></div>
+                        <div><span class="code-flag">/setup</span> <span class="code-path">~/Projects/existing-app</span></div>
+                        <div>&nbsp;</div>
+                        <div><span class="code-comment"># Generate feature specifications</span></div>
+                        <div><span class="code-flag">/feature-spec</span> <span class="code-path">~/Projects/existing-app/features/analytics</span></div>
+                        <div><span class="code-flag">/feature-technical-spec</span> <span class="code-path">~/Projects/existing-app/features/analytics</span></div>
+                        <div><span class="code-flag">/feature-plan</span> <span class="code-path">~/Projects/existing-app/features/analytics</span></div>
+                        <div>&nbsp;</div>
+                        <div><span class="code-comment"># Execute from feature directory</span></div>
+                        <div><span class="code-command">cd</span> <span class="code-path">~/Projects/existing-app/features/analytics</span></div>
+                        <div><span class="code-flag">/fresh-start</span> <span class="code-comment"># Creates feature/analytics branch</span></div>
+                        <div><span class="code-flag">/phase-start</span> <span class="code-command">1</span></div>
+                        <div><span class="code-flag">/phase-checkpoint</span> <span class="code-command">1</span></div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <script>
+        document.querySelectorAll('.quickstart-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.quickstart-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const tabName = tab.dataset.tab;
+                document.getElementById('greenfield-code').style.display = tabName === 'greenfield' ? 'block' : 'none';
+                document.getElementById('feature-code').style.display = tabName === 'feature' ? 'block' : 'none';
+            });
+        });
+    </script>
 
     <!-- CTA -->
     <section class="cta">
