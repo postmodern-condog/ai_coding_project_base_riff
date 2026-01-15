@@ -4,6 +4,7 @@
 
 - [ ] **[P0 / High]** Deep audit of automation verification — ensure all components needed for human-free verification are present (see below)
 - [ ] **[P0 / High]** Make workflow portable across CLIs/models without breaking Claude Code "clone-and-go" sharing
+- [ ] **[P1 / Medium]** Verification logging and manual intervention analysis (see below)
 - [ ] **[P1 / Medium]** Add optional path arguments to execution commands to reduce wrong-directory friction
 - [ ] Persistent learnings/patterns file for cross-task context (see below)
 - [ ] Compare web vs CLI interface for generation workflow (see below)
@@ -19,6 +20,33 @@
 - [x] Recovery & Rollback Commands — DONE (phase-rollback, task-retry, phase-analyze)
 
 ## Future Concepts
+
+### Verification Logging and Manual Intervention Analysis
+
+Track and analyze manual verification interventions to identify optimization opportunities.
+
+**Problem:**
+- No visibility into how much time is spent on manual verification
+- No data on which types of manual checks recur across projects
+- Can't prioritize automation efforts without understanding the manual burden
+- No feedback loop from execution experience back to spec generation
+
+**Goals:**
+1. Log every manual verification intervention with context (project, phase, type, item)
+2. Categorize interventions: truly-human-required vs. automatable-with-tools
+3. Aggregate data across projects to identify patterns
+4. Generate reports showing highest-impact automation opportunities
+5. Feed insights back into GENERATOR_PROMPT.md to reduce non-automatable criteria
+
+**Key Questions:**
+- Where should logs live? Per-project or centralized in orchestrator?
+- How to capture time spent without adding friction?
+- Should checkpoint items be pre-categorized at generation time?
+- How to surface actionable recommendations (not just reports)?
+
+**Related to:** Deep Audit of Automation Verification, Orchestrator `/verification-report`
+
+---
 
 ### Deep Audit of Automation Verification
 

@@ -109,6 +109,36 @@ cd ~/Projects/existing-app/features/analytics
 
 This enables multiple concurrent features without document overwrites. Each feature has its own EXECUTION_PLAN.md while sharing the project's AGENTS.md.
 
+### Adopting Existing Repositories
+
+If you're already working in another repository and want to start using this toolkit:
+
+```bash
+# 1. Set environment variable (one-time, in ~/.zshrc or ~/.bashrc):
+export AI_CODING_TOOLKIT="$HOME/Projects/ai_coding_project_base"
+
+# 2. From the orchestrator (ai_coding_orchestrator), adopt the repo:
+/adopt ~/Projects/my-existing-app
+
+# 3. Start a new Claude Code session in the adopted repo:
+cd ~/Projects/my-existing-app
+claude
+
+# 4. Generate an execution plan from your existing context:
+/bootstrap    # Converts your description/spec into an actionable plan
+
+# Or use the full workflow:
+/product-spec .
+/technical-spec .
+/generate-plan .
+
+# 5. Execute:
+/fresh-start
+/phase-start 1
+```
+
+This workflow is useful when you've been discussing a feature in another repo and decide you want to use the toolkit's structured approach.
+
 ### Alternative: Manual Setup
 
 If not using Claude Code, copy files manually and use `START_PROMPTS.md` for guidance.
@@ -214,6 +244,7 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 | `/feature-technical-spec [path]` | Generate feature technical specification |
 | `/feature-plan [path]` | Generate feature execution plan |
 | `/verify-spec <type>` | Verify spec document for quality issues |
+| `/bootstrap` | Generate execution plan from existing context (for adopted projects) |
 
 ### Execution Commands (run from your project directory)
 
@@ -668,6 +699,7 @@ ai_coding_project_base/
 │   │   ├── feature-technical-spec.md
 │   │   ├── feature-plan.md
 │   │   ├── verify-spec.md
+│   │   ├── bootstrap.md             # Quick plan from existing context
 │   │   ├── fresh-start.md
 │   │   ├── phase-prep.md
 │   │   ├── phase-start.md
