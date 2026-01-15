@@ -2,6 +2,28 @@
 
 A structured prompt framework for building software with AI coding assistants. Instead of ad-hoc prompting, this toolkit provides a systematic workflow that produces documents AI agents can execute against autonomously.
 
+## TL;DR
+
+**What is this?** A prompt generator that creates structured workflows for AI coding projects. Not an application — a framework that produces executable specifications.
+
+**How does it work?** Three phases:
+
+1. **Specify** — Guided Q&A produces `PRODUCT_SPEC.md` and `TECHNICAL_SPEC.md`
+2. **Plan** — Generator creates `EXECUTION_PLAN.md` (tasks with acceptance criteria) and `AGENTS.md` (workflow rules)
+3. **Execute** — AI agents work autonomously with human checkpoints between phases
+
+**Who is it for?** Developers using AI coding assistants who want structured, repeatable workflows instead of ad-hoc prompting.
+
+## Prerequisites
+
+Before using this toolkit, you need:
+
+- **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)** — Anthropic's CLI for Claude (primary interface for slash commands)
+- **Git** — Required for the branching and commit workflow
+- **Node.js + npm** (optional) — Only needed for markdown linting during development
+
+Not using Claude Code? See [Alternative: Manual Setup](#alternative-manual-setup) for copy-paste prompts that work with any LLM.
+
 ## The Problem
 
 AI coding assistants are powerful but inconsistent. Without structure:
