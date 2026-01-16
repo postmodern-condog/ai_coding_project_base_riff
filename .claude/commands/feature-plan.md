@@ -1,7 +1,7 @@
 ---
 description: Generate EXECUTION_PLAN.md and AGENTS_ADDITIONS.md for a feature
 argument-hint: [target-directory]
-allowed-tools: Read, Write, Edit, AskUserQuestion, Glob, Grep
+allowed-tools: Read, Write, Edit, AskUserQuestion, Glob, Grep, Bash
 ---
 
 Generate the execution plan and agent additions for the project at `$1`.
@@ -75,6 +75,52 @@ Read FEATURE_PROMPTS/FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md from this toolki
 Write both documents to the target directory:
 - `$1/EXECUTION_PLAN.md`
 - `$1/AGENTS_ADDITIONS.md`
+
+## Setup Execution Environment
+
+After writing the documents, ensure the execution commands and skills are available at PROJECT_ROOT so `/fresh-start`, `/phase-start`, etc. work when the user switches to the feature directory.
+
+Check if `PROJECT_ROOT/.claude/commands/fresh-start.md` exists:
+- If it exists: skip this section (project already set up)
+- If it does not exist: copy the execution commands and skills
+
+### 1. Copy Execution Commands
+
+Copy only the execution-phase commands to `PROJECT_ROOT/.claude/commands/`:
+
+```bash
+mkdir -p "PROJECT_ROOT/.claude/commands"
+cp .claude/commands/fresh-start.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/phase-prep.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/phase-start.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/phase-checkpoint.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/verify-task.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/progress.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/security-scan.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/list-todos.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/phase-analyze.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/phase-rollback.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/task-retry.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/populate-state.md "PROJECT_ROOT/.claude/commands/"
+```
+
+### 2. Copy Skills
+
+Copy the skills directory:
+
+```bash
+cp -r .claude/skills "PROJECT_ROOT/.claude/"
+```
+
+### 3. Create CLAUDE.md
+
+If `PROJECT_ROOT/CLAUDE.md` does not exist, create it with:
+
+```
+@AGENTS.md
+```
+
+If it already exists, do not overwrite it.
 
 ## Verification (Automatic)
 

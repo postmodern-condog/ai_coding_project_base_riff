@@ -93,11 +93,10 @@ cd ai_coding_project_base
 
 # Open this folder in Claude Code to use the slash commands in .claude/commands/
 
-# 2. Initialize & Generate (from toolkit directory)
-/setup ~/Projects/my-new-app           # Copy execution commands + skills
+# 2. Generate specs and plan (from toolkit directory)
 /product-spec ~/Projects/my-new-app    # Define what you're building
 /technical-spec ~/Projects/my-new-app  # Define how it's built
-/generate-plan ~/Projects/my-new-app   # Create EXECUTION_PLAN.md + AGENTS.md
+/generate-plan ~/Projects/my-new-app   # Create EXECUTION_PLAN.md + AGENTS.md + copy execution commands
 
 # If any of these output files already exist, do not overwrite them blindly:
 # prefer making a backup (or committing to git) before replacing.
@@ -125,10 +124,9 @@ Features are isolated in their own directories under `features/<name>/`:
 
 ```bash
 # From toolkit directory:
-/setup ~/Projects/existing-app           # Prompts for feature name, creates features/<name>/
 /feature-spec ~/Projects/existing-app/features/analytics
 /feature-technical-spec ~/Projects/existing-app/features/analytics
-/feature-plan ~/Projects/existing-app/features/analytics
+/feature-plan ~/Projects/existing-app/features/analytics   # Also copies execution commands
 
 # From your feature directory:
 cd ~/Projects/existing-app/features/analytics
@@ -267,7 +265,7 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 
 | Command | Description |
 |---------|-------------|
-| `/setup [path]` | Initialize project with execution commands + skills |
+| `/setup [path]` | Initialize project with execution commands + skills (optional - `/generate-plan` does this automatically) |
 | `/product-spec [path]` | Generate product specification |
 | `/technical-spec [path]` | Generate technical specification |
 | `/generate-plan [path]` | Generate execution plan and AGENTS.md |

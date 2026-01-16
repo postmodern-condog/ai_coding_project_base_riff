@@ -1,7 +1,7 @@
 ---
 description: Generate EXECUTION_PLAN.md and AGENTS.md
 argument-hint: [target-directory]
-allowed-tools: Read, Write, Edit, AskUserQuestion, Grep, Glob
+allowed-tools: Read, Write, Edit, AskUserQuestion, Grep, Glob, Bash
 ---
 
 Generate the execution plan and agent guidelines for the project at `$1`.
@@ -48,6 +48,48 @@ Read GENERATOR_PROMPT.md from this toolkit directory and follow its instructions
 Write both documents to the target directory:
 - `$1/EXECUTION_PLAN.md`
 - `$1/AGENTS.md`
+
+## Setup Execution Environment
+
+After writing the documents, copy the execution commands and skills to the target project so `/fresh-start`, `/phase-start`, etc. work when the user switches to that directory.
+
+### 1. Copy Execution Commands
+
+Copy only the execution-phase commands to `$1/.claude/commands/`:
+
+```bash
+mkdir -p "$1/.claude/commands"
+cp .claude/commands/fresh-start.md "$1/.claude/commands/"
+cp .claude/commands/phase-prep.md "$1/.claude/commands/"
+cp .claude/commands/phase-start.md "$1/.claude/commands/"
+cp .claude/commands/phase-checkpoint.md "$1/.claude/commands/"
+cp .claude/commands/verify-task.md "$1/.claude/commands/"
+cp .claude/commands/progress.md "$1/.claude/commands/"
+cp .claude/commands/security-scan.md "$1/.claude/commands/"
+cp .claude/commands/list-todos.md "$1/.claude/commands/"
+cp .claude/commands/phase-analyze.md "$1/.claude/commands/"
+cp .claude/commands/phase-rollback.md "$1/.claude/commands/"
+cp .claude/commands/task-retry.md "$1/.claude/commands/"
+cp .claude/commands/populate-state.md "$1/.claude/commands/"
+```
+
+### 2. Copy Skills
+
+Copy the skills directory:
+
+```bash
+cp -r .claude/skills "$1/.claude/"
+```
+
+### 3. Create CLAUDE.md
+
+If `$1/CLAUDE.md` does not exist, create it with:
+
+```
+@AGENTS.md
+```
+
+If it already exists, do not overwrite it.
 
 ## Verification (Automatic)
 
