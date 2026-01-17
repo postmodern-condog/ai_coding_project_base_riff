@@ -1,6 +1,6 @@
 ---
 description: Analyze and prioritize TODO items from TODOS.md
-allowed-tools: Read, Glob, Grep
+allowed-tools: Read, Glob, Grep, AskUserQuestion, Edit
 ---
 
 Analyze the TODO items in TODOS.md and produce a prioritized list with implementation guidance.
@@ -139,3 +139,118 @@ Adjust score based on:
 - Skip items that are clearly completed (checked boxes)
 - Group related items if they should be tackled together
 - Consider project phase — items relevant to current phase score higher
+
+---
+
+## Interactive Q&A Phase
+
+After displaying the prioritized list and summary, offer the user an interactive session to clarify requirements.
+
+### Step 1: Offer to Start Q&A
+
+Use the AskUserQuestion tool to ask:
+
+```
+Question: "Would you like to clarify requirements for any items?"
+Header: "Q&A Mode"
+Options:
+  - Label: "Yes, let's clarify"
+    Description: "I'll ask questions about specific items to improve their requirements"
+  - Label: "No, I'm done"
+    Description: "Exit without further clarification"
+```
+
+If the user selects "No", end the command.
+
+### Step 2: Select Item to Clarify
+
+If the user selects "Yes", use AskUserQuestion to let them pick an item:
+
+```
+Question: "Which item would you like to clarify? (Enter the priority number)"
+Header: "Select Item"
+Options:
+  - Label: "1. {first item title}"
+    Description: "Score: {N}/10 — {next action}"
+  - Label: "2. {second item title}"
+    Description: "Score: {N}/10 — {next action}"
+  - Label: "3. {third item title}"
+    Description: "Score: {N}/10 — {next action}"
+  - Label: "4. {fourth item title}"
+    Description: "Score: {N}/10 — {next action}"
+```
+
+Note: Only show up to 4 items per question (tool limit). If more items exist, include "Other" option for the user to type a number.
+
+### Step 3: Ask Open Questions One at a Time
+
+For the selected item, ask each open question individually using AskUserQuestion:
+
+```
+Question: "{The open question from the analysis}"
+Header: "{Item title (truncated)}"
+Options:
+  - Label: "{Claude's recommended answer}"
+    Description: "(Recommended) {Brief rationale for this recommendation}"
+  - Label: "{Alternative answer 1}"
+    Description: "{Why someone might choose this}"
+  - Label: "{Alternative answer 2}"
+    Description: "{Why someone might choose this}"
+```
+
+**Important guidelines for questions:**
+- Ask ONE question at a time
+- Always provide Claude's recommendation as the FIRST option with "(Recommended)" in the description
+- Provide 2-3 reasonable alternatives as other options
+- The user can always select "Other" to provide a custom answer
+- Wait for each answer before asking the next question
+
+### Step 4: Update TODOS.md with Clarifications
+
+After all questions for an item are answered, update TODOS.md:
+
+1. Find the item's section in TODOS.md
+2. Add a new subsection or update the existing description with the clarifications
+3. Format the clarifications clearly:
+
+```markdown
+### {Item Title}
+
+{Original description}
+
+**Clarifications (from Q&A {date}):**
+- {Question 1}: {Answer 1}
+- {Question 2}: {Answer 2}
+- {Question 3}: {Answer 3}
+```
+
+Use the Edit tool to make these updates.
+
+### Step 5: Continue or Exit
+
+After updating TODOS.md, use AskUserQuestion to ask:
+
+```
+Question: "Item updated. Would you like to clarify another item?"
+Header: "Continue?"
+Options:
+  - Label: "Yes, continue"
+    Description: "Select another item to clarify"
+  - Label: "No, I'm done"
+    Description: "Exit Q&A mode"
+```
+
+If "Yes", return to Step 2. If "No", display a summary of items clarified and exit.
+
+### Exit Summary
+
+When exiting Q&A mode, output:
+
+```markdown
+## Q&A Session Complete
+
+**Items clarified:** {count}
+{List of items that were clarified with brief summary of decisions made}
+
+TODOS.md has been updated with the clarifications above.
+```

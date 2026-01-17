@@ -6,10 +6,15 @@
 - [ ] **[P0 / High]** Make workflow portable across CLIs/models without breaking Claude Code "clone-and-go" sharing
 - [ ] **[P1 / Medium]** Verification logging and manual intervention analysis (see below)
 - [ ] **[P1 / Medium]** Add optional path arguments to execution commands to reduce wrong-directory friction
+- [ ] **[P1 / Medium]** Fix nested `.claude/` directories shadowing parent commands — When a
+  subdirectory has `.claude/` for local settings (e.g.,
+  `features/sprint5/.claude/settings.local.json`), Claude Code stops searching and doesn't
+  find parent commands. Options: `/workspace` command to set up subdirs with symlinks, or
+  document the workaround (`ln -s ../../.claude/commands .claude/commands`)
 - [ ] Persistent learnings/patterns file for cross-task context (see below)
 - [ ] Compare web vs CLI interface for generation workflow (see below)
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues)
-- [ ] Intro commands for each Step
+- [ ] Intro commands for each Step — **DEFERRED** (unclear requirements, needs more thought)
 - [ ] Verify that the Playwright MCP integration works
 - [ ] Git worktrees for parallel task execution (see below)
 - [ ] Session logging for automation opportunity discovery (see below)
@@ -24,6 +29,12 @@
 ### Verification Logging and Manual Intervention Analysis
 
 Track and analyze manual verification interventions to identify optimization opportunities.
+
+**Clarifications (from Q&A 2026-01-17):**
+- **Log location**: Per-project logs (each project has its own log file, no central dependency)
+- **Time tracking**: Optional time input after each manual check (prompt but allow skipping)
+- **Pre-categorization**: Both - generate hints at plan generation time (AUTOMATABLE vs HUMAN_REQUIRED), but allow reclassification during execution based on available tools
+- **Actionable recommendations**: Auto-create TODOS.md entries for high-impact automation opportunities with details
 
 **Problem:**
 - No visibility into how much time is spent on manual verification
@@ -51,6 +62,10 @@ Track and analyze manual verification interventions to identify optimization opp
 ### Deep Audit of Automation Verification
 
 Comprehensive review of the toolkit's verification system to ensure fully autonomous operation without human intervention.
+
+**Clarifications (from Q&A 2026-01-17):**
+- **Priority approach**: Work on acceptance criteria patterns AND browser/UI verification in parallel for faster overall progress
+- **Scope**: Full audit covering all 8 areas documented (not a minimal MVP pass)
 
 **Problem:**
 - The orchestrator revealed that progress tracking has gaps
@@ -92,6 +107,18 @@ Comprehensive review of the toolkit's verification system to ensure fully autono
    - Is Playwright MCP integration complete and tested?
    - What UI acceptance criteria patterns are supported?
    - Visual regression testing: is it integrated?
+   - **Tool Comparison:** Evaluate and compare browser automation options:
+     | Tool | Type | Strengths | Weaknesses | Use Case |
+     |------|------|-----------|------------|----------|
+     | Chrome DevTools MCP | MCP server | Already integrated, direct CDP access | Chrome-only, requires running browser | Real-time interaction, debugging |
+     | Claude for Chrome | Browser extension | User's actual browser context | Requires manual browser, not headless | Manual verification assistance |
+     | Puppeteer | Node library | Mature, well-documented, headless | Requires custom scripting, Chrome-focused | Automated test suites |
+     | Playwright MCP | MCP server | Multi-browser, modern API, headless | Separate MCP server to configure | Cross-browser automated verification |
+   - Questions to answer:
+     - Which tool best fits autonomous verification (no human browser needed)?
+     - Can multiple tools complement each other (e.g., Playwright for CI, DevTools for interactive)?
+     - What's the setup complexity vs. verification capability trade-off?
+     - Should the toolkit recommend a primary tool or support multiple?
 
 7. **Test Quality Verification**
    - Is TDD compliance actually enforced or just reported?
