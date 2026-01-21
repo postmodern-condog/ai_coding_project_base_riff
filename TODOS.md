@@ -16,11 +16,15 @@
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues)
 - [ ] Intro commands for each Step — **DEFERRED** (unclear requirements, needs more thought)
 - [ ] Verify that the Playwright MCP integration works
+- [ ] **[P2 / Low]** Add Codex skill pack installation option to `/setup` or `/generate-plan` — Allow users to opt-in to copying the codex commands via `scripts/install-codex-skill-pack.sh` (see below)
 - [ ] Git worktrees for parallel task execution (see below)
 - [ ] Session logging for automation opportunity discovery (see below)
 - [ ] **[P1 / High]** Parallel Agent Orchestration (see below)
 - [ ] **[P2 / Medium]** Spec Diffing and Plan Regeneration (see below)
 - [ ] **[P2 / Medium]** Human Review Queue (see below)
+- [ ] **[P1 / Medium]** Deferred Requirements Capture — Auto-capture "v2" and "out of scope" items during spec generation (see below)
+- [ ] **[P1 / Medium]** Add `/git-init` skill for automatic git repo initialization — When `/phase-prep` detects no git repo, offer to initialize one (see below)
+- [ ] **[P1 / Medium]** Enhance `/phase-prep` with detailed setup instructions — Research docs and provide step-by-step guidance for Pre-Phase Setup items (see below)
 - [x] Add `/list-todos` command (see below) — DONE
 - [x] Recovery & Rollback Commands — DONE (phase-rollback, task-retry, phase-analyze)
 
@@ -56,6 +60,67 @@ Track and analyze manual verification interventions to identify optimization opp
 - How to surface actionable recommendations (not just reports)?
 
 **Related to:** Deep Audit of Automation Verification, Orchestrator `/verification-report`
+
+---
+
+### Deferred Requirements Capture
+
+Automatically capture requirements marked as "v2", "out of scope", or "future" during spec generation so they don't get lost.
+
+**Problem:**
+- During PRODUCT_SPEC and TECHNICAL_SPEC Q&A, many good ideas get deferred to "v2" or marked "out of scope for MVP"
+- These decisions are captured in the spec documents but scattered across sections
+- When it's time to plan v2, there's no consolidated list of what was intentionally deferred
+- Some deferred items may be forgotten entirely if not in a searchable location
+
+**Proposed Solution:**
+
+Create a `DEFERRED.md` file that gets auto-populated during spec generation:
+
+```markdown
+# Deferred Requirements
+
+> Auto-generated during specification. Items marked for future versions or explicitly descoped.
+
+## From PRODUCT_SPEC.md (2026-01-20)
+
+| Requirement | Reason Deferred | Original Section |
+|-------------|-----------------|------------------|
+| Social sharing | Out of scope for MVP | User Features |
+| Mobile app | V2 - focus on web first | Platform Support |
+| Multi-tenancy | Enterprise feature | Architecture |
+
+## From TECHNICAL_SPEC.md (2026-01-20)
+
+| Requirement | Reason Deferred | Original Section |
+|-------------|-----------------|------------------|
+| GraphQL API | REST sufficient for MVP | API Design |
+| Redis caching | Premature optimization | Performance |
+```
+
+**Implementation approach:**
+
+1. **Update spec prompts** — Add instruction to identify and tag deferred items during Q&A
+2. **Auto-extract on save** — After PRODUCT_SPEC.md or TECHNICAL_SPEC.md is written, parse for deferred patterns:
+   - "out of scope"
+   - "v2" / "version 2" / "future version"
+   - "deferred"
+   - "not in MVP"
+   - "later" / "future"
+3. **Create/append DEFERRED.md** — Consolidate findings with source attribution
+4. **Link from TODOS.md** — Reference DEFERRED.md for v2 planning
+5. **`/plan-v2` command** — When ready, generate execution plan from DEFERRED.md items
+
+**Integration points:**
+- `/product-spec` — Extract deferred items after document generation
+- `/technical-spec` — Extract deferred items after document generation
+- `/feature-spec` — Extract deferred items (append to existing DEFERRED.md)
+- `/bootstrap` — Should also scan for deferred patterns in existing docs
+
+**Questions to answer:**
+- Should deferred items have priority/effort estimates captured at deferral time?
+- How to handle conflicts when same item is deferred in multiple specs?
+- Should DEFERRED.md be per-feature or project-wide?
 
 ---
 
@@ -252,6 +317,55 @@ Add a command that reads TODOS.md and produces an AI-analyzed prioritized list.
 2. Command reads TODOS.md
 3. For each item, AI analyzes based on project context (reads specs, codebase)
 4. Outputs prioritized markdown list
+
+### Codex Skill Pack Installation Option
+
+Add a configuration step to `/setup` or `/generate-plan` that offers to install the Codex skill pack for users who also use OpenAI's Codex CLI.
+
+**Problem:**
+- The toolkit includes a `codex/skills/` directory with skills adapted for Codex CLI
+- Users who use both Claude Code and Codex CLI must manually run `scripts/install-codex-skill-pack.sh`
+- No discoverability of this feature during project setup
+
+**Proposed Solution:**
+
+Add an optional prompt during `/setup` or `/generate-plan`:
+
+```
+Do you also use OpenAI Codex CLI? (y/N)
+→ y
+
+Installing Codex skill pack to ~/.codex/skills...
+  - Installed: code-verification
+  - Installed: security-scan
+  - ...
+Done. Restart Codex CLI to pick up new skills.
+```
+
+**Implementation options:**
+
+1. **Add to `/setup`** (recommended)
+   - Prompt during initial project setup
+   - Only runs once per project
+   - Fits naturally in "configure your environment" flow
+
+2. **Add to `/generate-plan`**
+   - Prompt after plan generation
+   - Could be re-run when adding new features
+   - Less intuitive location
+
+**Script details (`scripts/install-codex-skill-pack.sh`):**
+- Copies skills from `codex/skills/` to `$CODEX_HOME/skills` (default: `~/.codex/skills`)
+- Supports `--method symlink` for development (auto-updates)
+- Supports `--force` to overwrite existing skills
+- Supports custom `--dest` for non-standard Codex installations
+
+**Questions to answer:**
+- Should this be a one-time global install or per-project?
+- Should we detect if Codex CLI is installed before prompting?
+- Should we default to symlink (for updates) or copy (for stability)?
+
+---
 
 ### Subagents (Claude Code only)
 
@@ -782,3 +896,148 @@ Total items: 6 | Blocking: 2 | Decisions: 2 | Reviews: 1
 2. Hook into existing commands to add/remove items
 3. Build `/review-queue` command to aggregate and display
 4. Add notifications when queue grows (optional)
+
+### `/git-init` Skill for Automatic Git Repo Initialization
+
+Add a skill that detects missing git repo and offers to initialize one.
+
+**Problem:**
+- `/phase-prep` may detect that the project directory is not a git repository
+- User must manually run `git init`, create `.gitignore`, make initial commit
+- This is friction that could be automated with user consent
+
+**Proposed Implementation:**
+
+1. **Detection in `/phase-prep`:**
+   - When `git status` fails with "not a git repository"
+   - Instead of just reporting "BLOCKED", offer to run `/git-init`
+
+2. **`/git-init` skill behavior:**
+   ```
+   /git-init
+
+   Git repository not detected. Initialize?
+
+   Actions:
+   1. Run `git init`
+   2. Create .gitignore (project-appropriate defaults)
+   3. Make initial commit
+   4. (Optional) Create GitHub repo via `gh repo create`
+
+   [Initialize] [Initialize + GitHub] [Cancel]
+   ```
+
+3. **Smart `.gitignore` generation:**
+   - Detect project type (Node, Python, etc.) from existing files
+   - Include common patterns: `node_modules/`, `.env*`, `dist/`, etc.
+   - Include credentials patterns: `**/google-services.json`, `**/*.pem`, etc.
+
+4. **GitHub integration (optional):**
+   - Use `gh repo create` if GitHub CLI is authenticated
+   - Prompt for repo name (default: directory name)
+   - Set up remote and push initial commit
+
+**Skill file:** `.claude/commands/git-init.md`
+
+**Related:** The existing `github-init` skill could be enhanced or this could be a separate skill focused on local git initialization.
+
+---
+
+### Enhanced `/phase-prep` with Detailed Setup Instructions
+
+When `/phase-prep` detects incomplete Pre-Phase Setup items, provide detailed step-by-step instructions instead of just listing them.
+
+**Problem:**
+- Current `/phase-prep` outputs: "Human must complete: Create Supabase project"
+- User doesn't know the exact steps, what values to copy, or where to put them
+- Results in context-switching to search for documentation
+- Slows down project setup and introduces errors
+
+**Proposed Enhancement:**
+
+When Pre-Phase Setup items are incomplete, `/phase-prep` should:
+
+1. **Read and parse each setup item** from EXECUTION_PLAN.md
+2. **Research relevant documentation** (WebFetch/WebSearch as needed)
+3. **Generate detailed step-by-step instructions** including:
+   - Direct links to dashboards/consoles
+   - Exact field values to enter
+   - What to copy and where to paste it
+   - Verification steps to confirm completion
+4. **Output a complete guide** the user can follow sequentially
+
+**Example transformation:**
+
+Before (current):
+```
+Pre-Phase Setup:
+- [ ] Create Supabase project at https://supabase.com/dashboard
+- [ ] Note the project URL and anon key from Settings > API
+- [ ] Create .env file with SUPABASE_URL and SUPABASE_ANON_KEY
+```
+
+After (enhanced):
+```
+PRE-PHASE SETUP GUIDE
+=====================
+
+## Step 1: Create Supabase Project
+
+1. Go to https://supabase.com/dashboard
+2. Sign in or create account
+3. Click "New Project" (green button, top right)
+4. Fill in:
+   - Organization: Select or create one
+   - Name: `notesbrain` (or your preference)
+   - Database Password: Click "Generate" and SAVE THIS (needed later)
+   - Region: Choose closest to your users
+5. Click "Create new project"
+6. Wait 2-3 minutes for provisioning
+
+## Step 2: Get Credentials
+
+1. In Supabase dashboard, click "Project Settings" (gear icon)
+2. Click "API" in the left menu
+3. Copy these values:
+   - Project URL: `https://xxxxx.supabase.co` → SUPABASE_URL
+   - anon public key: `eyJ...` → SUPABASE_ANON_KEY
+
+## Step 3: Create .env File
+
+Create `.env` in project root with:
+\`\`\`
+SUPABASE_URL=<paste Project URL>
+SUPABASE_ANON_KEY=<paste anon public key>
+\`\`\`
+
+## Verification
+
+Run `/phase-prep 1` again to confirm all items complete.
+```
+
+**Implementation approach:**
+
+1. **Update `/phase-prep` command:**
+   - After detecting incomplete setup items, enter "guidance mode"
+   - For each item, identify the service/tool involved
+   - Look up or generate detailed instructions
+
+2. **Create setup instruction templates:**
+   - Store common setup patterns in `.claude/setup-guides/`
+   - Templates for: Supabase, Firebase, Stripe, Auth0, etc.
+   - Include version-dated instructions (services change UIs)
+
+3. **Dynamic research fallback:**
+   - If no template exists, use WebFetch to pull current docs
+   - Extract key steps and format consistently
+
+4. **Service detection heuristics:**
+   - "Supabase" → use Supabase guide
+   - "Firebase" / "FCM" → use Firebase guide
+   - "Create .env" → generate env file template from context
+
+**Files to modify:**
+- `.claude/commands/phase-prep.md` — Add guidance generation logic
+- Create: `.claude/setup-guides/supabase.md`
+- Create: `.claude/setup-guides/firebase.md`
+- Create: `.claude/setup-guides/common-env.md`

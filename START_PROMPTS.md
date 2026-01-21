@@ -138,7 +138,7 @@ Report results and confirm ready to proceed to Phase {N+1}.
 
 ## Recovery Prompts
 
-Use these when execution is interrupted or blocked. These are also available as slash commands.
+Use these when execution is interrupted or blocked. Optional: some are also available as slash commands if you've installed the recovery commands.
 
 ### Analyze Phase Problems
 

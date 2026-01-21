@@ -28,10 +28,23 @@ A structured prompt framework for building software with AI coding assistants. I
 Before using this toolkit, you need:
 
 - **[Claude Code](https://docs.anthropic.com/en/docs/claude-code)** — Anthropic's CLI for Claude (primary interface for slash commands)
+- **[Codex CLI](https://github.com/openai/codex)** (optional) — OpenAI's CLI; install the Codex skill pack below to use the same execution commands
 - **Git** — Required for the branching and commit workflow
 - **Node.js + npm** (optional) — Only needed for markdown linting during development
 
 Not using Claude Code? See [Alternative: Manual Setup](#alternative-manual-setup) for copy-paste prompts that work with any LLM.
+
+### Using Codex CLI (Optional)
+
+This repo includes a Codex CLI skill pack that mirrors the execution slash commands (`/fresh-start`, `/phase-start`, etc.).
+
+Install once (from this repo root):
+
+```bash
+./scripts/install-codex-skill-pack.sh
+```
+
+Then restart Codex CLI. In any target project directory, you can type commands like `/fresh-start` and `/phase-start 1`.
 
 ## The Problem
 
@@ -291,13 +304,15 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 | `/list-todos` | Analyze and prioritize TODO items |
 | `/progress` | Show progress through execution plan |
 
-### Recovery Commands (run from your project directory)
+### Optional Recovery Commands (extras)
 
 | Command | Description |
 |---------|-------------|
 | `/phase-analyze N` | Analyze what went wrong in phase N |
 | `/phase-rollback N` | Rollback to end of phase N (or task ID) |
 | `/task-retry X.Y.Z` | Retry a failed task with fresh context |
+
+These are not installed by default. To enable them, copy `extras/claude/commands/*` from the toolkit repo into your project's `.claude/commands/`.
 
 ## Optional Ad-Hoc Tools
 
@@ -753,7 +768,8 @@ ai_coding_project_base/
 │       │   └── SKILL.md
 │       └── tech-debt-check/
 │           └── SKILL.md
-├── docs/                            # Additional documentation
+├── extras/                          # Optional/internal assets
+│   └── docs/                        # Docs site + internal notes (optional)
 ├── deprecated/                      # Legacy prompts (kept for reference)
 ├── package.json                     # npm scripts for linting
 ├── .markdownlint.json               # Markdown lint configuration

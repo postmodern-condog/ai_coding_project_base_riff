@@ -67,11 +67,10 @@ cp .claude/commands/verify-task.md "$1/.claude/commands/"
 cp .claude/commands/progress.md "$1/.claude/commands/"
 cp .claude/commands/security-scan.md "$1/.claude/commands/"
 cp .claude/commands/list-todos.md "$1/.claude/commands/"
-cp .claude/commands/phase-analyze.md "$1/.claude/commands/"
-cp .claude/commands/phase-rollback.md "$1/.claude/commands/"
-cp .claude/commands/task-retry.md "$1/.claude/commands/"
 cp .claude/commands/populate-state.md "$1/.claude/commands/"
 ```
+
+Optional extras (not installed by default): recovery commands are available under `extras/claude/commands/`.
 
 ### 2. Copy Skills
 

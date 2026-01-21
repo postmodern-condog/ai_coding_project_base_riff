@@ -1,3 +1,8 @@
+---
+description: Generate `.claude/phase-state.json` from `EXECUTION_PLAN.md` and git history
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
+---
+
 # Populate Phase State
 
 Generate `.claude/phase-state.json` from existing EXECUTION_PLAN.md and git history.
@@ -6,6 +11,12 @@ Use this command when:
 - Starting to use the orchestrator on an existing project
 - phase-state.json is missing or corrupted
 - State has drifted from actual progress
+
+## Directory Guard (Wrong Directory Check)
+
+Before starting:
+- If the current directory appears to be the toolkit repo (e.g., `GENERATOR_PROMPT.md` exists), **STOP** and tell the user to run `/populate-state` from their project directory instead.
+- Confirm `EXECUTION_PLAN.md` exists in the current working directory. If it does not exist, **STOP** and tell the user to `cd` into the directory containing `EXECUTION_PLAN.md` and re-run `/populate-state`.
 
 ## Instructions
 
