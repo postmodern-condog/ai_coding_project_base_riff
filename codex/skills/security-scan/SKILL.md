@@ -1,97 +1,32 @@
 ---
 name: security-scan
-description: Emulates the AI Coding Toolkit's Claude Code command /security-scan (scan for dependency vulnerabilities, secrets, and insecure code patterns; optionally offer fixes; blocks phase checkpoints on critical/high issues). Triggers on "/security-scan" or "security-scan".
+description: Scan for security vulnerabilities in dependencies, code patterns, and secrets. Uses project-documented tooling where available.
 ---
 
-# /security-scan (Codex)
+# Security Scan Skill (Codex)
 
-Scan the codebase for security vulnerabilities:
-
-1. Dependency vulnerabilities (known CVEs)
-2. Secrets in code
-3. Static analysis for insecure patterns
-
-## Inputs
-
-Optional scope flag:
-- `--deps` (dependencies only)
-- `--secrets` (secrets only)
-- `--code` (static analysis only)
-- `--fix` (apply safe fixes where possible)
-
-If no argument, run all checks.
+Run a security scan using project-documented commands. Avoid hardcoded
+stack-specific tooling unless the project explicitly documents it.
 
 ## Workflow
 
-### 1) Detect Tech Stack
+1) Discover commands in `README.md`, `CONTRIBUTING.md`, `SECURITY.md`,
+   `Makefile`, `Taskfile.yml`, `justfile`, or `scripts/`
+2) Run dependency audit if a command is documented
+3) Run secrets detection (pattern-based) unless a project tool is documented
+4) Run static analysis if a command is documented
+5) Summarize results and severity
 
-Detect which tools to use based on repo files:
+## Secrets Detection (Default)
 
-- Node.js: `package.json`, lockfiles (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`)
-- Python: `requirements.txt`, `pyproject.toml`
-- Rust: `Cargo.toml`
-- Go: `go.mod`
-- Ruby: `Gemfile.lock`
+Search for common secret patterns (tokens, private keys, API keys) and report
+file + line number. Skip `node_modules/`, `.git/`, `dist/`, `build/`, `vendor/`,
+`venv/`.
 
-### 2) Dependency Audit
+## Reporting
 
-If Node.js is detected and `--secrets`/`--code` are not forcing scope:
+Report findings with severity (CRITICAL/HIGH/MEDIUM/LOW). For critical/high,
+present options and prefer project-documented fix commands.
 
-```bash
-npm audit --json 2>/dev/null
-```
-
-Summarize by severity and indicate whether `npm audit fix` can resolve.
-
-### 3) Secrets Detection
-
-Search for common secret patterns. Skip:
-- `node_modules/`, `.git/`, `dist/`, `build/`, `vendor/`, `venv/`, `.venv/`
-
-Examples (non-exhaustive):
-- AWS keys: `AKIA[0-9A-Z]{16}`
-- GitHub tokens: `ghp_[a-zA-Z0-9]{36}`, `github_pat_...`
-- Private keys: `-----BEGIN .* PRIVATE KEY-----`
-- Generic `api_key|secret|password` assignments
-
-Report findings with file + line number and severity.
-
-### 4) Static Analysis (Code Patterns)
-
-For JS/TS (examples):
-- `eval(` (HIGH)
-- `.innerHTML =` (MEDIUM)
-- `document.write(` (MEDIUM)
-- disabled TLS verification (HIGH)
-
-Use grep/rg to locate patterns and report file + line.
-
-### 5) Present Findings
-
-Aggregate and dedupe. Use this format:
-
-```text
-SECURITY SCAN RESULTS
-=====================
-Tech Stack: <detected>
-Checks Run: <list>
-
-CRITICAL (N)
-------------
-<issue summaries>
-
-HIGH (N)
---------
-<issue summaries>
-
-Summary: X critical, Y high, Z medium, W low
-Status: PASSED | FAILED | PASSED WITH NOTES
-```
-
-### 6) Fixes (Optional)
-
-For CRITICAL/HIGH issues:
-- Present options to fix, ignore (with documented acceptance), or defer.
-- If `--fix` is set, apply safe fixes automatically where possible (e.g., `npm audit fix` without `--force`).
-
-Re-scan after fixes to confirm resolution.
+If a required command is missing, ask the user to provide it or mark the check
+as SKIPPED with a reason.

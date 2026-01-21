@@ -64,6 +64,8 @@ cp .claude/commands/phase-prep.md "$1/.claude/commands/"
 cp .claude/commands/phase-start.md "$1/.claude/commands/"
 cp .claude/commands/phase-checkpoint.md "$1/.claude/commands/"
 cp .claude/commands/verify-task.md "$1/.claude/commands/"
+cp .claude/commands/criteria-audit.md "$1/.claude/commands/"
+cp .claude/commands/configure-verification.md "$1/.claude/commands/"
 cp .claude/commands/progress.md "$1/.claude/commands/"
 cp .claude/commands/security-scan.md "$1/.claude/commands/"
 cp .claude/commands/list-todos.md "$1/.claude/commands/"
@@ -80,7 +82,16 @@ Copy the skills directory:
 cp -r .claude/skills "$1/.claude/"
 ```
 
-### 3. Create CLAUDE.md
+### 3. Add Verification Config
+
+If `$1/.claude/verification-config.json` does not exist, copy the template:
+```bash
+cp .claude/verification-config.json "$1/.claude/verification-config.json"
+```
+
+If it already exists, do not overwrite it.
+
+### 4. Create CLAUDE.md
 
 If `$1/CLAUDE.md` does not exist, create it with:
 
@@ -123,6 +134,13 @@ Run the spec-verification workflow:
 
 **IMPORTANT**: Do not proceed to "Next Step" until verification passes or user explicitly chooses to proceed with noted issues.
 
+### 3. Criteria Audit
+
+Run `/criteria-audit $1` to validate verification metadata in EXECUTION_PLAN.md.
+
+- If FAIL: stop and ask the user to resolve missing metadata before proceeding.
+- If WARN: report and continue.
+
 ## Next Step
 
 When verification is complete, inform the user:
@@ -134,6 +152,7 @@ Verification: PASSED | PASSED WITH NOTES | NEEDS REVIEW
 Your project is ready for execution:
 1. cd $1
 2. /fresh-start
-3. /phase-prep 1
-4. /phase-start 1
+3. /configure-verification
+4. /phase-prep 1
+5. /phase-start 1
 ```

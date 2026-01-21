@@ -35,12 +35,17 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    - `phase-start.md`
    - `phase-checkpoint.md`
    - `verify-task.md`
+   - `criteria-audit.md`
+   - `configure-verification.md`
    - `progress.md`
    - `security-scan.md`
    - `list-todos.md`
 
    Copy skills directory:
    - `.claude/skills/` → target's `.claude/skills/`
+
+   Copy verification config (if missing):
+   - `.claude/verification-config.json` → target's `.claude/verification-config.json`
 
    **Do NOT copy:**
    - Generation commands (setup.md, product-spec.md, etc.) — these run from the toolkit
@@ -67,8 +72,9 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    Then switch to your project:
    4. cd $1
    5. /fresh-start
-   6. /phase-prep 1
-   7. /phase-start 1
+   6. /configure-verification
+   7. /phase-prep 1
+   8. /phase-start 1
    ```
 
    For Feature:
@@ -84,8 +90,9 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    Then switch to your feature directory:
    4. cd FEATURE_PATH
    5. /fresh-start
-   6. /phase-prep 1
-   7. /phase-start 1
+   6. /configure-verification
+   7. /phase-prep 1
+   8. /phase-start 1
 
    After phase completion, merge AGENTS_ADDITIONS.md into $1/AGENTS.md
    ```

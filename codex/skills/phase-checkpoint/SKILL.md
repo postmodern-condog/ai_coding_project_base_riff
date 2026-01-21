@@ -43,17 +43,17 @@ Run and report results:
    - Use the repo's configured test command (from `AGENTS.md` or `package.json`).
 
 2. **Type Checking**
-   - Run `npm run typecheck` (or project equivalent).
+   - Run the configured typecheck command (if applicable).
 
 3. **Linting**
-   - Run `npm run lint` (or project equivalent).
+   - Run the configured lint command (if applicable).
 
 4. **Security Scan**
    - Run the `/security-scan` workflow (dependency audit, secrets detection, static analysis).
    - CRITICAL or HIGH findings block checkpoint until resolved (or explicitly accepted by the user).
 
 5. **Coverage (if available)**
-   - Prefer `npm test -- --coverage` or `npx vitest --coverage` if configured.
+   - Run the configured coverage command (if applicable).
    - Target: 80% (if meaningful for the repo).
 
 ## Manual Verification

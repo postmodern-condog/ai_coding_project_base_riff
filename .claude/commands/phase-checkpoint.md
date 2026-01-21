@@ -34,34 +34,41 @@ Before running checks, detect which optional tools are available by attempting a
 | code-simplifier | Check if agent type available | Skip code simplification |
 | Trigger.dev MCP | `mcp__trigger__list_projects` | Skip Trigger.dev checks |
 
+Read `.claude/verification-config.json` from PROJECT_ROOT. Use it to determine
+commands for tests, lint, typecheck, build, coverage, and dev server.
+
+If the config is missing or required commands are empty:
+- Run `/configure-verification`
+- Do not proceed with automated checks until commands are configured
+
 ## Automated Checks
 
 Run these commands and report results:
 
 1. **Tests**
    ```
-   npm test
+   {commands.test from verification-config}
    ```
-   (or equivalent test command from AGENTS.md)
+   (if empty, block and ask to configure)
 
 2. **Type Checking**
    ```
-   npm run typecheck
+   {commands.typecheck from verification-config}
    ```
-   (or equivalent, if applicable)
+   (if empty, mark as not applicable or configure)
 
 3. **Linting**
    ```
-   npm run lint
+   {commands.lint from verification-config}
    ```
-   (or equivalent, if applicable)
+   (if empty, mark as not applicable or configure)
 
 4. **Security Scan**
 
    Run security checks:
-   - Run dependency audit (npm audit, pip-audit, etc.)
-   - Run secrets detection (grep for API keys, tokens, passwords)
-   - Run static analysis for insecure patterns
+   - Use the project’s configured security tooling (if documented)
+   - Run secrets detection (pattern-based)
+   - Run static analysis via documented tools or ask for a command
 
    For CRITICAL or HIGH issues:
    - Present each issue with resolution options
@@ -85,10 +92,10 @@ Run these commands and report results:
    ```
 
    To get coverage:
-   - JS/TS: `npm test -- --coverage` or `npx vitest --coverage`
-   - Python: `pytest --cov`
+   - Use `commands.coverage` from verification-config if present
+   - If empty, mark coverage as not applicable or ask to configure
 
-   Flag if coverage dropped compared to before the phase.
+   Flag if coverage dropped compared to before the phase (if a baseline exists).
 
 ## Optional Enhanced Checks
 
@@ -106,11 +113,12 @@ These checks run only if the required tools are available (detected above).
 7. **Browser Verification** (requires: Playwright MCP)
 
    If Playwright MCP is available and phase includes UI work:
-   - Run any browser-based acceptance criteria checks
+   - Parse Phase $1 tasks for acceptance criteria marked `BROWSER:*`
+   - Use the browser-verification skill with each criterion's `Verify:` metadata
    - Take snapshots for verification
 
    If unavailable:
-   - Add browser checks to Manual Verification section instead
+   - Add browser checks to Human Required section instead
 
 8. **Technical Debt Check** (optional)
 
@@ -122,10 +130,10 @@ These checks run only if the required tools are available (detected above).
 
    Report findings with severity levels. Informational only (does not block).
 
-## Manual Verification
+## Human Required
 
 From the "Phase $1 Checkpoint" section in EXECUTION_PLAN.md:
-- List each manual verification item
+- List each human-required item and its reason
 - For each item, provide step-by-step instructions explaining how to verify it
 - Indicate what I need to verify before proceeding
 
@@ -181,6 +189,26 @@ After checkpoint passes, update `.claude/phase-state.json`:
 
 If checkpoint fails, keep status as `IN_PROGRESS` and add `checkpoint_failed` with details.
 
+## Verification Evidence and Logs
+
+After running checks:
+- Write a checkpoint report to `.claude/verification/phase-$1.md`
+- Append results to `.claude/verification-log.jsonl`
+  - Include check type, status, timestamp, and evidence path
+ - Ensure `.claude/verification/` exists before writing evidence files
+
+Example log entry:
+```json
+{
+  "timestamp": "{ISO timestamp}",
+  "scope": "phase-checkpoint",
+  "phase": "$1",
+  "check": "tests",
+  "status": "PASS",
+  "evidence": ".claude/verification/phase-$1.md"
+}
+```
+
 ---
 
 ## Report
@@ -206,7 +234,7 @@ Optional Checks:
 - Browser Verification: PASSED | SKIPPED
 - Tech Debt: PASSED | NOTES | SKIPPED
 
-Manual Verification:
+Human Required:
 - [ ] {items from EXECUTION_PLAN.md checkpoint section}
 
 Approach Review: No issues noted | {list specific issues}

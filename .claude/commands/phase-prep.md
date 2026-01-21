@@ -31,7 +31,9 @@ Before starting, confirm the required files exist:
 ## Pre-Flight Checks
 
 1. **Pre-Phase Setup** — Check the "Pre-Phase Setup" section for Phase $1:
-   - List any unmet prerequisites I need to complete
+   - For each setup item, run its `Verify:` command if provided
+   - Mark each item as PASS/FAIL/BLOCKED based on command output
+   - If a setup item lacks a `Verify:` line, flag it as human-required
    - Identify environment variables or secrets needed
    - Note any external services that must be configured
 
@@ -39,11 +41,15 @@ Before starting, confirm the required files exist:
    - Check that all tasks from previous phases have checked boxes
    - Flag any incomplete dependencies
 
-3. **Git Status** — Check repository state:
+3. **Verification Config** — Check `.claude/verification-config.json`:
+   - If missing or any required command is empty, run `/configure-verification`
+   - Confirm commands for tests, lint, typecheck, build, coverage, dev server
+
+4. **Git Status** — Check repository state:
    - Run `git status` to verify clean working tree (or understand current state)
    - Note the current branch
 
-4. **Tool Availability** — Check optional tools by attempting a harmless call:
+5. **Tool Availability** — Check optional tools by attempting a harmless call:
 
    | Tool | Check | If Unavailable |
    |------|-------|----------------|
@@ -53,7 +59,12 @@ Before starting, confirm the required files exist:
 
    Only check tools relevant to this project's tech stack.
 
-5. **Permissions** — Review the tasks in Phase $1:
+6. **Criteria Audit** — Run `/criteria-audit` when preparing Phase 1:
+   - If `$1` is 1, run `/criteria-audit`
+   - If FAIL, block phase start until metadata is fixed
+   - If `$1` is not 1, skip unless EXECUTION_PLAN.md was edited since last phase
+
+7. **Permissions** — Review the tasks in Phase $1:
    - Identify any tools or permissions needed for autonomous execution
    - Check if any tasks require browser verification
 
@@ -68,10 +79,14 @@ Documents:
 - AGENTS.md (at PROJECT_ROOT): ✓ | ✗
 - Prior phases: Complete | N/A
 
+Verification Config:
+- verification-config.json: ✓ | ✗
+- Commands configured: Tests | Lint | Typecheck | Build | Coverage | Dev Server
+
 Git: {branch}, {clean | dirty}
 
 Pre-Phase Setup:
-- {items or "None required"}
+- {items with PASS/FAIL/BLOCKED}
 
 Environment:
 - {env vars or "None required"}
@@ -80,7 +95,23 @@ Tools:
 - Playwright MCP: ✓ | ✗
 - code-simplifier: ✓ | ✗
 - Trigger.dev MCP: ✓ | ✗ | N/A
+Criteria Audit: PASS | WARN | FAIL
 
 Status: READY | BLOCKED | READY WITH NOTES
 {Details if not READY}
+```
+
+After reporting, append the pre-phase results to `.claude/verification-log.jsonl`
+with timestamps and any evidence paths (if collected).
+
+Example log entry:
+```json
+{
+  "timestamp": "{ISO timestamp}",
+  "scope": "phase-prep",
+  "phase": "$1",
+  "check": "pre-phase-setup",
+  "status": "PASS",
+  "evidence": null
+}
 ```

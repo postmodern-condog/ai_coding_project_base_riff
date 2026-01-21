@@ -1,0 +1,14 @@
+{
+  "commands": {
+    "test": "",
+    "lint": "",
+    "typecheck": "",
+    "build": "",
+    "coverage": ""
+  },
+  "devServer": {
+    "command": "",
+    "url": "",
+    "startupSeconds": 10
+  }
+}

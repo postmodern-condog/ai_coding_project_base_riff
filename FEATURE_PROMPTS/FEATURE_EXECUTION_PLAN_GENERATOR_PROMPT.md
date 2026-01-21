@@ -36,6 +36,16 @@ PART 1: EXECUTION HIERARCHY DEFINITIONS
 PART 2: EXECUTION_PLAN.md FORMAT
 ═══════════════════════════════════════════════════════════════════
 
+Verification Types:
+- TEST — Verified by running a test (name or file path)
+- CODE — Verified by code inspection or file existence
+- LINT — Verified by lint command
+- TYPE — Verified by typecheck command
+- BUILD — Verified by build command
+- SECURITY — Verified by security scan
+- BROWSER:DOM | VISUAL | NETWORK | CONSOLE | PERFORMANCE | ACCESSIBILITY — Verified via MCP
+- MANUAL — Requires human judgment; include a reason
+
 # Execution Plan: {Feature Name}
 
 ## Overview
@@ -65,8 +75,11 @@ PART 2: EXECUTION_PLAN.md FORMAT
 ### Pre-Phase Setup
 Human must complete before starting:
 - [ ] {External service setup}
+  - Verify: `{command}`
 - [ ] {Environment variables needed}
+  - Verify: `{command}`
 - [ ] {Other manual prerequisites}
+  - Verify: `{command}`
 
 ### Step 1.1: {Step Name}
 **Depends On:** {Prior steps or "None"}
@@ -79,9 +92,16 @@ Human must complete before starting:
 {2-3 sentences explaining what to build and why, including how it integrates with existing code}
 
 **Acceptance Criteria:**
-- [ ] {Specific, testable criterion}
-- [ ] {Specific, testable criterion}
-- [ ] {Specific, testable criterion}
+- [ ] (TEST) {Specific, testable criterion}
+  - Verify: {test name or file path}
+- [ ] (CODE) {Specific, testable criterion}
+  - Verify: {file, export, or command to check}
+- [ ] (BROWSER:DOM) {Specific, testable criterion}
+  - Verify: {route}, {selector}, {expected state}
+
+Manual criteria (only if automation is not feasible):
+- [ ] (MANUAL) {Specific, testable criterion}
+  - Reason: {why human review is required}
 
 **Files to Create:**
 - `{path/to/file}` — {purpose}
@@ -97,8 +117,9 @@ Human must complete before starting:
 
 **Spec Reference:** {Section name from feature spec}
 
-**Requires Browser Verification:** {Yes/No}
-- If Yes, list which acceptance criteria need browser verification
+**Browser Verification:**
+- Criteria IDs: {list acceptance criteria marked BROWSER:*}
+- Notes: {routes or pages to visit}
 
 ---
 
@@ -124,9 +145,11 @@ Human must complete before starting:
 - [ ] Existing functionality still works
 - [ ] No breaking changes to public APIs
 
-**Manual Verification:**
+**Human Required:**
 - [ ] {Specific thing human should verify}
+  - Reason: {why human review is required}
 - [ ] {Another manual check}
+  - Reason: {why human review is required}
 
 **Browser Verification (if applicable):**
 - [ ] All UI acceptance criteria verified via Playwright MCP
@@ -188,6 +211,9 @@ PART 4: TASK QUALITY CHECKS
 For each task, verify:
 
 ✓ Has 3-6 specific, testable acceptance criteria
+✓ Every acceptance criterion includes a verification type
+✓ Every acceptance criterion includes a verification method
+✓ Manual criteria include a reason and are minimal
 ✓ Lists concrete files to create/modify
 ✓ References existing code to follow as patterns
 ✓ Specifies dependencies on prior tasks
@@ -197,6 +223,8 @@ For each task, verify:
 
 Red flags to fix:
 ✗ Vague criteria like "works correctly" or "handles errors properly"
+✗ Criterion missing verification type or method
+✗ Manual criteria used without a reason or used excessively
 ✗ Too many files (>7) touched in one task
 ✗ Dependencies on parallel tasks in the same step
 ✗ Missing spec reference
@@ -386,6 +414,9 @@ Steps are logical groupings within the branch—not separate branches.
 ## Verification
 
 After implementing each task, verify all acceptance criteria are met.
+Use verification metadata from EXECUTION_PLAN.md. If it is missing, infer and
+add the metadata to EXECUTION_PLAN.md before proceeding. If ambiguous, ask the
+human to confirm the verification method.
 
 ### Primary: Code Verification Skill (Claude Code)
 
@@ -403,9 +434,9 @@ The skill will:
 
 If the code-verification skill is not available, manually verify:
 
-1. **Run tests** — `npm test` (or equivalent)
-2. **Type check** — `npm run typecheck` (or equivalent)
-3. **Lint** — `npm run lint` (or equivalent)
+1. **Run tests** — Use the configured test command
+2. **Type check** — Use the configured typecheck command (if applicable)
+3. **Lint** — Use the configured lint command (if applicable)
 4. **Manual check** — For each acceptance criterion:
    - Read the criterion
    - Verify it is met (inspect code, run app, check output)
@@ -430,10 +461,10 @@ When completing acceptance criteria, update EXECUTION_PLAN.md checkboxes:
 ```
 ## Browser Verification
 
-For tasks marked "Requires Browser Verification: Yes":
+For acceptance criteria marked `BROWSER:*`:
 1. Start dev server if not running
 2. Navigate to relevant pages
-3. Verify each UI acceptance criterion visually
+3. Verify each UI acceptance criterion using `Verify:` metadata
 4. Check browser console for errors
 5. Capture screenshots for visual changes
 ```
@@ -596,11 +627,13 @@ EXECUTION_PLAN.md
 □ Integration points with existing code clearly identified
 □ All tasks reference existing code patterns to follow
 □ All tasks have testable acceptance criteria
+□ All acceptance criteria include verification types and methods
+□ Manual criteria include reasons (if present)
 □ All tasks specify files to create/modify
 □ All tasks have dependencies listed
 □ All phases have checkpoint criteria including regression checks
 □ No task depends on a parallel task in the same step
-□ Tasks with UI criteria marked as "Requires Browser Verification: Yes"
+□ Tasks with UI criteria marked as `BROWSER:*`
 □ Existing test suites accounted for in checkpoints
 □ Rollback/feature flag considerations documented (if applicable)
 
@@ -674,7 +707,9 @@ Here's a condensed example of how a feature execution plan might look:
 
 ### Pre-Phase Setup
 - [ ] Confirm database migration tooling is working
+  - Verify: `{migration command} --help`
 - [ ] Review existing schema patterns in `src/lib/db/`
+  - Verify: `rg "CREATE TABLE users" src/lib/db/migrations/001_users.sql`
 
 ### Step 1.1: Schema & Migrations
 
@@ -685,10 +720,14 @@ Add a notifications table following existing schema patterns. This table stores
 user notifications with support for read/unread status and different notification types.
 
 **Acceptance Criteria:**
-- [ ] Migration creates `notifications` table with columns: id, user_id, type, title, body, read, created_at
-- [ ] Foreign key constraint links to existing users table
-- [ ] Index exists on user_id + created_at for efficient queries
-- [ ] Migration runs successfully (up and down)
+- [ ] (CODE) Migration creates `notifications` table with columns: id, user_id, type, title, body, read, created_at
+  - Verify: `src/lib/db/migrations/003_notifications.sql` includes column definitions
+- [ ] (CODE) Foreign key constraint links to existing users table
+  - Verify: migration file includes `FOREIGN KEY (user_id) REFERENCES users(id)`
+- [ ] (CODE) Index exists on user_id + created_at for efficient queries
+  - Verify: migration file includes `CREATE INDEX` on `(user_id, created_at)`
+- [ ] (TEST) Migration runs successfully (up and down)
+  - Verify: test `should run migrations up and down`
 
 **Files to Create:**
 - `src/lib/db/migrations/003_notifications.sql` — migration file
@@ -704,7 +743,9 @@ user notifications with support for read/unread status and different notificatio
 
 **Spec Reference:** Feature Spec > Data Model
 
-**Requires Browser Verification:** No
+**Browser Verification:**
+- Criteria IDs: None
+- Notes: N/A
 
 ...
 ```

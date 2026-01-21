@@ -120,6 +120,7 @@ cd ai_coding_project_base
 # 3. Execute (from your project directory)
 cd ~/Projects/my-new-app
 /fresh-start           # Orient to project, load context
+/configure-verification # Set test/lint/typecheck/build/dev server commands
 /phase-prep 1          # Check prerequisites for Phase 1
 /phase-start 1         # Execute Phase 1 (creates branch, commits per task)
 /phase-checkpoint 1    # Run tests, security scan, verify completion
@@ -147,6 +148,7 @@ Features are isolated in their own directories under `features/<name>/`:
 # From your feature directory:
 cd ~/Projects/existing-app/features/analytics
 /fresh-start             # Detects feature mode, creates feature/analytics branch
+/configure-verification  # Set test/lint/typecheck/build/dev server commands
 /phase-prep 1
 /phase-start 1
 /phase-checkpoint 1
@@ -179,6 +181,7 @@ claude
 
 # 5. Execute:
 /fresh-start
+/configure-verification
 /phase-start 1
 ```
 
@@ -296,10 +299,12 @@ If not using Claude Code, copy files manually and use `START_PROMPTS.md` for gui
 | Command | Description |
 |---------|-------------|
 | `/fresh-start` | Orient to project, load context |
+| `/configure-verification` | Configure verification commands for this project |
 | `/phase-prep N` | Check prerequisites for phase N |
 | `/phase-start N` | Execute phase N (creates branch, commits per task) |
 | `/phase-checkpoint N` | Run tests, security scan, verify completion |
 | `/verify-task X.Y.Z` | Verify specific task acceptance criteria |
+| `/criteria-audit` | Validate acceptance criteria metadata for automation readiness |
 | `/security-scan` | Run security checks (deps, secrets, code) |
 | `/list-todos` | Analyze and prioritize TODO items |
 | `/progress` | Show progress through execution plan |
@@ -436,14 +441,14 @@ The toolkit includes integrated security scanning that runs automatically during
 
 | Category | Examples | Severity |
 |----------|----------|----------|
-| **Dependency vulnerabilities** | Known CVEs in npm/pip/cargo packages | CRITICAL-LOW |
+| **Dependency vulnerabilities** | Known CVEs in project dependencies | CRITICAL-LOW |
 | **Hardcoded secrets** | AWS keys, GitHub tokens, API keys, private keys | CRITICAL-HIGH |
 | **Insecure code patterns** | `eval()`, SQL concatenation, disabled SSL verification | HIGH-MEDIUM |
 
 ### How It Works
 
-1. **Auto-detects tech stack** from package.json, requirements.txt, Cargo.toml, etc.
-2. **Runs appropriate tools** (`npm audit`, `pip-audit`, pattern matching)
+1. **Discovers security tooling** from project docs and configuration
+2. **Runs documented tools** (or prompts for commands if missing)
 3. **Presents findings** with severity levels and fix suggestions
 4. **Offers resolution options** for each CRITICAL/HIGH issue
 5. **Blocks checkpoint** if unresolved CRITICAL/HIGH issues remain
@@ -671,6 +676,7 @@ You can generate specs in a web interface and continue execution in Claude Code:
 # 4. Execute normally:
 cd ~/Projects/my-app
 /fresh-start
+/configure-verification
 /phase-prep 1
 /phase-start 1
 ```
@@ -752,15 +758,22 @@ ai_coding_project_base/
 │   │   ├── verify-spec.md
 │   │   ├── bootstrap.md             # Quick plan from existing context
 │   │   ├── fresh-start.md
+│   │   ├── configure-verification.md
 │   │   ├── phase-prep.md
 │   │   ├── phase-start.md
 │   │   ├── phase-checkpoint.md
 │   │   ├── verify-task.md
+│   │   ├── criteria-audit.md
 │   │   ├── security-scan.md
 │   │   ├── list-todos.md
 │   │   └── progress.md
+│   ├── verification-config.json     # Verification commands and dev server config
 │   └── skills/
 │       ├── code-verification/       # Multi-agent verification with sub-agents
+│       │   └── SKILL.md
+│       ├── browser-verification/
+│       │   └── SKILL.md
+│       ├── criteria-audit/
 │       │   └── SKILL.md
 │       ├── security-scan/
 │       │   └── SKILL.md

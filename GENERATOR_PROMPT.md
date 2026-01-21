@@ -69,6 +69,16 @@ AGENTS.md does NOT include:
 PART 2: EXECUTION_PLAN.md FORMAT
 ══════════════════════════════════════════════════════════════════════════════
 
+Verification Types:
+- TEST — Verified by running a test (name or file path)
+- CODE — Verified by code inspection or file existence
+- LINT — Verified by lint command
+- TYPE — Verified by typecheck command
+- BUILD — Verified by build command
+- SECURITY — Verified by security scan
+- BROWSER:DOM | VISUAL | NETWORK | CONSOLE | PERFORMANCE | ACCESSIBILITY — Verified via MCP
+- MANUAL — Requires human judgment; include a reason
+
 # Execution Plan: {Project Name}
 
 ## Overview
@@ -100,8 +110,11 @@ Phase 2: {Name}
 Human must complete before agents begin:
 
 - [ ] {Environment variable or secret}
+  - Verify: `{command}`
 - [ ] {External service setup}
+  - Verify: `{command}`
 - [ ] {Other prerequisite}
+  - Verify: `{command}`
 
 ---
 
@@ -112,9 +125,16 @@ Human must complete before agents begin:
 **What:** {1-2 sentence description}
 
 **Acceptance Criteria:**
-- [ ] {Specific, testable criterion}
-- [ ] {Specific, testable criterion}
-- [ ] {Specific, testable criterion}
+- [ ] (TEST) {Specific, testable criterion}
+  - Verify: {test name or file path}
+- [ ] (CODE) {Specific, testable criterion}
+  - Verify: {file, export, or command to check}
+- [ ] (BROWSER:DOM) {Specific, testable criterion}
+  - Verify: {route}, {selector}, {expected state}
+
+Manual criteria (only if automation is not feasible):
+- [ ] (MANUAL) {Specific, testable criterion}
+  - Reason: {why human review is required}
 
 **Files:**
 - Create: `{path}` — {purpose}
@@ -143,9 +163,11 @@ Human must complete before agents begin:
 - [ ] Type checking passes
 - [ ] Linting passes
 
-**Manual Verification:**
+**Human Required:**
 - [ ] {What human should verify}
+  - Reason: {why human review is required}
 - [ ] {Another manual check}
+  - Reason: {why human review is required}
 
 ---
 
@@ -370,6 +392,9 @@ For tests that need real external services:
 ## Verification
 
 After implementing each task, verify all acceptance criteria are met.
+Use verification metadata from EXECUTION_PLAN.md. If it is missing, infer and
+add the metadata to EXECUTION_PLAN.md before proceeding. If ambiguous, ask the
+human to confirm the verification method.
 
 ### Primary: Code Verification Skill (Claude Code)
 
@@ -389,9 +414,9 @@ The skill will:
 
 If the code-verification skill is not available, manually verify:
 
-1. **Run tests** — `npm test` (or equivalent)
-2. **Type check** — `npm run typecheck` (or equivalent)
-3. **Lint** — `npm run lint` (or equivalent)
+1. **Run tests** — Use the configured test command
+2. **Type check** — Use the configured typecheck command (if applicable)
+3. **Lint** — Use the configured lint command (if applicable)
 4. **Manual check** — For each acceptance criterion:
    - Read the criterion
    - Verify it is met (inspect code, run app, check output)
@@ -539,6 +564,9 @@ Before generating:
 
 Task quality checks:
 ✓ 3-6 specific, testable acceptance criteria
+✓ Every acceptance criterion includes a verification type
+✓ Every acceptance criterion includes a verification method
+✓ Manual criteria include a reason and are minimal
 ✓ Concrete files to create/modify (not vague)
 ✓ Dependencies explicitly listed
 ✓ References spec section
@@ -546,6 +574,8 @@ Task quality checks:
 
 Red flags to fix:
 ✗ Vague criteria like "works correctly"
+✗ Criterion missing verification type or method
+✗ Manual criteria used without a reason or used excessively
 ✗ Too many files (>7) in one task
 ✗ Dependencies on parallel tasks
 ✗ Missing spec reference
@@ -577,6 +607,8 @@ Generate:
 **EXECUTION_PLAN.md**
 - [ ] All phases have pre-phase setup sections
 - [ ] All tasks have 3-6 testable acceptance criteria
+- [ ] All acceptance criteria include verification types and methods
+- [ ] Manual criteria include reasons (if present)
 - [ ] All tasks specify files to create/modify
 - [ ] All tasks have dependencies listed
 - [ ] All phases have checkpoint criteria

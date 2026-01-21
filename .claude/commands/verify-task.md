@@ -28,6 +28,11 @@ Before starting, confirm `EXECUTION_PLAN.md` exists in the current working direc
 
 1. Read Task $1 definition from EXECUTION_PLAN.md
 2. Extract all acceptance criteria
+3. Read `.claude/verification-config.json` from PROJECT_ROOT if it exists
+
+If the config is missing or required commands are empty:
+- Run `/configure-verification`
+- Note the missing config in the report if verification cannot proceed
 
 ## Verification Workflow
 
@@ -41,15 +46,22 @@ For each acceptance criterion, create a verification item:
 |-------|-------|
 | ID | `V-001`, `V-002`, etc. |
 | Criterion | The acceptance criterion text |
-| Type | `CODE`, `TEST`, `LINT`, `TYPE`, `BUILD`, or `BROWSER` |
+| Type | `CODE`, `TEST`, `LINT`, `TYPE`, `BUILD`, `SECURITY`, `BROWSER:*`, or `MANUAL` |
+| Verify | The `Verify:` method (test name, command, route/selector, etc.) |
+| Evidence | Where evidence will be stored (log, screenshot, or output path) |
 | Files | Which files to examine |
+
+If a criterion is missing a type or `Verify:` line:
+- Infer the most likely type and verification method
+- Update EXECUTION_PLAN.md to add the missing metadata
+- If ambiguous, ask the human to confirm before proceeding
 
 ### Step 2: Pre-flight Check
 
 Confirm each criterion is testable:
 - Clear pass/fail criteria
 - Required files exist
-- Test commands available
+- Verification command available (from .claude/verification-config.json)
 
 Flag untestable criteria immediately.
 
@@ -109,6 +121,18 @@ For each criterion:
 3. **If FAIL**: Attempt fix, then re-verify (up to 5 attempts)
 4. **Track attempts** to avoid repeating failed fixes
 
+Verification method by type:
+- **TEST**: Use config `commands.test`. If `Verify:` includes a test name or file
+  path, run a focused test command if the test runner supports it; otherwise run
+  the full test suite and note the limitation.
+- **LINT**: Use config `commands.lint`.
+- **TYPE**: Use config `commands.typecheck`.
+- **BUILD**: Use config `commands.build`.
+- **SECURITY**: Run `/security-scan` (or equivalent for config if defined).
+- **CODE**: Inspect the file, export, or command indicated by `Verify:`.
+- **BROWSER:*:** Use the browser-verification skill with route/selector details.
+- **MANUAL**: Do not attempt to verify; list in report for human review.
+
 ### Step 5: Exit Conditions
 
 Stop verification loop when:
@@ -142,10 +166,27 @@ TDD Issues (if any):
 - [Criterion] {issue description}
 ```
 
+### Step 7: Verification Log
+
+Append a JSON line to `.claude/verification-log.jsonl` for each criterion:
+```json
+{
+  "timestamp": "{ISO timestamp}",
+  "scope": "task",
+  "task_id": "$1",
+  "criterion_id": "V-001",
+  "type": "TEST",
+  "status": "PASS",
+  "evidence": ".claude/verification/task-$1.md"
+}
+```
+
+Ensure `.claude/verification/` exists before writing evidence files.
+
 ## On Success
 
 - Check off completed criteria in EXECUTION_PLAN.md: `- [ ]` → `- [x]`
-- Update `.claude/phase-state.json` task entry:
+- Update `.claude/phase-state.json` task entry, including per-criterion results:
   ```json
   {
     "tasks": {
@@ -155,12 +196,18 @@ TDD Issues (if any):
         "verification": {
           "passed": true,
           "criteria_met": "X/X",
-          "tdd_compliant": true
+          "tdd_compliant": true,
+          "criteria": {
+            "V-001": {"status": "PASS", "type": "TEST", "evidence": "..."},
+            "V-002": {"status": "PASS", "type": "CODE", "evidence": "..."}
+          }
         }
       }
     }
   }
   ```
+- Write an evidence report to `.claude/verification/task-$1.md`
+- Append a record to `.claude/verification-log.jsonl`
 - Report: Task $1 verified, all criteria met
 
 ## On Failure
@@ -168,7 +215,7 @@ TDD Issues (if any):
 - Report which criteria failed
 - Provide fix recommendations
 - Do not check off incomplete criteria
-- Update `.claude/phase-state.json` task entry:
+- Update `.claude/phase-state.json` task entry and note failed criteria:
   ```json
   {
     "tasks": {

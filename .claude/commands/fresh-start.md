@@ -157,3 +157,5 @@ Check which of these exist and read them:
    - Current phase and progress
    - Tech stack and key patterns
 3. Confirm you're ready to begin execution
+4. If `.claude/verification-config.json` is missing or empty, recommend running
+   `/configure-verification` before `/phase-prep`

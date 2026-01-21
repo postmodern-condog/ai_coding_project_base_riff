@@ -55,11 +55,11 @@ For instructions with `browser: true`:
 
 1. **Check Playwright MCP availability**
    - If unavailable, mark instruction as BLOCKED with reason: "Playwright MCP not available"
-   - Suggest: "Ensure Playwright MCP server is running (npx @playwright/mcp@latest)"
+   - Suggest: "Ensure the Playwright MCP server is running (see tool docs)"
 
 2. **Verify dev server is running**
    - Check if configured dev server URL responds (e.g., `http://localhost:3000`)
-   - If not running, attempt to start using configured command (e.g., `npm run dev`)
+   - If not running, attempt to start using the configured dev server command
    - Wait for configured startup time before proceeding
    - If unable to start, mark as BLOCKED: "Dev server not accessible at {URL}"
 

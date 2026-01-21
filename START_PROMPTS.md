@@ -31,7 +31,9 @@ I want to execute Phase {N} from EXECUTION_PLAN.md. Before starting:
 
 1. Check the Pre-Phase Setup section — are there unmet prerequisites I need to complete?
 2. Verify dependencies — are all prior phases complete?
-3. Review permissions — are there any permissions needed in configuration files for autonomous execution?
+3. Run a criteria audit for Phase 1 — are acceptance criteria tagged with verification metadata?
+4. Ensure verification config is set — if missing, run /configure-verification
+5. Review permissions — are there any permissions needed in configuration files for autonomous execution?
 
 Report what's ready and what's blocking.
 ```
@@ -95,8 +97,10 @@ I want to execute Phase {N} from EXECUTION_PLAN.md for this feature. Before star
 
 1. Check the Pre-Phase Setup section — are there unmet prerequisites I need to complete?
 2. Verify dependencies — are all prior phases complete?
-3. Review integration points — are the existing components we're modifying in the expected state?
-4. Check for any permissions needed in configuration files for autonomous execution
+3. Run a criteria audit for Phase 1 — are acceptance criteria tagged with verification metadata?
+4. Ensure verification config is set — if missing, run /configure-verification
+5. Review integration points — are the existing components we're modifying in the expected state?
+6. Check for any permissions needed in configuration files for autonomous execution
 
 Report what's ready and what's blocking.
 ```

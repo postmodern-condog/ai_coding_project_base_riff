@@ -95,6 +95,8 @@ cp .claude/commands/phase-prep.md "PROJECT_ROOT/.claude/commands/"
 cp .claude/commands/phase-start.md "PROJECT_ROOT/.claude/commands/"
 cp .claude/commands/phase-checkpoint.md "PROJECT_ROOT/.claude/commands/"
 cp .claude/commands/verify-task.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/criteria-audit.md "PROJECT_ROOT/.claude/commands/"
+cp .claude/commands/configure-verification.md "PROJECT_ROOT/.claude/commands/"
 cp .claude/commands/progress.md "PROJECT_ROOT/.claude/commands/"
 cp .claude/commands/security-scan.md "PROJECT_ROOT/.claude/commands/"
 cp .claude/commands/list-todos.md "PROJECT_ROOT/.claude/commands/"
@@ -111,7 +113,16 @@ Copy the skills directory:
 cp -r .claude/skills "PROJECT_ROOT/.claude/"
 ```
 
-### 3. Create CLAUDE.md
+### 3. Add Verification Config
+
+If `PROJECT_ROOT/.claude/verification-config.json` does not exist, copy the template:
+```bash
+cp .claude/verification-config.json "PROJECT_ROOT/.claude/verification-config.json"
+```
+
+If it already exists, do not overwrite it.
+
+### 4. Create CLAUDE.md
 
 If `PROJECT_ROOT/CLAUDE.md` does not exist, create it with:
 
@@ -134,6 +145,13 @@ After writing EXECUTION_PLAN.md, run the spec-verification workflow:
 
 **IMPORTANT**: Do not proceed to "Next Step" until verification passes or user explicitly chooses to proceed with noted issues.
 
+## Criteria Audit
+
+Run `/criteria-audit $1` to validate verification metadata in EXECUTION_PLAN.md.
+
+- If FAIL: stop and ask the user to resolve missing metadata before proceeding.
+- If WARN: report and continue.
+
 ## Next Step
 
 When verification is complete, inform the user:
@@ -145,6 +163,7 @@ Verification: PASSED | PASSED WITH NOTES | NEEDS REVIEW
 Next steps:
 1. cd $1  (the feature directory)
 2. /fresh-start  (will offer to merge AGENTS_ADDITIONS.md if needed)
-3. /phase-prep 1
-4. /phase-start 1
+3. /configure-verification
+4. /phase-prep 1
+5. /phase-start 1
 ```
