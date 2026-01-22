@@ -258,3 +258,105 @@ Example log entry:
   "evidence": null
 }
 ```
+
+## Auto-Advance (After Prep Passes)
+
+Check if auto-advance is enabled and this prep passes all checks.
+
+### Configuration Check
+
+Read `.claude/settings.local.json` for auto-advance configuration:
+
+```json
+{
+  "autoAdvance": {
+    "enabled": true,      // default: true
+    "delaySeconds": 15    // default: 15
+  }
+}
+```
+
+If `autoAdvance` is not configured, use defaults (`enabled: true`, `delaySeconds: 15`).
+
+### Auto-Advance Conditions
+
+Auto-advance to `/phase-start $1` ONLY if ALL of these are true:
+
+1. ✓ All Pre-Phase Setup items are PASS (none FAIL or BLOCKED)
+2. ✓ No human setup tasks remain incomplete
+3. ✓ Dependencies (prior phases) are complete
+4. ✓ Verification config is properly configured
+5. ✓ Criteria audit passed (for Phase 1)
+6. ✓ `--pause` flag was NOT passed to this command
+7. ✓ `autoAdvance.enabled` is true (or not configured, defaulting to true)
+
+### If Auto-Advance Conditions Met
+
+1. **Show countdown:**
+   ```
+   AUTO-ADVANCE
+   ============
+   All Phase $1 prerequisites verified. Ready to execute...
+
+   Auto-advancing to /phase-start $1 in 15s...
+   (Press Enter to pause)
+   ```
+
+2. **Wait for delay or interrupt:**
+   - Wait `autoAdvance.delaySeconds` (default 15)
+   - If user presses Enter during countdown, cancel auto-advance
+   - Show countdown updates: `14s... 13s... 12s...`
+
+3. **If not interrupted:**
+   - Track this command in auto-advance session log
+   - Execute `/phase-start $1`
+   - Phase-start will continue, and its checkpoint will continue the chain
+
+4. **If interrupted:**
+   ```
+   Auto-advance paused by user.
+
+   Ready for Phase $1. Run manually when ready:
+     /phase-start $1
+   ```
+
+### If Auto-Advance Conditions NOT Met
+
+Stop and report why:
+
+```
+AUTO-ADVANCE STOPPED
+====================
+
+Reason: {one of below}
+- Pre-Phase Setup items require human action
+- Prior phases not complete
+- Verification config not configured
+- Criteria audit failed (Phase 1 only)
+- Auto-advance disabled via --pause flag
+- Auto-advance disabled in settings
+
+{If human items exist:}
+Requires attention:
+- [ ] {human item 1} — See detailed instructions above
+- [ ] {human item 2}
+
+Next steps:
+1. Complete the items above
+2. Run /phase-prep $1 again
+```
+
+### Auto-Advance Session Tracking
+
+If this is part of an auto-advance chain (`.claude/auto-advance-session.json` exists), append this command to the session log:
+
+```json
+{
+  "commands": [
+    // ... previous commands
+    {"command": "/phase-prep $1", "status": "PASS", "timestamp": "{ISO}"}
+  ]
+}
+```
+
+If auto-advance stops here, generate the session report (see phase-checkpoint for format) and clean up the session file.
