@@ -2,6 +2,8 @@
 
 A structured framework for AI agents to build software autonomously—with verification, guardrails, and human oversight built in.
 
+**[View Landing Page](https://benjaminshoemaker.github.io/ai_coding_project_base/)** · **[Example Project Output](https://github.com/benjaminshoemaker/calc-example)**
+
 ## TL;DR
 
 **What is this?** A framework that turns ad-hoc AI prompting into a repeatable workflow with automatic verification.
@@ -35,7 +37,7 @@ Not using Claude Code? See [Manual Setup](docs/manual-setup.md) for copy-paste p
 
 ```bash
 # 1. Clone the toolkit
-git clone https://github.com/yourusername/ai_coding_project_base.git
+git clone https://github.com/benjaminshoemaker/ai_coding_project_base.git
 cd ai_coding_project_base
 
 # Open this folder in Claude Code to use the slash commands
@@ -222,7 +224,7 @@ ai_coding_project_base/
 
 ## Contributing
 
-See `AGENTS.md` for workflow guidelines when making changes to this toolkit.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to this project.
 
 ```bash
 npm run lint      # Check markdown
