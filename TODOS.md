@@ -22,7 +22,7 @@
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues)
 - [ ] Intro commands for each Step — **DEFERRED** (unclear requirements, needs more thought)
 - [ ] Verify that the Playwright MCP integration works
-- [ ] **[P2 / Low]** Add Codex skill pack installation option to `/setup` or `/generate-plan` — Allow users to opt-in to copying the codex commands via `scripts/install-codex-skill-pack.sh` (see below)
+- [x] **[P2 / Low]** Add Codex skill pack installation option to `/setup` or `/generate-plan` — Allow users to opt-in to copying the codex commands via `scripts/install-codex-skill-pack.sh` (see below) — DONE
 - [ ] Git worktrees for parallel task execution (see below)
 - [ ] Session logging for automation opportunity discovery (see below)
 - [ ] **[P1 / High x0.5]** Parallel Agent Orchestration (see below)

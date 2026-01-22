@@ -58,7 +58,35 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    @AGENTS.md
    ```
 
-5. **Report success and next steps**
+5. **Codex CLI Detection (Optional)**
+
+   Check if OpenAI Codex CLI is installed:
+   ```bash
+   command -v codex >/dev/null 2>&1
+   ```
+
+   If Codex is detected:
+   - Use AskUserQuestion to prompt:
+     ```
+     Question: "Codex CLI detected. Install toolkit skills for Codex?"
+     Options:
+       - "Yes, install" — Install skills via symlink (auto-updates with toolkit)
+       - "No, skip" — Don't install Codex skills
+     ```
+
+   If user selects "Yes, install":
+   - Run from this toolkit directory:
+     ```bash
+     ./scripts/install-codex-skill-pack.sh --method symlink
+     ```
+   - Report the installation result
+
+   If Codex is not detected:
+   - Skip silently (don't mention Codex to users who don't have it)
+
+   **Note:** Using symlinks means Codex skills auto-update when user runs `git pull` on the toolkit.
+
+6. **Report success and next steps**
 
    For Greenfield:
    ```
