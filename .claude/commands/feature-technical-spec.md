@@ -135,42 +135,68 @@ After writing FEATURE_TECHNICAL_SPEC.md, run the spec-verification workflow:
 
 **IMPORTANT**: Do not proceed to "Next Step" until verification passes or user explicitly chooses to proceed with noted issues.
 
-## Deferred Requirements Extraction
+## Deferred Requirements Capture (During Q&A)
 
-After verification, scan FEATURE_TECHNICAL_SPEC.md for deferred requirements and extract them to `PROJECT_ROOT/DEFERRED.md`.
+**IMPORTANT:** Capture deferred requirements interactively during the Q&A process, not after.
 
-### Patterns to Detect
+Write deferred items to `PROJECT_ROOT/DEFERRED.md` (not the feature directory).
 
-Search the document for these patterns (case-insensitive):
+### When to Trigger
+
+During the Q&A, watch for signals that the user is deferring a technical decision:
 - "out of scope"
-- "v2" / "version 2" / "future version"
-- "deferred"
 - "not in this feature" / "separate feature"
-- "later" / "in the future"
+- "v2" / "future version"
 - "premature optimization"
-- "technical debt" (when explicitly deferred)
+- "technical debt we'll address later"
+- "keep it simple for now"
 - "follow-up" / "future enhancement"
 
-### Extraction Format
+### Capture Flow
 
-For each match found, extract:
-1. **Requirement** — The technical item being deferred
-2. **Reason** — Why it was deferred
-3. **Section** — Which section of the spec it appeared in
-4. **Feature** — The feature name (from FEATURE_NAME)
+When you detect a deferral signal, immediately use AskUserQuestion:
 
-### DEFERRED.md Update
+```
+Question: "Would you like to save this to your deferred requirements?"
+Header: "Defer?"
+Options:
+  - "Yes, capture it" — I'll ask a few quick questions to document it
+  - "No, skip" — Don't record this
+```
 
-Append to `PROJECT_ROOT/DEFERRED.md`:
+**If user selects "Yes, capture it":**
+
+Ask these clarifying questions:
+
+1. **What's being deferred?**
+   "In one sentence, what's the technical decision or feature?"
+   (Pre-fill with your understanding from context)
+
+2. **Why defer it?**
+   Options: "Premature optimization" / "Out of scope" / "Separate feature" / "V2" / "Needs more research" / "Other"
+
+3. **Notes for later?**
+   "Any technical context that will help when revisiting this?"
+   (Optional — user can skip)
+
+### Write to DEFERRED.md Immediately
+
+After collecting answers, append to `PROJECT_ROOT/DEFERRED.md` right away.
+
+**Add new section or append to existing feature section:**
 
 ```markdown
 
 ## From FEATURE_TECHNICAL_SPEC.md: {FEATURE_NAME} ({date})
 
-| Requirement | Reason Deferred | Original Section |
-|-------------|-----------------|------------------|
-| {extracted requirement} | {reason phrase} | {section name} |
+| Requirement | Reason | Notes |
+|-------------|--------|-------|
+| {user's answer} | {selected reason} | {notes or "—"} |
 ```
+
+### Continue Q&A
+
+After capturing (or skipping), continue the spec Q&A where you left off.
 
 ## Next Step
 
@@ -179,7 +205,7 @@ When verification is complete, inform the user:
 FEATURE_TECHNICAL_SPEC.md created and verified at $1/FEATURE_TECHNICAL_SPEC.md
 
 Verification: PASSED | PASSED WITH NOTES | NEEDS REVIEW
-Deferred Requirements: {count} items extracted to PROJECT_ROOT/DEFERRED.md
+Deferred Requirements: {count} items captured to PROJECT_ROOT/DEFERRED.md
 
 Next: Run /feature-plan $1
 ```

@@ -58,57 +58,89 @@ Read FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md from this toolkit directory and foll
 
 Write the completed specification to `$1/FEATURE_SPEC.md`.
 
-## Deferred Requirements Extraction
+## Deferred Requirements Capture (During Q&A)
 
-After writing FEATURE_SPEC.md, scan it for deferred requirements and extract them to `PROJECT_ROOT/DEFERRED.md` (not the feature directory).
+**IMPORTANT:** Capture deferred requirements interactively during the Q&A process, not after.
 
-### Patterns to Detect
+Write deferred items to `PROJECT_ROOT/DEFERRED.md` (not the feature directory).
 
-Search the document for these patterns (case-insensitive):
+### When to Trigger
+
+During the Q&A, watch for signals that the user is deferring something:
 - "out of scope"
-- "v2" / "version 2" / "future version"
-- "deferred"
 - "not in this feature" / "separate feature"
-- "later" / "in the future"
+- "v2" / "future version"
+- "later" / "eventually"
 - "follow-up" / "future enhancement"
-- "nice to have" (when explicitly deferred)
+- "nice to have"
+- "we'll skip that for now"
 
-### Extraction Format
+### Capture Flow
 
-For each match found, extract:
-1. **Requirement** — The feature item being deferred
-2. **Reason** — Why it was deferred
-3. **Section** — Which section of the spec it appeared in
-4. **Feature** — The feature name (from FEATURE_NAME)
+When you detect a deferral signal, immediately use AskUserQuestion:
 
-### DEFERRED.md Update
+```
+Question: "Would you like to save this to your deferred requirements?"
+Header: "Defer?"
+Options:
+  - "Yes, capture it" — I'll ask a few quick questions to document it
+  - "No, skip" — Don't record this
+```
 
-Append to `PROJECT_ROOT/DEFERRED.md`:
+**If user selects "Yes, capture it":**
+
+Ask these clarifying questions:
+
+1. **What's being deferred?**
+   "In one sentence, what's the requirement or feature?"
+   (Pre-fill with your understanding from context)
+
+2. **Why defer it?**
+   Options: "Out of scope for this feature" / "Separate feature" / "V2" / "Needs more research" / "Other"
+
+3. **Notes for later?**
+   "Any context that will help when revisiting this?"
+   (Optional — user can skip)
+
+### Write to DEFERRED.md Immediately
+
+After collecting answers, append to `PROJECT_ROOT/DEFERRED.md` right away.
+
+**If file doesn't exist, create it:**
+
+```markdown
+# Deferred Requirements
+
+> Captured during specification Q&A. Review when planning future versions.
+
+## From FEATURE_SPEC.md: {FEATURE_NAME} ({date})
+
+| Requirement | Reason | Notes |
+|-------------|--------|-------|
+| {user's answer} | {selected reason} | {notes or "—"} |
+```
+
+**If file exists, add new feature section or append to existing:**
 
 ```markdown
 
 ## From FEATURE_SPEC.md: {FEATURE_NAME} ({date})
 
-| Requirement | Reason Deferred | Original Section |
-|-------------|-----------------|------------------|
-| {extracted requirement} | {reason phrase} | {section name} |
+| Requirement | Reason | Notes |
+|-------------|--------|-------|
+| {user's answer} | {selected reason} | {notes or "—"} |
 ```
 
-If PROJECT_ROOT/DEFERRED.md doesn't exist, create it with header first.
+### Continue Q&A
 
-### Reporting
-
-After extraction, report:
-```
-Deferred Requirements: {count} items extracted to PROJECT_ROOT/DEFERRED.md
-```
+After capturing (or skipping), continue the spec Q&A where you left off.
 
 ## Next Step
 
 When complete, inform the user:
 ```
 FEATURE_SPEC.md created at $1/FEATURE_SPEC.md
-Deferred Requirements: {count} items extracted to PROJECT_ROOT/DEFERRED.md
+Deferred Requirements: {count} items captured to PROJECT_ROOT/DEFERRED.md
 
 Next: Run /feature-technical-spec $1
 ```
