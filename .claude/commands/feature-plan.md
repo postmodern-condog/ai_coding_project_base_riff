@@ -132,6 +132,34 @@ If `PROJECT_ROOT/CLAUDE.md` does not exist, create it with:
 
 If it already exists, do not overwrite it.
 
+### 5. Codex CLI Detection (Optional)
+
+Check if OpenAI Codex CLI is installed:
+```bash
+command -v codex >/dev/null 2>&1
+```
+
+If Codex is detected:
+- Use AskUserQuestion to prompt:
+  ```
+  Question: "Codex CLI detected. Install toolkit skills for Codex?"
+  Options:
+    - "Yes, install" — Install skills via symlink (auto-updates with toolkit)
+    - "No, skip" — Don't install Codex skills
+  ```
+
+If user selects "Yes, install":
+- Run from this toolkit directory:
+  ```bash
+  ./scripts/install-codex-skill-pack.sh --method symlink
+  ```
+- Report the installation result
+
+If Codex is not detected:
+- Skip silently (don't mention Codex to users who don't have it)
+
+**Note:** Using symlinks means Codex skills auto-update when user runs `git pull` on the toolkit.
+
 ## Verification (Automatic)
 
 After writing EXECUTION_PLAN.md, run the spec-verification workflow:
