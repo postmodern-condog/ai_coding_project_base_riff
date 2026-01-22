@@ -77,7 +77,10 @@ Verification Types:
 - BUILD — Verified by build command
 - SECURITY — Verified by security scan
 - BROWSER:DOM | VISUAL | NETWORK | CONSOLE | PERFORMANCE | ACCESSIBILITY — Verified via MCP
-- MANUAL — Requires human judgment; include a reason
+- MANUAL — Requires human judgment; include a reason (use sparingly)
+
+IMPORTANT: Every non-MANUAL criterion MUST include a machine-verifiable `Verify:` line.
+MANUAL should only be used for true UX judgment (looks good, feels right, user experience).
 
 # Execution Plan: {Project Name}
 
@@ -126,15 +129,15 @@ Human must complete before agents begin:
 
 **Acceptance Criteria:**
 - [ ] (TEST) {Specific, testable criterion}
-  - Verify: {test name or file path}
+  - Verify: `{test command or test name}`
 - [ ] (CODE) {Specific, testable criterion}
-  - Verify: {file, export, or command to check}
+  - Verify: `{command to check file/export exists}`
 - [ ] (BROWSER:DOM) {Specific, testable criterion}
-  - Verify: {route}, {selector}, {expected state}
+  - Verify: route=`{route}`, selector=`{selector}`, expect=`{state}`
 
-Manual criteria (only if automation is not feasible):
-- [ ] (MANUAL) {Specific, testable criterion}
-  - Reason: {why human review is required}
+Manual criteria (ONLY for true UX judgment — use sparingly):
+- [ ] (MANUAL) {Specific criterion requiring human judgment}
+  - Reason: {why automation cannot verify this}
 
 **Files:**
 - Create: `{path}` — {purpose}
@@ -565,8 +568,8 @@ Before generating:
 Task quality checks:
 ✓ 3-6 specific, testable acceptance criteria
 ✓ Every acceptance criterion includes a verification type
-✓ Every acceptance criterion includes a verification method
-✓ Manual criteria include a reason and are minimal
+✓ Every non-MANUAL criterion has a `Verify:` line with executable command
+✓ MANUAL criteria are rare (< 10% of total) with clear reasons
 ✓ Concrete files to create/modify (not vague)
 ✓ Dependencies explicitly listed
 ✓ References spec section
@@ -574,8 +577,10 @@ Task quality checks:
 
 Red flags to fix:
 ✗ Vague criteria like "works correctly"
-✗ Criterion missing verification type or method
-✗ Manual criteria used without a reason or used excessively
+✗ Non-MANUAL criterion missing `Verify:` command
+✗ MANUAL used when automation is possible (prefer BROWSER: types)
+✗ MANUAL criteria without a reason
+✗ Too many MANUAL criteria (> 2 per task)
 ✗ Too many files (>7) in one task
 ✗ Dependencies on parallel tasks
 ✗ Missing spec reference
@@ -605,10 +610,10 @@ Generate:
 ## Post-Generation Checklist
 
 **EXECUTION_PLAN.md**
-- [ ] All phases have pre-phase setup sections
+- [ ] All phases have pre-phase setup sections (with `Verify:` commands)
 - [ ] All tasks have 3-6 testable acceptance criteria
-- [ ] All acceptance criteria include verification types and methods
-- [ ] Manual criteria include reasons (if present)
+- [ ] All non-MANUAL criteria have `Verify:` lines with executable commands
+- [ ] MANUAL criteria are rare (< 10%) with clear reasons
 - [ ] All tasks specify files to create/modify
 - [ ] All tasks have dependencies listed
 - [ ] All phases have checkpoint criteria

@@ -1,11 +1,11 @@
 ---
 description: Configure verification commands for this project
 argument-hint: [project-directory]
-allowed-tools: Read, Edit, Grep, Glob, AskUserQuestion
+allowed-tools: Read, Edit, Grep, Glob, Bash, AskUserQuestion
 ---
 
-Configure `.claude/verification-config.json` with the project’s actual commands
-for tests, lint, typecheck, build, coverage, and dev server.
+Configure `.claude/verification-config.json` with the project's actual commands
+for tests, lint, typecheck, build, coverage, dev server, and authentication.
 
 ## Project Directory
 
@@ -28,6 +28,45 @@ Determine working context:
 Confirm `PROJECT_ROOT` exists and is writable. If not, stop and ask for a valid
 project directory.
 
+## Check Browser Tool Availability
+
+Before configuring, verify that browser verification tools are available.
+Attempt harmless calls to detect installed MCPs:
+
+| Tool | Check Method | Install Instructions |
+|------|--------------|---------------------|
+| Chrome DevTools MCP | Call `mcp__chrome-devtools__list_pages` | Already available if you see this tool |
+| Playwright MCP | Check for `mcp__playwright__*` tools | Add to `.claude/settings.json` mcpServers |
+
+**Report availability:**
+
+```
+BROWSER TOOLS
+=============
+Chrome DevTools MCP: Available | Not detected
+Playwright MCP: Available | Not detected
+
+{If neither available}
+WARNING: No browser MCP tools detected.
+Browser verification will require manual verification.
+
+To enable automated browser verification, add to .claude/settings.json:
+
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-playwright"]
+    }
+  }
+}
+
+Or use Chrome DevTools MCP which may already be configured.
+```
+
+Continue with configuration even if no browser tools are available (browser
+verification will fall back to manual).
+
 ## Discovery (Read-Only)
 
 Scan project documentation for commands and hints:
@@ -40,7 +79,7 @@ Scan project documentation for commands and hints:
 - Any `docs/` or `scripts/` usage notes
 
 Look for sections mentioning: tests, linting, type checking, build, coverage,
-local dev server, and security checks.
+local dev server, authentication, and login routes.
 
 Summarize any candidate commands you find.
 
@@ -59,9 +98,64 @@ fields. Then ask the human to confirm or provide commands for:
 If a command is not applicable, set it to an empty string and note it as
 "not applicable" in the summary.
 
+## Configure Authentication
+
+Ask the human about authentication requirements:
+
+1. "Does your app require login for browser verification?"
+   - If NO: Set `auth.strategy` to `"none"` and skip remaining auth questions
+   - If YES: Continue with auth configuration
+
+2. "What is the login route?" (default: `/login`)
+   - Set `auth.loginRoute`
+
+3. "What environment variable holds the test username/email?"
+   - Default: `TEST_USER_EMAIL`
+   - Set `auth.credentials.usernameVar`
+
+4. "What environment variable holds the test password?"
+   - Default: `TEST_USER_PASSWORD`
+   - Set `auth.credentials.passwordVar`
+
+5. Set `auth.strategy` to `"env"` and `auth.storageState` to
+   `.claude/verification/auth-state.json`
+
+## Ensure .gitignore Protection
+
+If authentication is configured, verify `.env.verification` won't be committed:
+
+1. Check if `.gitignore` exists in PROJECT_ROOT
+2. Check if `.env.verification` is already listed
+3. If not listed, **automatically add it**:
+
+```bash
+# Add to .gitignore if not present
+if ! grep -q "^\.env\.verification$" .gitignore 2>/dev/null; then
+  echo "" >> .gitignore
+  echo "# Verification credentials (never commit)" >> .gitignore
+  echo ".env.verification" >> .gitignore
+  echo "Added .env.verification to .gitignore"
+fi
+```
+
+4. Also ensure `.claude/verification/auth-state.json` is ignored:
+
+```bash
+if ! grep -q "\.claude/verification/auth-state\.json" .gitignore 2>/dev/null; then
+  echo ".claude/verification/auth-state.json" >> .gitignore
+  echo "Added auth-state.json to .gitignore"
+fi
+```
+
+**CRITICAL:** If `.gitignore` doesn't exist and auth is configured, create it
+with these entries before proceeding.
+
 ## Write Config
 
-Update `.claude/verification-config.json` with the confirmed values.
+Update `.claude/verification-config.json` with all confirmed values.
+
+Set `browser.tool` to `"auto"` (no user prompt needed — the browser-verification
+skill will automatically detect and use the best available tool).
 
 ## Report
 
@@ -69,6 +163,10 @@ Update `.claude/verification-config.json` with the confirmed values.
 VERIFICATION CONFIGURED
 =======================
 Project Root: {path}
+
+Browser Tools:
+- Chrome DevTools MCP: {Available | Not detected}
+- Playwright MCP: {Available | Not detected}
 
 Commands:
 - test: {value or ""}
@@ -82,6 +180,39 @@ Dev Server:
 - url: {value or ""}
 - startupSeconds: {value}
 
+Authentication:
+- strategy: {none | env}
+- loginRoute: {value or "N/A"}
+- usernameVar: {value or "N/A"}
+- passwordVar: {value or "N/A"}
+
+Git Protection:
+- .gitignore includes .env.verification: {Yes | Added | WARNING: No .gitignore}
+
 Status: READY | READY WITH NOTES
-Notes: {missing or not-applicable commands}
+Notes: {missing commands, auth setup needed, no browser tools, etc.}
+```
+
+## Post-Configuration Reminders
+
+If authentication was configured:
+
+```
+AUTHENTICATION SETUP REQUIRED
+=============================
+1. Copy .env.verification.example to .env.verification
+2. Fill in TEST_USER_EMAIL and TEST_USER_PASSWORD
+3. Verify .env.verification is in .gitignore (should be auto-added)
+4. Run a browser verification to test login works
+```
+
+If no browser tools detected:
+
+```
+BROWSER VERIFICATION NOTE
+=========================
+No browser MCP tools were detected. Browser-based acceptance criteria
+will require manual verification until a browser MCP is configured.
+
+Recommended: Add Playwright MCP to your Claude settings.
 ```

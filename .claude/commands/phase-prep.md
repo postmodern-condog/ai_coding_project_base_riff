@@ -33,9 +33,24 @@ Before starting, confirm the required files exist:
 1. **Pre-Phase Setup** — Check the "Pre-Phase Setup" section for Phase $1:
    - For each setup item, run its `Verify:` command if provided
    - Mark each item as PASS/FAIL/BLOCKED based on command output
-   - If a setup item lacks a `Verify:` line, flag it as human-required
+   - **Auto-generate Verify commands** if missing (see below)
    - Identify environment variables or secrets needed
    - Note any external services that must be configured
+
+   **Auto-Verify Generation:**
+   If a setup item lacks a `Verify:` line, infer one based on item type:
+
+   | Item Pattern | Auto-Generated Verify Command |
+   |--------------|-------------------------------|
+   | Environment variable `VAR_NAME` | `test -n "$VAR_NAME" && echo "VAR_NAME is set"` |
+   | Service at `localhost:PORT` | `curl -sf http://localhost:PORT/health || curl -sf http://localhost:PORT` |
+   | Service at URL | `curl -sf {URL}/health || curl -sf {URL}` |
+   | File exists `path/to/file` | `test -f path/to/file && echo "File exists"` |
+   | Directory exists `path/to/dir` | `test -d path/to/dir && echo "Directory exists"` |
+   | Command available `cmd` | `command -v cmd >/dev/null && echo "cmd available"` |
+   | Database connection | `{db-cli} -c "SELECT 1" || echo "DB connection failed"` |
+
+   After auto-generating, add the `Verify:` line to EXECUTION_PLAN.md for future runs.
 
 2. **Dependencies** — Verify prior phases are complete:
    - Check that all tasks from previous phases have checked boxes
