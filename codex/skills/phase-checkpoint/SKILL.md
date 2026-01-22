@@ -59,8 +59,11 @@ Run and report results:
 ## Manual Verification
 
 From the "Phase N Checkpoint" section in `EXECUTION_PLAN.md`:
-- List each manual verification item
-- Provide step-by-step instructions for the human to verify
+- List each manual verification item with its reason
+- For each item, provide numbered step-by-step instructions:
+  1. What to do (specific actions)
+  2. What to look for (expected outcomes)
+  3. How to confirm success
 
 ## Approach Review (Human)
 
@@ -99,7 +102,12 @@ Automated Checks:
 - Coverage: <X>% (target: 80%) | SKIPPED
 
 Manual Verification:
-- [ ] <items from EXECUTION_PLAN.md checkpoint section>
+- [ ] <item description>
+  - Reason: <why human review is needed>
+  - Steps:
+    1. <First action to take>
+    2. <What to verify/look for>
+    3. <How to confirm success>
 
 Approach Review: No issues noted | <issues>
 

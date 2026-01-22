@@ -133,9 +133,11 @@ These checks run only if the required tools are available (detected above).
 ## Human Required
 
 From the "Phase $1 Checkpoint" section in EXECUTION_PLAN.md:
-- List each human-required item and its reason
-- For each item, provide step-by-step instructions explaining how to verify it
-- Indicate what I need to verify before proceeding
+- List each human-required item with its reason
+- For each item, provide numbered step-by-step instructions that explain:
+  1. What to do (specific actions)
+  2. What to look for (expected outcomes)
+  3. How to confirm success
 
 ## Approach Review (Human)
 
@@ -235,7 +237,13 @@ Optional Checks:
 - Tech Debt: PASSED | NOTES | SKIPPED
 
 Human Required:
-- [ ] {items from EXECUTION_PLAN.md checkpoint section}
+- [ ] {item description}
+  - Reason: {why human review is needed}
+  - Steps:
+    1. {First action to take}
+    2. {What to verify/look for}
+    3. {How to confirm success}
+- [ ] {next item...}
 
 Approach Review: No issues noted | {list specific issues}
 
