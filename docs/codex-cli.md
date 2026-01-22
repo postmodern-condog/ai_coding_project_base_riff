@@ -4,6 +4,12 @@ This toolkit includes a Codex CLI skill pack that mirrors the execution slash co
 
 ## Installation
 
+### Auto-Detection (Recommended)
+
+When running `/setup` to initialize a new project, the toolkit automatically detects if Codex CLI is installed. If found, it offers to install the skill pack via symlinks—keeping commands in sync as the toolkit updates.
+
+### Manual Installation
+
 From the toolkit repo root:
 
 ```bash
@@ -11,6 +17,13 @@ From the toolkit repo root:
 ```
 
 Then restart Codex CLI.
+
+### Symlinks vs Copy
+
+The recommended installation uses symlinks. This means:
+- Commands stay in sync when you update the toolkit
+- No need to reinstall after toolkit updates
+- Single source of truth for command definitions
 
 ## Usage
 

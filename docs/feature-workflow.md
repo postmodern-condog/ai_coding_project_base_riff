@@ -30,6 +30,7 @@ Each feature gets its own directory with isolated planning documents:
 ```
 your-project/
 ├── AGENTS.md                    # Shared workflow rules
+├── DEFERRED.md                  # Project-wide deferred requirements
 ├── features/
 │   ├── analytics/
 │   │   ├── FEATURE_SPEC.md
@@ -44,6 +45,8 @@ your-project/
 └── [your code]
 ```
 
+Note: `DEFERRED.md` lives at the project root (not in feature directories) since deferred items often span features or apply to the whole project.
+
 ## Output Documents
 
 | Document | Purpose |
@@ -52,6 +55,18 @@ your-project/
 | `FEATURE_TECHNICAL_SPEC.md` | Defines *how* the feature integrates technically |
 | `EXECUTION_PLAN.md` | Breaks feature work into phases, steps, and tasks |
 | `AGENTS_ADDITIONS.md` | Additional workflow guidelines to merge into existing `AGENTS.md` |
+
+## Deferred Requirements
+
+During spec Q&A, when you mention something is "out of scope," "v2," or "for later," the toolkit prompts you to capture it:
+
+```
+"Would you like to save this to your deferred requirements?"
+○ Yes, capture it — I'll ask a few quick questions to document it
+○ No, skip — Don't record this
+```
+
+If you choose to capture, it asks clarifying questions (what's being deferred, why, notes for later) and immediately appends to `PROJECT_ROOT/DEFERRED.md`. This prevents good ideas from getting lost during rapid specification work.
 
 ## Git Branching
 

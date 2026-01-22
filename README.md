@@ -129,15 +129,23 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/verify-spec <type>` | Verify spec document for quality issues |
 | `/bootstrap` | Generate plan from existing context |
 
+### Setup Commands (run from toolkit directory)
+
+| Command | Description |
+|---------|-------------|
+| `/setup [path]` | Initialize new project with toolkit structure |
+| `/gh-init [path]` | Initialize git repo with smart .gitignore and optional GitHub remote |
+| `/install-hooks [path]` | Install git hooks (pre-push doc sync check) |
+
 ### Execution Commands (run from your project directory)
 
 | Command | Description |
 |---------|-------------|
 | `/fresh-start` | Orient to project, load context |
 | `/configure-verification` | Set test/lint/build commands for your stack |
-| `/phase-prep N` | Check prerequisites for phase N |
+| `/phase-prep N` | Check prerequisites, preview future human items |
 | `/phase-start N` | Execute phase N (creates branch, commits per task) |
-| `/phase-checkpoint N` | Run tests, security scan, verify completion |
+| `/phase-checkpoint N` | Local-first verification, then production checks |
 | `/verify-task X.Y.Z` | Verify specific task acceptance criteria |
 | `/criteria-audit` | Validate acceptance criteria metadata |
 | `/security-scan` | Run security checks (deps, secrets, code) |
@@ -156,6 +164,7 @@ your-project/
 ├── EXECUTION_PLAN.md        # Tasks with acceptance criteria
 ├── AGENTS.md                # Workflow rules for AI agents
 ├── LEARNINGS.md             # Discovered patterns (created as you work)
+├── DEFERRED.md              # Deferred requirements (captured during Q&A)
 ├── .claude/
 │   ├── commands/            # Execution commands (auto-copied)
 │   ├── skills/              # Verification skills (auto-copied)
@@ -166,6 +175,29 @@ your-project/
 These documents persist across sessions, enabling any AI agent to pick up where another left off.
 
 `LEARNINGS.md` is created as you work—use `/capture-learning` to save project-specific patterns, conventions, and gotchas. The `/fresh-start` command loads these learnings into context for each new task.
+
+`DEFERRED.md` is populated during specification Q&A. When you mention something is "out of scope," "v2," or "for later," the toolkit prompts you to capture it with clarifying context so nothing gets lost.
+
+## Workflow Automation
+
+### Auto-Advance
+
+After checkpoint verification passes, the toolkit can automatically advance to the next phase:
+
+```
+/phase-start 1 → /phase-checkpoint 1 → [15s countdown] → /phase-prep 2 → ...
+```
+
+Auto-advance triggers when:
+- All local verification passes (tests, lint, build)
+- All production verification passes (deployment, integration)
+- `/phase-prep` shows all prerequisites are green
+
+The countdown can be interrupted with Ctrl+C. When the sequence stops (prerequisite fails, verification fails, or interrupted), a session report shows all completed phases and blocking issues.
+
+### Local-First Verification
+
+Phase checkpoints run local verification first (tests, lint, security scan). Production verification (deployment, integration) only runs after local passes. This prevents wasted cycles on production checks when basic issues exist.
 
 ## How Verification Works
 
@@ -210,7 +242,8 @@ ai_coding_project_base/
 │   └── FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md
 ├── .claude/
 │   ├── commands/                    # All slash commands
-│   └── skills/                      # Verification skills
+│   ├── skills/                      # Verification skills
+│   └── hooks/                       # Git hooks (pre-push doc check)
 ├── docs/                            # Detailed documentation
 ├── extras/                          # Landing page, optional tools
 └── AGENTS.md                        # Toolkit contributor guidelines

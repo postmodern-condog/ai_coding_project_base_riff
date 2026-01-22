@@ -172,6 +172,39 @@ If no browser MCP is configured, browser-based criteria require manual verificat
 }
 ```
 
+## Phase Checkpoint Verification
+
+Phase checkpoints (`/phase-checkpoint N`) run a two-stage verification process.
+
+### Local-First Verification
+
+Local verification runs first. All local checks must pass before production verification begins:
+
+| Check | Description |
+|-------|-------------|
+| Tests | All tests pass (unit, integration, e2e) |
+| Lint | No linting errors |
+| Build | Project builds successfully |
+| Types | No type errors |
+| Security scan | No critical/high vulnerabilities |
+| Task verification | All phase tasks pass acceptance criteria |
+
+### Production Verification
+
+Only runs after local verification passes:
+
+| Check | Description |
+|-------|-------------|
+| Deployment | App deploys and starts correctly |
+| Smoke tests | Critical paths work in deployed environment |
+| Integration | External service integrations function |
+
+This prevents wasted cycles on production checks when basic issues exist locally.
+
+### Auto-Advance
+
+When both local and production verification pass, the checkpoint can automatically advance to the next phase. See the main README for auto-advance details.
+
 ## Security Scanning
 
 The toolkit includes integrated security scanning that runs automatically during `/phase-checkpoint` and can be invoked manually via `/security-scan`.
