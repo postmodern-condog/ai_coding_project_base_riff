@@ -42,11 +42,75 @@ Read PRODUCT_SPEC_PROMPT.md from this toolkit directory and follow its instructi
 
 Write the completed specification to `$1/PRODUCT_SPEC.md`.
 
+## Deferred Requirements Extraction
+
+After writing PRODUCT_SPEC.md, scan it for deferred requirements and extract them to `$1/DEFERRED.md`.
+
+### Patterns to Detect
+
+Search the document for these patterns (case-insensitive):
+- "out of scope"
+- "v2" / "version 2" / "future version"
+- "deferred"
+- "not in MVP" / "post-MVP"
+- "later" / "in the future"
+- "phase 2" / "next phase"
+- "nice to have" (when explicitly deferred)
+- "won't implement" / "will not implement"
+
+### Extraction Format
+
+For each match found, extract:
+1. **Requirement** — The feature/item being deferred (surrounding context)
+2. **Reason** — Why it was deferred (the pattern phrase and context)
+3. **Section** — Which section of the spec it appeared in
+
+### DEFERRED.md Format
+
+If `$1/DEFERRED.md` does not exist, create it:
+
+```markdown
+# Deferred Requirements
+
+> Auto-generated during specification. Items marked for future versions or explicitly descoped.
+> Each occurrence is listed separately (not deduplicated) to show patterns.
+
+## From PRODUCT_SPEC.md ({date})
+
+| Requirement | Reason Deferred | Original Section |
+|-------------|-----------------|------------------|
+| {extracted requirement} | {reason phrase} | {section name} |
+```
+
+If `$1/DEFERRED.md` already exists, append a new section:
+
+```markdown
+
+## From PRODUCT_SPEC.md ({date})
+
+| Requirement | Reason Deferred | Original Section |
+|-------------|-----------------|------------------|
+| {extracted requirement} | {reason phrase} | {section name} |
+```
+
+### Reporting
+
+After extraction, report:
+```
+Deferred Requirements: {count} items extracted to DEFERRED.md
+```
+
+If no deferred items found:
+```
+Deferred Requirements: None detected
+```
+
 ## Next Step
 
 When complete, inform the user:
 ```
 PRODUCT_SPEC.md created at $1/PRODUCT_SPEC.md
+Deferred Requirements: {count} items extracted to DEFERRED.md
 
 Next: Run /technical-spec $1
 ```

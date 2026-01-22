@@ -58,11 +58,57 @@ Read FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md from this toolkit directory and foll
 
 Write the completed specification to `$1/FEATURE_SPEC.md`.
 
+## Deferred Requirements Extraction
+
+After writing FEATURE_SPEC.md, scan it for deferred requirements and extract them to `PROJECT_ROOT/DEFERRED.md` (not the feature directory).
+
+### Patterns to Detect
+
+Search the document for these patterns (case-insensitive):
+- "out of scope"
+- "v2" / "version 2" / "future version"
+- "deferred"
+- "not in this feature" / "separate feature"
+- "later" / "in the future"
+- "follow-up" / "future enhancement"
+- "nice to have" (when explicitly deferred)
+
+### Extraction Format
+
+For each match found, extract:
+1. **Requirement** — The feature item being deferred
+2. **Reason** — Why it was deferred
+3. **Section** — Which section of the spec it appeared in
+4. **Feature** — The feature name (from FEATURE_NAME)
+
+### DEFERRED.md Update
+
+Append to `PROJECT_ROOT/DEFERRED.md`:
+
+```markdown
+
+## From FEATURE_SPEC.md: {FEATURE_NAME} ({date})
+
+| Requirement | Reason Deferred | Original Section |
+|-------------|-----------------|------------------|
+| {extracted requirement} | {reason phrase} | {section name} |
+```
+
+If PROJECT_ROOT/DEFERRED.md doesn't exist, create it with header first.
+
+### Reporting
+
+After extraction, report:
+```
+Deferred Requirements: {count} items extracted to PROJECT_ROOT/DEFERRED.md
+```
+
 ## Next Step
 
 When complete, inform the user:
 ```
 FEATURE_SPEC.md created at $1/FEATURE_SPEC.md
+Deferred Requirements: {count} items extracted to PROJECT_ROOT/DEFERRED.md
 
 Next: Run /feature-technical-spec $1
 ```

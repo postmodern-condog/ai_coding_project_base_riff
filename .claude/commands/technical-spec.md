@@ -57,6 +57,52 @@ After writing TECHNICAL_SPEC.md, run the spec-verification workflow:
 
 **IMPORTANT**: Do not proceed to "Next Step" until verification passes or user explicitly chooses to proceed with noted issues.
 
+## Deferred Requirements Extraction
+
+After verification, scan TECHNICAL_SPEC.md for deferred requirements and extract them to `$1/DEFERRED.md`.
+
+### Patterns to Detect
+
+Search the document for these patterns (case-insensitive):
+- "out of scope"
+- "v2" / "version 2" / "future version"
+- "deferred"
+- "not in MVP" / "post-MVP"
+- "later" / "in the future"
+- "phase 2" / "next phase"
+- "premature optimization"
+- "over-engineering" / "overkill for MVP"
+- "won't implement" / "will not implement"
+
+### Extraction Format
+
+For each match found, extract:
+1. **Requirement** — The technical item being deferred
+2. **Reason** — Why it was deferred
+3. **Section** — Which section of the spec it appeared in
+
+### DEFERRED.md Update
+
+If `$1/DEFERRED.md` already exists (from product-spec), append:
+
+```markdown
+
+## From TECHNICAL_SPEC.md ({date})
+
+| Requirement | Reason Deferred | Original Section |
+|-------------|-----------------|------------------|
+| {extracted requirement} | {reason phrase} | {section name} |
+```
+
+If it doesn't exist, create it with header and this section.
+
+### Reporting
+
+After extraction, report:
+```
+Deferred Requirements: {count} items extracted to DEFERRED.md
+```
+
 ## Next Step
 
 When verification is complete, inform the user:
@@ -64,6 +110,7 @@ When verification is complete, inform the user:
 TECHNICAL_SPEC.md created and verified at $1/TECHNICAL_SPEC.md
 
 Verification: PASSED | PASSED WITH NOTES | NEEDS REVIEW
+Deferred Requirements: {count} items extracted to DEFERRED.md
 
 Next: Run /generate-plan $1
 ```

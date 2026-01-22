@@ -135,6 +135,43 @@ After writing FEATURE_TECHNICAL_SPEC.md, run the spec-verification workflow:
 
 **IMPORTANT**: Do not proceed to "Next Step" until verification passes or user explicitly chooses to proceed with noted issues.
 
+## Deferred Requirements Extraction
+
+After verification, scan FEATURE_TECHNICAL_SPEC.md for deferred requirements and extract them to `PROJECT_ROOT/DEFERRED.md`.
+
+### Patterns to Detect
+
+Search the document for these patterns (case-insensitive):
+- "out of scope"
+- "v2" / "version 2" / "future version"
+- "deferred"
+- "not in this feature" / "separate feature"
+- "later" / "in the future"
+- "premature optimization"
+- "technical debt" (when explicitly deferred)
+- "follow-up" / "future enhancement"
+
+### Extraction Format
+
+For each match found, extract:
+1. **Requirement** — The technical item being deferred
+2. **Reason** — Why it was deferred
+3. **Section** — Which section of the spec it appeared in
+4. **Feature** — The feature name (from FEATURE_NAME)
+
+### DEFERRED.md Update
+
+Append to `PROJECT_ROOT/DEFERRED.md`:
+
+```markdown
+
+## From FEATURE_TECHNICAL_SPEC.md: {FEATURE_NAME} ({date})
+
+| Requirement | Reason Deferred | Original Section |
+|-------------|-----------------|------------------|
+| {extracted requirement} | {reason phrase} | {section name} |
+```
+
 ## Next Step
 
 When verification is complete, inform the user:
@@ -142,6 +179,7 @@ When verification is complete, inform the user:
 FEATURE_TECHNICAL_SPEC.md created and verified at $1/FEATURE_TECHNICAL_SPEC.md
 
 Verification: PASSED | PASSED WITH NOTES | NEEDS REVIEW
+Deferred Requirements: {count} items extracted to PROJECT_ROOT/DEFERRED.md
 
 Next: Run /feature-plan $1
 ```
