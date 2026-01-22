@@ -2,8 +2,8 @@
 
 ## In Progress
 
-- [ ] **[P0 / High]** Deep audit of automation verification — ensure all components needed for human-free verification are present (see below)
-- [ ] **[P0 / High]** Make workflow portable across CLIs/models without breaking Claude Code "clone-and-go" sharing
+- [x] **[P0 / High]** Deep audit of automation verification — ensure all components needed for human-free verification are present (see below) — DONE (84292a8)
+- [ ] **[P0 / High x0.5]** Make workflow portable across CLIs/models without breaking Claude Code "clone-and-go" sharing
 - [ ] **[P1 / Medium]** Verification logging and manual intervention analysis (see below)
 - [ ] **[P1 / Medium]** Add optional path arguments to execution commands to reduce wrong-directory friction
 - [ ] **[P1 / Medium]** Fix nested `.claude/` directories shadowing parent commands — When a
@@ -14,9 +14,9 @@
 - [x] Persistent learnings/patterns file for cross-task context (see below) — DONE
 - [x] **[P1 / Medium]** Add `/capture-learning` command for simple learnings capture (see below) — DONE
 - [ ] **[P2 / Low]** Add `/quick-feat` command for very simple features (see below)
-- [ ] **[P1 / Medium]** Enhance `/phase-prep` to show human prep for future phases (see below)
-- [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` — Detect permission mode and suggest switching to "execute dangerously" mode for uninterrupted autonomous execution if not already enabled
-- [ ] **[P1 / Medium x2]** Investigate auto-advancing steps without human intervention — When all prereqs for the next step are met (tests pass, no blockers, verification complete), automatically proceed to the next step instead of stopping for human confirmation
+- [ ] **[P1 / Medium]** Enhance `/phase-prep` to show human prep for future phases (clarified, see below)
+- [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below)
+- [ ] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below)
 - [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
 - [ ] Compare web vs CLI interface for generation workflow (see below)
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues)
@@ -25,18 +25,140 @@
 - [ ] **[P2 / Low]** Add Codex skill pack installation option to `/setup` or `/generate-plan` — Allow users to opt-in to copying the codex commands via `scripts/install-codex-skill-pack.sh` (see below)
 - [ ] Git worktrees for parallel task execution (see below)
 - [ ] Session logging for automation opportunity discovery (see below)
-- [ ] **[P1 / High]** Parallel Agent Orchestration (see below)
+- [ ] **[P1 / High x0.5]** Parallel Agent Orchestration (see below)
 - [ ] **[P2 / Medium]** Spec Diffing and Plan Regeneration (see below)
-- [ ] **[P2 / Medium]** Human Review Queue (see below)
-- [ ] **[P1 / Medium]** Bias phase checkpoint output towards local verification before production — Update `/phase-checkpoint` report to emphasize "verify locally first" messaging, suggest running dev server checks, and add a "Ready to Push?" section that explicitly prompts user to confirm local testing before pushing to remote/production
-- [ ] **[P1 / Medium]** Deferred Requirements Capture — Auto-capture "v2" and "out of scope" items during spec generation (see below)
-- [ ] **[P1 / Medium]** Add `/git-init` skill for automatic git repo initialization — When `/phase-prep` detects no git repo, offer to initialize one (see below)
+- [ ] **[P2 / Medium x0.6]** Human Review Queue (see below)
+- [ ] **[P1 / Medium]** Structure phase-checkpoint to verify local before production (clarified, see below)
+- [ ] **[P1 / Medium]** Deferred Requirements Capture — Auto-capture "v2" and "out of scope" items during spec generation (clarified, see below)
+- [x] **[P1 / Medium]** Create `/gh-init` command with local git init and auto-detection (clarified, see below) — DONE
 - [ ] **[P1 / Medium]** Enhance `/phase-prep` with detailed setup instructions — Research docs and provide step-by-step guidance for Pre-Phase Setup items (see below)
 - [x] Add `/list-todos` command (see below) — DONE
 - [x] Recovery & Rollback Commands — DONE (phase-rollback, task-retry, phase-analyze)
 - [ ] **[P1 / Medium]** Pre-push hook to check if README/docs need updating — Before every push, analyze recent commits and prompt if documentation appears outdated relative to code/command changes
 
 ## Future Concepts
+
+### Auto-Advance Steps Without Human Intervention
+
+Automatically proceed through the workflow when all prerequisites are met, reducing manual command entry.
+
+**Clarifications (from Q&A 2026-01-22):**
+- **Default behavior**: Auto-advance ON by default; use `--pause` flag to disable
+- **Delay**: 15-second countdown before auto-advancing
+- **UX**: Show countdown with interrupt hint: "Auto-advancing in 15s... (press Enter to pause)"
+- **Trigger condition**: ONLY auto-advance when everything is green (all automated checks pass, no human tasks required)
+- **Stop conditions**: If ANY human intervention required (incomplete prep items, manual verification items), stop and wait
+- **Configuration**: Configurable in `.claude/settings.local.json`:
+  ```json
+  {
+    "autoAdvance": {
+      "enabled": true,
+      "delaySeconds": 15
+    }
+  }
+  ```
+
+**Command boundaries where auto-advance applies:**
+
+| After... | If all green... | Auto-start... |
+|----------|-----------------|---------------|
+| `/phase-checkpoint N` | All criteria verified, no manual items | `/phase-prep N+1` |
+| `/phase-prep N+1` | All setup complete, no human tasks | `/phase-start N+1` |
+
+**What does NOT auto-advance:**
+- `/phase-prep` with incomplete human setup items (e.g., "Create Stripe account")
+- `/phase-checkpoint` with unverifiable manual items
+- Any step that encounters errors or failures
+
+**Session report when auto-advance stops:**
+- When the auto-advance sequence eventually stops (due to human intervention required, error, or final phase complete), generate a summary report
+- Report includes:
+  - Every command executed during the auto-advance session
+  - Outcome of each command (success, failure, manual items found)
+  - Total phases/steps completed
+  - Reason for stopping
+  - Any items now requiring human attention
+- Format example:
+  ```
+  AUTO-ADVANCE SESSION COMPLETE
+  =============================
+
+  Commands executed:
+  1. /phase-checkpoint 1 → ✓ All criteria passed
+  2. /phase-prep 2 → ✓ All setup complete
+  3. /phase-start 2 → ✓ All tasks completed
+  4. /phase-checkpoint 2 → ⚠ Manual verification required
+
+  Summary:
+  - Phases completed: 1 (Phase 2)
+  - Steps completed: 4
+  - Duration: 12m 34s
+  - Stopped: Manual verification items detected
+
+  Requires attention:
+  - [ ] Verify payment flow works end-to-end (localhost:3000/checkout)
+  - [ ] Confirm email notifications received
+  ```
+
+**Implementation approach:**
+1. Add `autoAdvance` config parsing to settings loader
+2. Modify `/phase-checkpoint` to check next phase readiness on success
+3. Add 15s countdown with stdin interrupt detection
+4. Modify `/phase-prep` to auto-trigger `/phase-start` when all green
+5. Add `--pause` flag to both commands to override
+6. Track commands executed during auto-advance session
+7. Generate summary report when sequence stops
+
+---
+
+### Prompt for `--dangerously-skip-permissions` Before `/phase-start`
+
+Detect permission mode and suggest switching to dangerous mode for uninterrupted autonomous execution.
+
+**Clarifications (from Q&A 2026-01-22):**
+- **Prompt timing**: Once per project, on first `/phase-start`
+- **Storage**: Remember choice in `.claude/settings.local.json`
+- **On accept**: Enable dangerous mode, don't prompt again
+- **On decline**: Remember preference, proceed with normal permissions, never re-prompt
+- **Reset**: Users can manually edit `.claude/settings.local.json` to change preference (document this)
+
+**Proposed UX:**
+
+```
+PERMISSION MODE CHECK
+=====================
+
+For autonomous phase execution, Claude Code works best with
+`--dangerously-skip-permissions` enabled. This allows:
+- Uninterrupted task execution
+- Automatic file creation and modification
+- Running build/test commands without prompts
+
+⚠️  This grants Claude broad access to your project directory.
+   Only enable if you trust the execution plan.
+
+Enable dangerous mode for this project?
+[Yes, enable] [No, keep prompts]
+```
+
+**Settings format:**
+```json
+{
+  "permissionMode": {
+    "prompted": true,
+    "dangerous": true  // or false if declined
+  }
+}
+```
+
+**Implementation approach:**
+1. At start of `/phase-start`, check if `permissionMode.prompted` exists in settings
+2. If not prompted yet, show the permission mode prompt
+3. Store user's choice in `.claude/settings.local.json`
+4. If dangerous mode enabled, remind user how Claude Code was started (may need restart with flag)
+5. Document manual reset in README or `/help` output
+
+---
 
 ### Verification Logging and Manual Intervention Analysis
 
@@ -74,6 +196,11 @@ Track and analyze manual verification interventions to identify optimization opp
 ### Deferred Requirements Capture
 
 Automatically capture requirements marked as "v2", "out of scope", or "future" during spec generation so they don't get lost.
+
+**Clarifications (from Q&A 2026-01-22):**
+- **File scope**: Project-wide single DEFERRED.md at project root
+- **Estimates**: No priority/effort estimates at deferral time; estimate later when planning v2
+- **Duplicates**: List each occurrence with source spec (don't dedupe; useful for seeing patterns)
 
 **Problem:**
 - During PRODUCT_SPEC and TECHNICAL_SPEC Q&A, many good ideas get deferred to "v2" or marked "out of scope for MVP"
@@ -398,6 +525,11 @@ Committed: feat(auth): add logout button to navbar
 
 Add a second section to `/phase-prep` output showing human prep requirements for future phases, allowing users to front-load setup work.
 
+**Clarifications (from Q&A 2026-01-22):**
+- **Detail level**: Human items only (accounts, API keys, manual setup tasks)
+- **Scope**: All remaining phases (not limited)
+- **Default behavior**: Always show future preview (no flag needed)
+
 **Problem:**
 - `/phase-prep N` only shows prep for phase N
 - Users often want to knock out all manual setup at once (create all accounts, get all API keys)
@@ -543,10 +675,18 @@ Done. Restart Codex CLI to pick up new skills.
 - Supports `--force` to overwrite existing skills
 - Supports custom `--dest` for non-standard Codex installations
 
-**Questions to answer:**
-- Should this be a one-time global install or per-project?
-- Should we detect if Codex CLI is installed before prompting?
-- Should we default to symlink (for updates) or copy (for stability)?
+**Clarifications (from Q&A 2026-01-22):**
+- **Detection**: Auto-detect if `codex` command is in PATH before prompting — don't confuse users who don't use Codex
+- **Scope**: Global install (once per machine) — skills installed to `~/.codex/skills`, available to all projects
+- **Method**: Use symlinks — auto-updates when toolkit updates, best for development
+- **Skill updates**: Symlinks handle this automatically — document that `git pull` on toolkit auto-updates Codex skills (no extra tooling needed)
+
+**Implementation approach:**
+1. In `/setup`, check if `which codex` succeeds (or `command -v codex`)
+2. If Codex detected, prompt: "Codex CLI detected. Install toolkit skills? [Yes/No]"
+3. If yes, run `scripts/install-codex-skill-pack.sh --method symlink`
+4. Track in `.claude/settings.local.json` that this was done (don't re-prompt)
+5. Document in README: "Codex skills auto-update when you `git pull` the toolkit"
 
 ---
 
@@ -998,6 +1138,49 @@ Handle mid-project spec changes gracefully without losing progress.
 3. Map spec sections to EXECUTION_PLAN.md tasks via `Spec Reference` field
 4. Integrate with GENERATOR_PROMPT.md for partial regeneration
 
+### Structure Phase-Checkpoint: Local Before Production
+
+Update `/phase-checkpoint` to always verify local environment first, followed by production verification.
+
+**Clarifications (from Q&A 2026-01-22):**
+- **Output format**: Two distinct sections: "## Local Verification" then "## Production Verification"
+- **Order enforcement**: Local verification items always come first, production second
+- **Dependencies**: If local verification fails, stop there — don't run/show production checks
+
+**Problem:**
+- Current checkpoint output may suggest production verification before local is confirmed
+- Users should always verify locally before deploying/pushing to production
+- Mixing local and production checks makes it unclear what to do first
+
+**Proposed Output Structure:**
+
+```
+PHASE 2 CHECKPOINT
+==================
+
+## Local Verification
+
+✓ Tests pass (npm test)
+✓ Type check passes (npm run typecheck)
+✓ Dev server starts (npm run dev)
+[ ] Manual: Verify login flow works at localhost:3000
+
+## Production Verification
+
+(Blocked: Complete local verification first)
+
+- [ ] Verify staging deployment
+- [ ] Check production logs for errors
+```
+
+**Implementation:**
+1. Categorize each acceptance criterion as LOCAL or PRODUCTION
+2. Output LOCAL section first, run those checks
+3. Only output/run PRODUCTION section if LOCAL passes completely
+4. Update GENERATOR_PROMPT.md to tag criteria with environment
+
+---
+
 ### Human Review Queue
 
 Aggregate items awaiting human attention for team workflows.
@@ -1080,49 +1263,65 @@ Total items: 6 | Blocking: 2 | Decisions: 2 | Reviews: 1
 3. Build `/review-queue` command to aggregate and display
 4. Add notifications when queue grows (optional)
 
-### `/git-init` Skill for Automatic Git Repo Initialization
+### Create `/gh-init` Command
 
-Add a skill that detects missing git repo and offers to initialize one.
+New command for git repository initialization with smart project detection.
+
+**Clarifications (from Q&A 2026-01-22):**
+- **Command name**: `/gh-init` (avoids overlap with existing `github-init` skill)
+- **.gitignore**: Auto-detect project type (Node/Python/etc.) from existing files
+- **Trigger points**: Both `/fresh-start` and `/phase-prep` should offer to run `/gh-init` when no git repo exists
 
 **Problem:**
-- `/phase-prep` may detect that the project directory is not a git repository
+- `/phase-prep` or `/fresh-start` may detect that the project directory is not a git repository
 - User must manually run `git init`, create `.gitignore`, make initial commit
 - This is friction that could be automated with user consent
 
-**Proposed Implementation:**
+**`/gh-init` behavior:**
 
-1. **Detection in `/phase-prep`:**
-   - When `git status` fails with "not a git repository"
-   - Instead of just reporting "BLOCKED", offer to run `/git-init`
+```
+/gh-init
 
-2. **`/git-init` skill behavior:**
-   ```
-   /git-init
+No git repository found. Initializing...
 
-   Git repository not detected. Initialize?
+Detected: Node.js project (found package.json)
 
-   Actions:
-   1. Run `git init`
-   2. Create .gitignore (project-appropriate defaults)
-   3. Make initial commit
-   4. (Optional) Create GitHub repo via `gh repo create`
+Creating .gitignore with:
+  - node_modules/
+  - dist/
+  - .env*
+  - .claude/settings.local.json
+  ... (15 patterns total)
 
-   [Initialize] [Initialize + GitHub] [Cancel]
-   ```
+Running: git init
+Running: git add .
+Running: git commit -m "Initial commit"
 
-3. **Smart `.gitignore` generation:**
-   - Detect project type (Node, Python, etc.) from existing files
-   - Include common patterns: `node_modules/`, `.env*`, `dist/`, etc.
-   - Include credentials patterns: `**/google-services.json`, `**/*.pem`, etc.
+✓ Git repository initialized with 1 commit.
 
-4. **GitHub integration (optional):**
-   - Use `gh repo create` if GitHub CLI is authenticated
-   - Prompt for repo name (default: directory name)
-   - Set up remote and push initial commit
+Create GitHub remote? [Yes, public] [Yes, private] [No, done]
+```
 
-**Skill file:** `.claude/commands/git-init.md`
+**Project type detection:**
+| File Found | Project Type | .gitignore Template |
+|------------|--------------|---------------------|
+| package.json | Node.js | node_modules, dist, .env*, etc. |
+| requirements.txt / pyproject.toml | Python | __pycache__, venv, .env*, etc. |
+| Cargo.toml | Rust | target/, Cargo.lock (if lib), etc. |
+| go.mod | Go | bin/, vendor/ (if used), etc. |
+| (none detected) | Generic | .env*, credentials, *.pem, etc. |
 
-**Related:** The existing `github-init` skill could be enhanced or this could be a separate skill focused on local git initialization.
+**Always-included patterns (all project types):**
+- `.env*`
+- `**/credentials*`
+- `**/*.pem`
+- `.claude/settings.local.json`
+
+**Integration with workflow commands:**
+- `/fresh-start`: If no .git, offer "Would you like to initialize a git repo? Run /gh-init"
+- `/phase-prep`: If no .git, show as blocking item with "Run /gh-init to resolve"
+
+**File to create:** `.claude/commands/gh-init.md`
 
 ---
 
