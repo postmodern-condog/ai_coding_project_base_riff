@@ -18,12 +18,19 @@
 - [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below) — REMOVED (no clean way to detect permission mode at runtime)
 - [x] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below) — DONE
 - [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
+- [ ] **[P1 / Medium x2]** Atomic commits traceable to requirements — Commits are per-task, but no explicit link back to PRODUCT_SPEC requirements in commit messages. Add requirement IDs (e.g., `REQ-001`) to specs and propagate through EXECUTION_PLAN.md to commit messages (see below)
+
+**Clarifications (from Q&A 2026-01-22):**
+- **`/adopt`**: Does not exist yet. Intended for importing existing non-toolkit projects into the workflow. Add as separate TODO.
+- **`/bootstrap`**: Quick planning bypass — skip `/product-spec` + `/technical-spec` when you have clear requirements already. Creates EXECUTION_PLAN.md directly from description/context.
+- **Overlap resolution**: Merge `/bootstrap` functionality into `/quick-feat`. Single command handles both simple features (inline plan) and larger features (multi-phase plan without full specs). Deprecate `/bootstrap` after merge.
+- **New TODO needed**: Create `/adopt` command for importing existing projects into toolkit workflow
 - [ ] Compare web vs CLI interface for generation workflow (see below)
-- [ ] Issue tracker integration (Jira, Linear, GitHub Issues)
+- [ ] Issue tracker integration (Jira, Linear, GitHub Issues) — **DEFERRED** (nice-to-have, not core workflow)
 - [ ] Intro commands for each Step — **DEFERRED** (unclear requirements, needs more thought)
-- [ ] Verify that the Playwright MCP integration works
+- [x] Verify that the Playwright MCP integration works — **REMOVED** (per user decision 2026-01-22)
 - [x] **[P2 / Low]** Add Codex skill pack installation option to `/setup` or `/generate-plan` — Allow users to opt-in to copying the codex commands via `scripts/install-codex-skill-pack.sh` (see below) — DONE
-- [ ] Git worktrees for parallel task execution (see below)
+- [ ] Git worktrees for parallel task execution (see below) — **DEFERRED** (Task Tool parallelism is sufficient for most cases)
 - [ ] Session logging for automation opportunity discovery (see below)
 - [ ] **[P1 / High x0.5]** Parallel Agent Orchestration (see below)
 - [ ] **[P2 / Medium]** Spec Diffing and Plan Regeneration (see below)
@@ -1262,6 +1269,61 @@ Total items: 6 | Blocking: 2 | Decisions: 2 | Reviews: 1
 2. Hook into existing commands to add/remove items
 3. Build `/review-queue` command to aggregate and display
 4. Add notifications when queue grows (optional)
+
+### Atomic Commits Traceable to Requirements
+
+Link commits directly to PRODUCT_SPEC requirements for full traceability from business need to code change.
+
+**Problem:**
+- Commits say `task(1.2.A): Add user authentication` but don't indicate which product requirement drove this
+- When reviewing history, can't easily answer "why was this feature built?"
+- Auditing compliance or explaining decisions requires manual cross-referencing
+
+**Proposed Solution:**
+
+1. **Add requirement IDs to PRODUCT_SPEC.md:**
+   ```markdown
+   ## MVP Features
+
+   ### REQ-001: User Authentication
+   Users must be able to create accounts and log in securely.
+
+   ### REQ-002: Data Export
+   Users can export their data in CSV format.
+   ```
+
+2. **Propagate to EXECUTION_PLAN.md:**
+   ```markdown
+   ### Task 1.2.A: Implement login flow
+   **Requirement:** REQ-001
+   **Acceptance Criteria:**
+   - ...
+   ```
+
+3. **Include in commit messages:**
+   ```
+   task(1.2.A): Implement login flow [REQ-001]
+
+   - Add LoginForm component
+   - Wire to auth API
+   - Add session persistence
+
+   Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
+   ```
+
+**Benefits:**
+- `git log --grep="REQ-001"` shows all commits for a requirement
+- PR descriptions can auto-generate "Requirements addressed" section
+- Audit trail from spec → plan → code → commit
+- Enables impact analysis when requirements change
+
+**Implementation approach:**
+1. Update PRODUCT_SPEC_PROMPT.md to generate requirement IDs
+2. Update GENERATOR_PROMPT.md to include `Requirement:` field per task
+3. Update `/phase-start` commit message template to include `[REQ-XXX]`
+4. (Optional) Add `/trace-requirement REQ-001` command to show full lineage
+
+---
 
 ### Create `/gh-init` Command
 
