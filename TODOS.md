@@ -34,6 +34,7 @@
 - [ ] **[P1 / Medium]** Enhance `/phase-prep` with detailed setup instructions — Research docs and provide step-by-step guidance for Pre-Phase Setup items (see below)
 - [x] Add `/list-todos` command (see below) — DONE
 - [x] Recovery & Rollback Commands — DONE (phase-rollback, task-retry, phase-analyze)
+- [ ] **[P1 / Medium]** Pre-push hook to check if README/docs need updating — Before every push, analyze recent commits and prompt if documentation appears outdated relative to code/command changes
 
 ## Future Concepts
 
