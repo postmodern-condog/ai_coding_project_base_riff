@@ -713,7 +713,7 @@
             <div class="nav-links">
                 <a href="#how-it-works">How it Works</a>
                 <a href="#features">Features</a>
-                <a href="#example">Example</a>
+                <a href="#why">Why</a>
                 <a href="#quickstart">Quick Start</a>
                 <a href="https://github.com/benjaminshoemaker/ai_coding_project_base" class="btn btn-secondary">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
@@ -728,8 +728,8 @@
         <div class="container">
             <div class="hero-content">
                 <div class="hero-badge">Clone and Go — No Install Required</div>
-                <h1>AI agents that build software <span class="highlight">reliably</span></h1>
-                <p>A flexible template for autonomous AI coding. Clone it, shape it to your needs, and start building—with verification and guardrails built in. No packages to install, no services to configure.</p>
+                <h1>AI coding workflow that builds software <span class="highlight">reliably</span></h1>
+                <p>A flexible template for semi-autonomous AI coding. Clone it, shape it to your needs, and start building - with verification and guardrails built in. No packages to install, no services to configure.</p>
                 <div class="hero-actions">
                     <a href="https://github.com/benjaminshoemaker/ai_coding_project_base" class="btn btn-primary">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
@@ -859,9 +859,69 @@
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon">⏸️</div>
-                    <h3 class="feature-title">Pause & Resume</h3>
-                    <p class="feature-description">State is maintained across sessions. Stop, leave, come back—any agent or human can pick up where things left off.</p>
+                    <div class="feature-icon">▶️</div>
+                    <h3 class="feature-title">Auto-Advance</h3>
+                    <p class="feature-description">After checkpoints pass, automatically advance to the next phase. Hands-off execution with a 15-second interrupt window.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3 class="feature-title">Learning Capture</h3>
+                    <p class="feature-description">Save project-specific patterns and gotchas to LEARNINGS.md. Future sessions load this context automatically.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📥</div>
+                    <h3 class="feature-title">Deferred Requirements</h3>
+                    <p class="feature-description">When you say "v2" or "later" during Q&A, the toolkit captures it with context. Nothing gets lost in the shuffle.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔌</div>
+                    <h3 class="feature-title">Multi-CLI Support</h3>
+                    <p class="feature-description">Works with Claude Code and OpenAI Codex CLI. Auto-detects your environment and adapts accordingly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- From the Creator -->
+    <section id="why" style="padding: 100px 0;">
+        <div class="container">
+            <div style="max-width: 720px; margin: 0 auto;">
+                <div class="section-label">From the Creator</div>
+                <h2 class="section-title" style="margin-bottom: 32px;">Why I built this</h2>
+                <div style="font-size: 16px; color: var(--text-secondary); line-height: 1.8;">
+                    <p style="margin-bottom: 20px;">
+                        I started using CLI tools (Claude Code, Codex CLI) after vibe coding tools like Replit and Lovable left me wanting more.
+                    </p>
+                    <p style="margin-bottom: 20px;">
+                        Using these CLI tools for some time, I, like many people, wanted to improve my workflow. AI coding agents are powerful, but unreliable. The CLI tools help govern the agents, but with that freedom also comes the risk of adding overhead and complexity.
+                    </p>
+                    <p style="margin-bottom: 20px;">
+                        With most of the workflows that I found online and in AI coding communities, they were both complex (87 agents! Ralph! Run 10 Claude's at once!), and they were relatively opinionated. I found these workflows to be too restrictive, particularly in the dynamic, fast-moving AI coding space.
+                    </p>
+                    <p style="margin-bottom: 20px;">
+                        This workflow has a few goals:
+                    </p>
+                    <ol style="margin-bottom: 20px; padding-left: 24px;">
+                        <li style="margin-bottom: 8px;">Facilitate consistent AI-assisted coding.</li>
+                        <li style="margin-bottom: 8px;">Accentuate the strengths of AI coding agents while mitigating their weaknesses.</li>
+                        <li>Accomplish that with low mental overhead and complexity.</li>
+                    </ol>
+                    <p style="margin-bottom: 20px;">
+                        That's why it's a Git repo that you can clone, fork, inspect, and modify as you see fit.
+                    </p>
+                    <p style="margin-bottom: 0;">
+                        If it's working well, you'll be able to understand & customize your workflow; you'll spend more time planning than pasting; and you'll spend more time reviewing completed work, than inspecting half-completed prompts.
+                    </p>
+                </div>
+                <div style="margin-top: 32px; display: flex; align-items: center; gap: 16px;">
+                    <div style="width: 48px; height: 48px; background: var(--accent-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">👨‍💻</div>
+                    <div>
+                        <div style="font-family: var(--font-mono); font-size: 14px; font-weight: 600;">Benjamin Shoemaker</div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Creator</div>
+                    </div>
                 </div>
             </div>
         </div>
