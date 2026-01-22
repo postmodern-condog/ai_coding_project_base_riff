@@ -119,6 +119,59 @@ Run verification manually anytime:
 /verify-spec feature-plan        # Verify feature EXECUTION_PLAN.md
 ```
 
+## Browser Verification
+
+For acceptance criteria that require browser interaction (UI rendering, user flows, visual checks), the toolkit supports automated browser verification with authentication.
+
+### Supported Tools
+
+| Tool | Type | Best For |
+|------|------|----------|
+| **Chrome DevTools MCP** | MCP server | Real-time interaction, debugging, already integrated |
+| **Playwright MCP** | MCP server | Cross-browser automated verification, headless |
+
+The toolkit auto-detects available tools and uses the best option. Configure via `/configure-verification`.
+
+### Authentication
+
+Many apps require login before browser verification can access protected pages. The toolkit supports authenticated browser sessions:
+
+1. **Run `/configure-verification`** — Answer questions about login route and credentials
+2. **Create `.env.verification`** — Copy from `.env.verification.example` and fill in test credentials
+3. **Verification auto-authenticates** — Browser skills log in before checking protected pages
+
+```
+# .env.verification (never commit this file)
+TEST_USER_EMAIL=test@example.com
+TEST_USER_PASSWORD=your-test-password
+```
+
+The auth state is cached in `.claude/verification/auth-state.json` to avoid repeated logins.
+
+### Fallback Chain
+
+When browser verification runs:
+
+1. Try primary tool (auto-selected or configured)
+2. If unavailable, try fallback tool
+3. If no tools available, mark as MANUAL verification needed
+
+### No Browser Tools?
+
+If no browser MCP is configured, browser-based criteria require manual verification. To enable automation:
+
+```json
+// .claude/settings.json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-playwright"]
+    }
+  }
+}
+```
+
 ## Security Scanning
 
 The toolkit includes integrated security scanning that runs automatically during `/phase-checkpoint` and can be invoked manually via `/security-scan`.

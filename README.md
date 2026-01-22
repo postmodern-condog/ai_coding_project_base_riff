@@ -143,6 +143,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/security-scan` | Run security checks (deps, secrets, code) |
 | `/progress` | Show progress through execution plan |
 | `/list-todos` | Analyze and prioritize TODO items |
+| `/capture-learning` | Save project patterns to LEARNINGS.md |
 
 See [Recovery Commands](docs/recovery-commands.md) for failure handling (`/phase-analyze`, `/phase-rollback`, `/task-retry`).
 
@@ -154,6 +155,7 @@ your-project/
 ├── TECHNICAL_SPEC.md        # How it's built
 ├── EXECUTION_PLAN.md        # Tasks with acceptance criteria
 ├── AGENTS.md                # Workflow rules for AI agents
+├── LEARNINGS.md             # Discovered patterns (created as you work)
 ├── .claude/
 │   ├── commands/            # Execution commands (auto-copied)
 │   ├── skills/              # Verification skills (auto-copied)
@@ -162,6 +164,8 @@ your-project/
 ```
 
 These documents persist across sessions, enabling any AI agent to pick up where another left off.
+
+`LEARNINGS.md` is created as you work—use `/capture-learning` to save project-specific patterns, conventions, and gotchas. The `/fresh-start` command loads these learnings into context for each new task.
 
 ## How Verification Works
 
