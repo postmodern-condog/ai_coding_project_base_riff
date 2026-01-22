@@ -22,6 +22,7 @@
 - [ ] **[P1 / High]** Parallel Agent Orchestration (see below)
 - [ ] **[P2 / Medium]** Spec Diffing and Plan Regeneration (see below)
 - [ ] **[P2 / Medium]** Human Review Queue (see below)
+- [ ] **[P1 / Medium]** Bias phase checkpoint output towards local verification before production — Update `/phase-checkpoint` report to emphasize "verify locally first" messaging, suggest running dev server checks, and add a "Ready to Push?" section that explicitly prompts user to confirm local testing before pushing to remote/production
 - [ ] **[P1 / Medium]** Deferred Requirements Capture — Auto-capture "v2" and "out of scope" items during spec generation (see below)
 - [ ] **[P1 / Medium]** Add `/git-init` skill for automatic git repo initialization — When `/phase-prep` detects no git repo, offer to initialize one (see below)
 - [ ] **[P1 / Medium]** Enhance `/phase-prep` with detailed setup instructions — Research docs and provide step-by-step guidance for Pre-Phase Setup items (see below)

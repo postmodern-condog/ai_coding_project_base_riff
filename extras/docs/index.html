@@ -186,11 +186,35 @@
             display: flex;
             align-items: center;
             padding: 120px 0 80px;
-            position: relative;
+        }
+
+        .hero .container {
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+            align-items: center;
+            width: 100%;
+        }
+
+        @media (min-width: 1100px) {
+            .hero .container {
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                gap: 64px;
+            }
         }
 
         .hero-content {
-            max-width: 800px;
+            max-width: 560px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+
+        @media (min-width: 1100px) {
+            .hero-content {
+                text-align: left;
+            }
         }
 
         .hero-badge {
@@ -224,7 +248,7 @@
 
         .hero h1 {
             font-family: var(--font-mono);
-            font-size: clamp(32px, 5vw, 56px);
+            font-size: clamp(32px, 5vw, 52px);
             font-weight: 600;
             line-height: 1.1;
             letter-spacing: -0.02em;
@@ -237,18 +261,25 @@
         }
 
         .hero p {
-            font-size: 18px;
+            font-size: 17px;
             color: var(--text-secondary);
-            max-width: 600px;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
             animation: fadeInUp 0.6s ease-out 0.2s both;
+            line-height: 1.7;
         }
 
         .hero-actions {
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
+            justify-content: center;
             animation: fadeInUp 0.6s ease-out 0.3s both;
+        }
+
+        @media (min-width: 1100px) {
+            .hero-actions {
+                justify-content: flex-start;
+            }
         }
 
         @keyframes fadeInUp {
@@ -264,19 +295,17 @@
 
         /* Terminal preview */
         .hero-terminal {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 45%;
-            max-width: 500px;
-            display: none;
+            width: 100%;
+            max-width: 480px;
+            min-width: 400px;
+            flex-shrink: 1;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
         }
 
-        @media (min-width: 1024px) {
+        @media (max-width: 500px) {
             .hero-terminal {
-                display: block;
-                animation: fadeInUp 0.8s ease-out 0.4s both;
+                min-width: 100%;
+                max-width: 100%;
             }
         }
 
@@ -321,6 +350,8 @@
             font-family: var(--font-mono);
             font-size: 13px;
             line-height: 1.8;
+            white-space: nowrap;
+            overflow-x: auto;
         }
 
         .terminal-line {
@@ -637,12 +668,13 @@
                 display: none;
             }
 
-            .hero {
-                text-align: center;
+            .hero .container {
+                align-items: center;
             }
 
             .hero-content {
                 max-width: 100%;
+                text-align: center;
             }
 
             .hero p {
@@ -694,9 +726,9 @@
     <section class="hero">
         <div class="container">
             <div class="hero-content">
-                <div class="hero-badge">Open Source Framework</div>
+                <div class="hero-badge">Clone and Go — No Install Required</div>
                 <h1>AI agents that build software <span class="highlight">reliably</span></h1>
-                <p>A framework for autonomous AI coding with built-in verification, guardrails, and human oversight. Stop babysitting your AI assistant.</p>
+                <p>A flexible template for autonomous AI coding. Clone it, shape it to your needs, and start building—with verification and guardrails built in. No packages to install, no services to configure.</p>
                 <div class="hero-actions">
                     <a href="https://github.com/benjaminshoemaker/ai_coding_project_base" class="btn btn-primary">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
@@ -705,26 +737,26 @@
                     <a href="#quickstart" class="btn btn-secondary">Quick Start</a>
                 </div>
             </div>
-        </div>
-        <div class="hero-terminal">
-            <div class="terminal">
-                <div class="terminal-header">
-                    <span class="terminal-dot"></span>
-                    <span class="terminal-dot"></span>
-                    <span class="terminal-dot"></span>
-                    <span class="terminal-title">claude-code</span>
-                </div>
-                <div class="terminal-body">
-                    <div class="terminal-line">
-                        <span class="terminal-prompt">$</span>
-                        <span class="terminal-command">/phase-start 1</span>
+            <div class="hero-terminal">
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-dot"></span>
+                        <span class="terminal-title">claude-code</span>
                     </div>
-                    <div class="terminal-output">Creating branch phase-1...</div>
-                    <div class="terminal-output">Executing task 1.1.A...</div>
-                    <div class="terminal-output terminal-success">✓ Tests passing</div>
-                    <div class="terminal-output terminal-success">✓ Verification complete</div>
-                    <div class="terminal-output">Committed: task(1.1.A)</div>
-                    <div class="terminal-output">Executing task 1.1.B...</div>
+                    <div class="terminal-body">
+                        <div class="terminal-line">
+                            <span class="terminal-prompt">$</span>
+                            <span class="terminal-command">/phase-start 1</span>
+                        </div>
+                        <div class="terminal-output">Creating branch phase-1...</div>
+                        <div class="terminal-output">Executing task 1.1.A...</div>
+                        <div class="terminal-output terminal-success">✓ Tests passing</div>
+                        <div class="terminal-output terminal-success">✓ Verification complete</div>
+                        <div class="terminal-output">Committed: task(1.1.A)</div>
+                        <div class="terminal-output">Executing task 1.1.B...</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -735,7 +767,7 @@
         <div class="container">
             <div class="section-label">How it Works</div>
             <h2 class="section-title">Three phases. Full autonomy within guardrails.</h2>
-            <p class="section-description">Structured workflows that let AI agents work independently while ensuring nothing slips through the cracks.</p>
+            <p class="section-description">Low mental overhead for you. Commands and verification keep work on track without constant intervention.</p>
 
             <div class="phases">
                 <div class="phase-card">
@@ -825,9 +857,9 @@
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon">🏗️</div>
-                    <h3 class="feature-title">Brownfield Support</h3>
-                    <p class="feature-description">Feature workflow for existing codebases. Technical debt assessment and human decision markers included.</p>
+                    <div class="feature-icon">⏸️</div>
+                    <h3 class="feature-title">Pause & Resume</h3>
+                    <p class="feature-description">State is maintained across sessions. Stop, leave, come back—any agent or human can pick up where things left off.</p>
                 </div>
             </div>
         </div>
@@ -837,8 +869,8 @@
     <section id="quickstart">
         <div class="container">
             <div class="section-label">Quick Start</div>
-            <h2 class="section-title">Up and running in minutes</h2>
-            <p class="section-description">Clone the toolkit, generate your specs, and let AI agents handle the rest.</p>
+            <h2 class="section-title">Clone, open, go.</h2>
+            <p class="section-description">No npm install. No configuration. No accounts. Just clone the repo and start using the slash commands in Claude Code.</p>
 
             <div class="quickstart">
                 <div class="quickstart-header">
@@ -902,7 +934,7 @@
     <section class="cta">
         <div class="container">
             <h2 class="cta-title">Ready to build reliably?</h2>
-            <p class="cta-description">Open source. Works with Claude Code. Start shipping with confidence.</p>
+            <p class="cta-description">Open source template. Clone it, customize it, make it yours. No installation required.</p>
             <div class="cta-actions">
                 <a href="https://github.com/benjaminshoemaker/ai_coding_project_base" class="btn btn-primary">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>

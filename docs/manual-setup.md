@@ -1,0 +1,68 @@
+# Manual Setup
+
+If you're not using Claude Code, you can use this toolkit with any LLM by copying prompts manually.
+
+## Setup Steps
+
+1. **Clone the toolkit** to get access to the prompt files:
+   ```bash
+   git clone https://github.com/yourusername/ai_coding_project_base.git
+   ```
+
+2. **Copy execution assets** to your project:
+   ```bash
+   cp -r ai_coding_project_base/.claude/commands/ your-project/.claude/commands/
+   cp -r ai_coding_project_base/.claude/skills/ your-project/.claude/skills/
+   ```
+
+3. **Generate specs** by pasting prompt contents into your LLM:
+   - `PRODUCT_SPEC_PROMPT.md` → produces `PRODUCT_SPEC.md`
+   - `TECHNICAL_SPEC_PROMPT.md` → produces `TECHNICAL_SPEC.md`
+
+4. **Generate execution plan** (requires file access):
+   - If your LLM can read files, use `GENERATOR_PROMPT.md`
+   - Otherwise, paste your specs into the prompt context
+
+5. **Execute using START_PROMPTS.md**:
+   - Copy the relevant execution prompts
+   - Paste them into your LLM session with your project context
+
+## Prompt Files Reference
+
+### Greenfield Projects
+
+| Output Document | Prompt File |
+|-----------------|-------------|
+| PRODUCT_SPEC.md | `PRODUCT_SPEC_PROMPT.md` |
+| TECHNICAL_SPEC.md | `TECHNICAL_SPEC_PROMPT.md` |
+| EXECUTION_PLAN.md + AGENTS.md | `GENERATOR_PROMPT.md` |
+
+### Feature Development
+
+| Output Document | Prompt File |
+|-----------------|-------------|
+| FEATURE_SPEC.md | `FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md` |
+| FEATURE_TECHNICAL_SPEC.md | `FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md` |
+| EXECUTION_PLAN.md + AGENTS_ADDITIONS.md | `FEATURE_PROMPTS/FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md` |
+
+### Execution
+
+See `START_PROMPTS.md` for phase execution prompts.
+
+## Limitations
+
+Without Claude Code's slash commands, you lose:
+
+- **Automatic file placement** — You'll need to save outputs manually
+- **Automatic verification** — Run tests and checks manually
+- **Git workflow automation** — Manage branches and commits yourself
+- **MCP tool detection** — Configure tools manually
+
+The core workflow (specify → plan → execute) still works, but requires more manual coordination.
+
+## Recommended Workflow
+
+1. Use a web LLM (Claude, ChatGPT) for specification generation
+2. Save the generated docs to your project
+3. Use any code-capable LLM for execution, following `START_PROMPTS.md`
+4. Manually run verification between tasks
