@@ -28,7 +28,7 @@
 - [ ] **[P1 / High x0.5]** Parallel Agent Orchestration (see below)
 - [ ] **[P2 / Medium]** Spec Diffing and Plan Regeneration (see below)
 - [ ] **[P2 / Medium x0.6]** Human Review Queue (see below)
-- [ ] **[P1 / Medium]** Structure phase-checkpoint to verify local before production (clarified, see below)
+- [x] **[P1 / Medium]** Structure phase-checkpoint to verify local before production (clarified, see below) — DONE
 - [x] **[P1 / Medium]** Deferred Requirements Capture — Auto-capture "v2" and "out of scope" items during spec generation (clarified, see below) — DONE
 - [x] **[P1 / Medium]** Create `/gh-init` command with local git init and auto-detection (clarified, see below) — DONE
 - [ ] **[P1 / Medium]** Enhance `/phase-prep` with detailed setup instructions — Research docs and provide step-by-step guidance for Pre-Phase Setup items (see below)

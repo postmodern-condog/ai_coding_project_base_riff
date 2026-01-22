@@ -41,7 +41,12 @@ If the config is missing or required commands are empty:
 - Run `/configure-verification`
 - Do not proceed with automated checks until commands are configured
 
-## Automated Checks
+## Local Verification (Must Pass First)
+
+**IMPORTANT**: All local verification must pass before proceeding to production verification.
+If any local check fails, stop and report — do not run production checks.
+
+### Automated Local Checks
 
 Run these commands and report results:
 
@@ -63,10 +68,22 @@ Run these commands and report results:
    ```
    (if empty, mark as not applicable or configure)
 
-4. **Security Scan**
+4. **Build** (if applicable)
+   ```
+   {commands.build from verification-config}
+   ```
+   (if empty and project has build step, ask to configure)
+
+5. **Dev Server Starts**
+   ```
+   {devServer.command from verification-config}
+   ```
+   Verify it starts without errors and is accessible at `{devServer.url}`.
+
+6. **Security Scan**
 
    Run security checks:
-   - Use the project’s configured security tooling (if documented)
+   - Use the project's configured security tooling (if documented)
    - Run secrets detection (pattern-based)
    - Run static analysis via documented tools or ask for a command
 
@@ -77,7 +94,7 @@ Run these commands and report results:
 
    Security scan blocks checkpoint if CRITICAL or HIGH issues remain unresolved.
 
-5. **Code Quality Metrics**
+7. **Code Quality Metrics**
 
    Collect and report these metrics for the phase:
 
@@ -97,11 +114,11 @@ Run these commands and report results:
 
    Flag if coverage dropped compared to before the phase (if a baseline exists).
 
-## Optional Enhanced Checks
+### Optional Local Checks
 
 These checks run only if the required tools are available (detected above).
 
-6. **Code Simplification** (requires: code-simplifier plugin)
+8. **Code Simplification** (requires: code-simplifier plugin)
 
    If available, run code-simplifier on files changed in this phase:
    ```bash
@@ -110,36 +127,37 @@ These checks run only if the required tools are available (detected above).
 
    Focus: reduce complexity, improve naming, eliminate redundancy. Preserve all functionality.
 
-7. **Browser Verification** (requires: Playwright MCP)
+9. **Browser Verification - Local** (requires: Playwright MCP or Chrome DevTools MCP)
 
-   If Playwright MCP is available and phase includes UI work:
+   If browser tools are available and phase includes UI work:
    - Parse Phase $1 tasks for acceptance criteria marked `BROWSER:*`
    - Use the browser-verification skill with each criterion's `Verify:` metadata
    - Take snapshots for verification
+   - Test against local dev server (localhost)
 
    If unavailable:
    - Add browser checks to Human Required section instead
 
-8. **Technical Debt Check** (optional)
+10. **Technical Debt Check** (optional)
 
-   If `.claude/skills/tech-debt-check/SKILL.md` exists:
-   - Run duplication analysis
-   - Run complexity analysis
-   - Check file sizes
-   - Detect AI code smells
+    If `.claude/skills/tech-debt-check/SKILL.md` exists:
+    - Run duplication analysis
+    - Run complexity analysis
+    - Check file sizes
+    - Detect AI code smells
 
-   Report findings with severity levels. Informational only (does not block).
+    Report findings with severity levels. Informational only (does not block).
 
-## Human Required
+### Manual Local Verification
 
-From the "Phase $1 Checkpoint" section in EXECUTION_PLAN.md:
-- List each human-required item with its reason
+From the "Phase $1 Checkpoint" section in EXECUTION_PLAN.md, extract LOCAL items:
+- List each human-required item for local verification
 - For each item, provide numbered step-by-step instructions that explain:
   1. What to do (specific actions)
   2. What to look for (expected outcomes)
   3. How to confirm success
 
-## Approach Review (Human)
+### Approach Review (Human)
 
 Ask the human to review the phase's implementation approach against these criteria:
 
@@ -154,12 +172,45 @@ Ask the human to review the phase's implementation approach against these criter
 - If all criteria pass, report: "Approach Review: No issues noted"
 - If issues exist, report each one briefly with context
 
-This is a quick sanity check to catch "works but wrong approach" issues before they compound.
-
-## Regression Check (if feature work)
+### Regression Check (if feature work)
 
 - Confirm existing tests still pass
 - Note any changes to existing functionality
+
+---
+
+## Production Verification (After Local Passes)
+
+**BLOCKED** until all Local Verification passes.
+
+If local verification has any failures, show:
+```
+## Production Verification
+
+(Blocked: Complete local verification first)
+
+Pending production checks:
+- [ ] {list items from EXECUTION_PLAN.md marked for production/staging}
+```
+
+### When Local Verification Passes
+
+Extract PRODUCTION items from "Phase $1 Checkpoint" in EXECUTION_PLAN.md:
+
+1. **Staging/Production Deployment Verification**
+   - If phase includes deployment: verify staging environment works
+   - Check production logs for errors (if applicable)
+   - Verify no regressions in deployed environment
+
+2. **External Integration Verification**
+   - Third-party API connections working
+   - External services responding correctly
+   - Webhooks/callbacks functioning
+
+3. **Production-Only Manual Checks**
+   - Items that can only be verified in production environment
+   - Performance under real load (if applicable)
+   - Cross-browser/device testing on production URLs
 
 ## State Update
 
@@ -221,31 +272,51 @@ Phase $1 Checkpoint Results
 
 Tool Availability:
 - Playwright MCP: ✓ | ✗
+- Chrome DevTools MCP: ✓ | ✗
 - code-simplifier: ✓ | ✗
 - Trigger.dev MCP: ✓ | ✗ | N/A
+
+## Local Verification
 
 Automated Checks:
 - Tests: PASSED | FAILED
 - Type Check: PASSED | FAILED | SKIPPED
 - Linting: PASSED | FAILED | SKIPPED
+- Build: PASSED | FAILED | SKIPPED
+- Dev Server: PASSED | FAILED | SKIPPED
 - Security: PASSED | FAILED | X critical, Y high
 - Coverage: {X}% (target: 80%)
 
 Optional Checks:
 - Code Simplification: APPLIED | SKIPPED
-- Browser Verification: PASSED | SKIPPED
+- Browser Verification (local): PASSED | SKIPPED
 - Tech Debt: PASSED | NOTES | SKIPPED
 
-Human Required:
+Manual Local Checks:
 - [ ] {item description}
-  - Reason: {why human review is needed}
   - Steps:
     1. {First action to take}
     2. {What to verify/look for}
     3. {How to confirm success}
-- [ ] {next item...}
 
 Approach Review: No issues noted | {list specific issues}
 
-Overall: Ready to proceed | Issues to address
+Local Verification: ✓ PASSED | ✗ FAILED (address issues above)
+
+---
+
+## Production Verification
+
+[If local passed:]
+- [ ] Staging deployment verified
+- [ ] Production logs clean
+- [ ] External integrations working
+- [ ] {other production items from EXECUTION_PLAN.md}
+
+[If local failed:]
+(Blocked: Complete local verification first)
+
+---
+
+Overall: Ready to proceed | Local issues to address | Production issues to address
 ```
