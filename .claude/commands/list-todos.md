@@ -5,16 +5,19 @@ allowed-tools: Read, Glob, Grep, AskUserQuestion, Edit
 
 Analyze the TODO items in TODOS.md and produce a prioritized list with implementation guidance.
 
-## Directory Guard (Wrong Directory Check)
+## Prerequisites
 
 Before starting:
-- If the current directory appears to be the toolkit repo (e.g., `GENERATOR_PROMPT.md` exists), **STOP** and tell the user to run `/list-todos` from their project directory instead.
 - Confirm `TODOS.md` exists in the current working directory. If it does not exist, **STOP** and ask the user where their project TODOs live.
 
 ## Process
 
 1. **Read TODOS.md** from the project root
-2. **Read project context** — Scan PRODUCT_SPEC.md, TECHNICAL_SPEC.md, AGENTS.md, and EXECUTION_PLAN.md if they exist
+2. **Read project context (optional)** — Look for context files in this order of preference:
+   - VISION.md (if exists, use for project alignment)
+   - PRODUCT_SPEC.md (fallback if no VISION.md)
+   - TECHNICAL_SPEC.md, AGENTS.md, EXECUTION_PLAN.md (additional context if they exist)
+   - If none exist, proceed without project context — analyze based on TODO content alone
 3. **Extract TODO items** — Parse all actionable items from TODOS.md
 4. **Analyze each item** using the framework below
 5. **Sort by priority score** (highest first), break ties by value to project
@@ -30,7 +33,13 @@ For each TODO item, evaluate:
 |--------|-----|--------|------|
 | **Requirements Clarity** | One-liner with no context, unclear intent | Some details but gaps remain | Detailed spec with acceptance criteria |
 | **Ease of Implementation** | Can't assess without clearer requirements | Moderate effort, approach is clear | Straightforward, clear path |
-| **Value to Project** | Can't assess without clearer requirements | Useful improvement | Core functionality, high impact |
+| **Value to Project** (weighted 2×) | Can't assess without clearer requirements | Useful improvement | Core functionality, high impact |
+
+**Assessing Value to Project:**
+- If VISION.md or PRODUCT_SPEC.md exists, evaluate how strongly the item aligns with the stated vision and goals
+- If no context files exist, assess value based on the TODO item's own description and apparent impact
+- Items that directly advance the core vision/goals score higher than tangential improvements
+- Consider both immediate utility and strategic alignment
 
 ### Critical Rule: Do NOT Infer
 
@@ -46,12 +55,21 @@ A one-liner TODO like "Add feature X" with no additional context = LOW clarity, 
 ### Priority Score Calculation
 
 ```
-Priority = (Clarity + Ease + Value) / 3 × 10
+Priority = ((Clarity + Ease + (Value × 2)) / 4 × 10) × Personal Multiplier
 ```
 
-Where each factor is scored 1-3 (Low=1, Medium=2, High=3), producing a 1-10 scale.
+Where each factor is scored 1-3 (Low=1, Medium=2, High=3). Value is weighted 2× because alignment with project goals is the strongest signal for prioritization.
 
-**If Clarity is LOW, cap the Priority Score at 3/10 maximum.**
+**Personal Priority Multiplier:**
+- Look for `[priority: N]` inline in the TODO item (e.g., `[priority: 1.5]`)
+- Valid range: 0.5 to 2.0
+- If not specified, default to 1.0
+- Examples:
+  - `[priority: 2]` — User considers this twice as important
+  - `[priority: 0.5]` — User considers this half as important
+  - `[priority: 1.5]` — User considers this 50% more important
+
+**If Clarity is LOW, cap the Priority Score at 3/10 maximum** (applied before multiplier).
 
 Adjust score based on:
 - **Boost (+1-2):** Blocks other work, security-related, frequently requested
@@ -64,11 +82,12 @@ Adjust score based on:
 ```markdown
 ## {N}. {TODO Title}
 
-**Priority Score:** {N}/10
+**Priority Score:** {N}/10 {if multiplier != 1.0: "(base {base}/10 × {multiplier})"}
 **Ranking Factors:**
 - Requirements Clarity: {Medium|High} — {one sentence explanation}
 - Ease of Implementation: {Low|Medium|High} — {one sentence explanation}
 - Value to Project: {Low|Medium|High} — {one sentence explanation}
+{if multiplier != 1.0: "- Personal Priority: ×{multiplier}"}
 
 **Implementation Notes:**
 {2-4 sentences on how to implement: key files to modify, approach, dependencies, estimated scope}
@@ -85,11 +104,12 @@ Adjust score based on:
 ```markdown
 ## {N}. {TODO Title}
 
-**Priority Score:** {N}/10 (capped due to unclear requirements)
+**Priority Score:** {N}/10 (capped due to unclear requirements{if multiplier != 1.0: ", ×{multiplier} applied"})
 **Ranking Factors:**
 - Requirements Clarity: **Low** — {explain what's missing: no context, unclear intent, etc.}
 - Ease of Implementation: Cannot assess
 - Value to Project: Cannot assess
+{if multiplier != 1.0: "- Personal Priority: ×{multiplier}"}
 
 **What I understand:** {Brief statement of what little is clear, or "Only the title"}
 
@@ -122,11 +142,11 @@ Adjust score based on:
 
 ## Summary
 
-| Priority | Item | Score | Next Action |
-|----------|------|-------|-------------|
-| 1 | {title} | {N}/10 | {action} |
-| 2 | {title} | {N}/10 | {action} |
-| ... | ... | ... | ... |
+| Priority | Item | Score | Multiplier | Next Action |
+|----------|------|-------|------------|-------------|
+| 1 | {title} | {N}/10 | {×N or —} | {action} |
+| 2 | {title} | {N}/10 | {×N or —} | {action} |
+| ... | ... | ... | ... | ... |
 
 **Ready to implement:** {count}
 **Needs clarification:** {count}

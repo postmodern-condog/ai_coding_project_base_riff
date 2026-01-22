@@ -11,10 +11,13 @@
   `features/sprint5/.claude/settings.local.json`), Claude Code stops searching and doesn't
   find parent commands. Options: `/workspace` command to set up subdirs with symlinks, or
   document the workaround (`ln -s ../../.claude/commands .claude/commands`)
-- [ ] Persistent learnings/patterns file for cross-task context (see below)
-- [ ] **[P1 / Medium]** Add `/capture-learning` command for simple learnings capture (see below)
+- [x] Persistent learnings/patterns file for cross-task context (see below) — DONE
+- [x] **[P1 / Medium]** Add `/capture-learning` command for simple learnings capture (see below) — DONE
 - [ ] **[P2 / Low]** Add `/quick-feat` command for very simple features (see below)
 - [ ] **[P1 / Medium]** Enhance `/phase-prep` to show human prep for future phases (see below)
+- [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` — Detect permission mode and suggest switching to "execute dangerously" mode for uninterrupted autonomous execution if not already enabled
+- [ ] **[P1 / Medium x2]** Investigate auto-advancing steps without human intervention — When all prereqs for the next step are met (tests pass, no blockers, verification complete), automatically proceed to the next step instead of stopping for human confirmation
+- [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
 - [ ] Compare web vs CLI interface for generation workflow (see below)
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues)
 - [ ] Intro commands for each Step — **DEFERRED** (unclear requirements, needs more thought)

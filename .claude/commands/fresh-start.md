@@ -144,6 +144,7 @@ Check which of these exist and read them:
 **From PROJECT_ROOT** (always check):
 - **PRODUCT_SPEC.md** — What we're building (greenfield)
 - **TECHNICAL_SPEC.md** — How it's built (greenfield)
+- **LEARNINGS.md** — Discovered patterns and gotchas (if exists)
 
 **From FEATURE_DIR** (if feature mode):
 - **FEATURE_SPEC.md** — Feature requirements
@@ -156,6 +157,9 @@ Check which of these exist and read them:
    - What is being built
    - Current phase and progress
    - Tech stack and key patterns
+   - Key learnings to follow (if LEARNINGS.md exists)
 3. Confirm you're ready to begin execution
 4. If `.claude/verification-config.json` is missing or empty, recommend running
    `/configure-verification` before `/phase-prep`
+
+**Important:** If LEARNINGS.md exists, apply those patterns throughout your work. These are project-specific conventions discovered during development that override general defaults.
