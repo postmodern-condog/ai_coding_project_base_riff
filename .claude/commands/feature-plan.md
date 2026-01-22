@@ -132,33 +132,58 @@ If `PROJECT_ROOT/CLAUDE.md` does not exist, create it with:
 
 If it already exists, do not overwrite it.
 
-### 5. Codex CLI Detection (Optional)
+(Codex CLI detection runs separately below, regardless of whether this section was skipped.)
+
+## Codex CLI Detection (Always Runs)
+
+This section runs regardless of whether the project was already set up, to catch new skills added to the toolkit.
 
 Check if OpenAI Codex CLI is installed:
 ```bash
 command -v codex >/dev/null 2>&1
 ```
 
-If Codex is detected:
-- Use AskUserQuestion to prompt:
-  ```
-  Question: "Codex CLI detected. Install toolkit skills for Codex?"
-  Options:
-    - "Yes, install" — Install skills via symlink (auto-updates with toolkit)
-    - "No, skip" — Don't install Codex skills
-  ```
+If Codex is NOT detected: skip silently.
 
-If user selects "Yes, install":
-- Run from this toolkit directory:
-  ```bash
-  ./scripts/install-codex-skill-pack.sh --method symlink
-  ```
-- Report the installation result
+If Codex IS detected:
 
-If Codex is not detected:
-- Skip silently (don't mention Codex to users who don't have it)
+1. **Check for new skills** by comparing toolkit skills to installed skills:
+   ```bash
+   # Get toolkit skills
+   TOOLKIT_SKILLS=$(ls codex/skills/ | grep -v README)
 
-**Note:** Using symlinks means Codex skills auto-update when user runs `git pull` on the toolkit.
+   # Get installed skills
+   INSTALLED_SKILLS=$(ls ~/.codex/skills/ 2>/dev/null | grep -v '^\.')
+
+   # Find skills in toolkit but not installed
+   NEW_SKILLS=$(comm -23 <(echo "$TOOLKIT_SKILLS" | sort) <(echo "$INSTALLED_SKILLS" | sort))
+   ```
+
+2. **If new skills exist**, use AskUserQuestion:
+   ```
+   Question: "New Codex skills available: {list}. Install them?"
+   Options:
+     - "Yes, install new skills" — Add via symlink (auto-updates with toolkit)
+     - "No, skip" — Don't install
+   ```
+
+3. **If no installed skills exist** (first time), use AskUserQuestion:
+   ```
+   Question: "Codex CLI detected. Install toolkit skills for Codex?"
+   Options:
+     - "Yes, install" — Install skills via symlink (auto-updates with toolkit)
+     - "No, skip" — Don't install Codex skills
+   ```
+
+4. **If user selects install**, run from this toolkit directory:
+   ```bash
+   ./scripts/install-codex-skill-pack.sh --method symlink
+   ```
+   The script automatically skips already-installed skills and only adds new ones.
+
+5. Report installation result (new skills added, existing skills unchanged).
+
+**Note:** Per-skill symlinks mean content updates are automatic, but new skills require re-running this detection.
 
 ## Verification (Automatic)
 

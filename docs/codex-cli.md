@@ -21,9 +21,21 @@ Then restart Codex CLI.
 ### Symlinks vs Copy
 
 The recommended installation uses symlinks. This means:
-- Commands stay in sync when you update the toolkit
-- No need to reinstall after toolkit updates
-- Single source of truth for command definitions
+- Skill content stays in sync when you update the toolkit
+- No need to reinstall after toolkit updates for existing skills
+- Single source of truth for skill definitions
+
+### New Skills
+
+Symlinks are created per-skill, not for the entire skills directory. This means:
+
+| Change | Auto-updates? |
+|--------|:-------------:|
+| Skill content modified | ✅ Yes |
+| New skill added to toolkit | ❌ No — re-run needed |
+| Skill renamed | ❌ No — re-run needed |
+
+When you run `/feature-plan` (or `/setup`), the toolkit automatically detects new skills and prompts you to install them. You don't need to manually track toolkit updates.
 
 ## Usage
 
