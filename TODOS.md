@@ -14,7 +14,7 @@
 - [x] Persistent learnings/patterns file for cross-task context (see below) — DONE
 - [x] **[P1 / Medium]** Add `/capture-learning` command for simple learnings capture (see below) — DONE
 - [ ] **[P2 / Low]** Add `/quick-feat` command for very simple features (see below)
-- [ ] **[P1 / Medium]** Enhance `/phase-prep` to show human prep for future phases (clarified, see below)
+- [x] **[P1 / Medium]** Enhance `/phase-prep` to show human prep for future phases (clarified, see below) — DONE
 - [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below)
 - [ ] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below)
 - [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
@@ -31,7 +31,7 @@
 - [x] **[P1 / Medium]** Structure phase-checkpoint to verify local before production (clarified, see below) — DONE
 - [x] **[P1 / Medium]** Deferred Requirements Capture — Auto-capture "v2" and "out of scope" items during spec generation (clarified, see below) — DONE
 - [x] **[P1 / Medium]** Create `/gh-init` command with local git init and auto-detection (clarified, see below) — DONE
-- [ ] **[P1 / Medium]** Enhance `/phase-prep` with detailed setup instructions — Research docs and provide step-by-step guidance for Pre-Phase Setup items (see below)
+- [x] **[P1 / Medium]** Enhance `/phase-prep` with detailed setup instructions — Research docs and provide step-by-step guidance for Pre-Phase Setup items (see below) — DONE
 - [x] Add `/list-todos` command (see below) — DONE
 - [x] Recovery & Rollback Commands — DONE (phase-rollback, task-retry, phase-analyze)
 - [x] **[P1 / Medium]** Pre-push hook to check if README/docs need updating — Before every push, analyze recent commits and prompt if documentation appears outdated relative to code/command changes — DONE

@@ -83,6 +83,125 @@ Before starting, confirm the required files exist:
    - Identify any tools or permissions needed for autonomous execution
    - Check if any tasks require browser verification
 
+## Detailed Setup Instructions (When Items Incomplete)
+
+If any Pre-Phase Setup items are FAIL or BLOCKED, provide detailed step-by-step instructions for each:
+
+### For Each Incomplete Item
+
+1. **Identify the service/tool involved** (e.g., Supabase, Stripe, Firebase)
+
+2. **Research if needed** — Use WebFetch/WebSearch to get current setup steps
+
+3. **Generate a complete guide** including:
+   - Direct links to dashboards/consoles
+   - Exact field values to enter
+   - What to copy and where to paste
+   - Verification steps to confirm completion
+
+### Example Transformation
+
+Instead of:
+```
+Pre-Phase Setup:
+- [ ] Create Supabase project — BLOCKED
+```
+
+Output:
+```
+PRE-PHASE SETUP GUIDE
+=====================
+
+## Create Supabase Project
+
+1. Go to https://supabase.com/dashboard
+2. Sign in or create account
+3. Click "New Project" (green button, top right)
+4. Fill in:
+   - Organization: Select or create one
+   - Name: `{project-name}` (or your preference)
+   - Database Password: Click "Generate" and SAVE THIS
+   - Region: Choose closest to your users
+5. Click "Create new project"
+6. Wait 2-3 minutes for provisioning
+
+## Get Credentials
+
+1. In Supabase dashboard, click "Project Settings" (gear icon)
+2. Click "API" in the left menu
+3. Copy these values:
+   - Project URL: `https://xxxxx.supabase.co` → SUPABASE_URL
+   - anon public key: `eyJ...` → SUPABASE_ANON_KEY
+
+## Update .env File
+
+Add to `.env`:
+```
+SUPABASE_URL=<paste Project URL>
+SUPABASE_ANON_KEY=<paste anon public key>
+```
+
+## Verify Setup
+
+Run `/phase-prep $1` again to confirm all items complete.
+```
+
+### Common Service Templates
+
+For frequently used services, provide detailed guides:
+- **Supabase**: Project creation, API keys, database setup
+- **Firebase**: Project creation, config, auth setup
+- **Stripe**: Test account, API keys, webhook setup
+- **Auth0**: Tenant creation, application setup
+- **Vercel/Netlify**: Project linking, environment variables
+
+---
+
+## Future Phase Preview
+
+After showing current phase prerequisites, scan ALL remaining phases and show human-required items.
+
+### What to Extract
+
+For each phase after $1, extract ONLY human-required setup items:
+- Account creation (external services)
+- API key acquisition
+- Manual configuration tasks
+- External service setup
+
+Do NOT include:
+- Automated checks
+- Code-related tasks
+- Verification steps
+
+### Output Format
+
+```
+## Future Phase Preview
+
+Items below require human action. Complete now to avoid blockers later.
+
+### Phase {N+1}: {Phase Title}
+Human Setup Required:
+- {Human item 1}
+- {Human item 2}
+
+### Phase {N+2}: {Phase Title}
+Human Setup Required:
+- {Human item 1}
+
+### Phase {N+3}: {Phase Title}
+(No human setup items)
+
+---
+TIP: Complete future setup now to avoid blockers later.
+Run `/phase-prep {N}` for detailed instructions on any item.
+```
+
+If no future phases have human items, omit this section.
+
+---
+
 ## Report
 
 ```
@@ -103,6 +222,8 @@ Git: {branch}, {clean | dirty}
 Pre-Phase Setup:
 - {items with PASS/FAIL/BLOCKED}
 
+[If any FAIL/BLOCKED, show detailed setup guide above]
+
 Environment:
 - {env vars or "None required"}
 
@@ -110,10 +231,17 @@ Tools:
 - Playwright MCP: ✓ | ✗
 - code-simplifier: ✓ | ✗
 - Trigger.dev MCP: ✓ | ✗ | N/A
+
 Criteria Audit: PASS | WARN | FAIL
 
 Status: READY | BLOCKED | READY WITH NOTES
 {Details if not READY}
+
+---
+
+## Future Phase Preview
+
+[Show human items for all remaining phases]
 ```
 
 After reporting, append the pre-phase results to `.claude/verification-log.jsonl`
