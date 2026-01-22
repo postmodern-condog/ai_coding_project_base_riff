@@ -32,6 +32,85 @@ Before starting, confirm the required files exist:
 
 - If either is missing, **STOP** and tell the user to `cd` into their project/feature directory (the one containing `EXECUTION_PLAN.md`) and re-run `/phase-start $1`.
 
+## Permission Mode Check (Once Per Project)
+
+Check `.claude/settings.local.json` for `permissionMode.prompted`:
+
+```json
+{
+  "permissionMode": {
+    "prompted": true,
+    "dangerous": true  // or false
+  }
+}
+```
+
+**If NOT prompted yet (field missing or `prompted: false`):**
+
+Display this prompt using AskUserQuestion:
+
+```
+PERMISSION MODE CHECK
+=====================
+
+For autonomous phase execution, Claude Code works best with
+`--dangerously-skip-permissions` enabled. This allows:
+- Uninterrupted task execution
+- Automatic file creation and modification
+- Running build/test commands without prompts
+
+⚠️  This grants Claude broad access to your project directory.
+   Only enable if you trust the execution plan.
+
+Enable dangerous mode for this project?
+```
+
+**Options:**
+- "Yes, enable" — Set `dangerous: true`, don't prompt again
+- "No, keep prompts" — Set `dangerous: false`, don't prompt again
+
+**After user choice:**
+
+1. Update `.claude/settings.local.json`:
+   ```json
+   {
+     "permissionMode": {
+       "prompted": true,
+       "dangerous": true  // or false based on choice
+     }
+   }
+   ```
+
+2. If user selected "Yes, enable":
+   ```
+   ✓ Dangerous mode preference saved.
+
+   NOTE: If Claude Code was started WITHOUT --dangerously-skip-permissions,
+   you may need to restart with:
+     claude --dangerously-skip-permissions
+
+   For this session, some actions may still prompt for confirmation.
+   ```
+
+3. If user selected "No, keep prompts":
+   ```
+   ✓ Permission preference saved. Normal prompts will continue.
+
+   You can change this later by editing .claude/settings.local.json
+   or deleting the permissionMode entry to be prompted again.
+   ```
+
+**If already prompted (`prompted: true`):**
+
+- Skip this check entirely
+- Continue to Execution Rules
+
+**Manual Reset:**
+
+Users can manually edit `.claude/settings.local.json` to:
+- Delete `permissionMode` to be prompted again
+- Change `dangerous` value directly
+
 ## Execution Rules
 
 1. **Git Workflow (Auto-Commit)**

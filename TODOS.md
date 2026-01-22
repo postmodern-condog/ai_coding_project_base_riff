@@ -15,7 +15,7 @@
 - [x] **[P1 / Medium]** Add `/capture-learning` command for simple learnings capture (see below) — DONE
 - [ ] **[P2 / Low]** Add `/quick-feat` command for very simple features (see below)
 - [x] **[P1 / Medium]** Enhance `/phase-prep` to show human prep for future phases (clarified, see below) — DONE
-- [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below)
+- [x] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below) — DONE
 - [ ] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below)
 - [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
 - [ ] Compare web vs CLI interface for generation workflow (see below)
