@@ -12,6 +12,9 @@
   find parent commands. Options: `/workspace` command to set up subdirs with symlinks, or
   document the workaround (`ln -s ../../.claude/commands .claude/commands`)
 - [ ] Persistent learnings/patterns file for cross-task context (see below)
+- [ ] **[P1 / Medium]** Add `/capture-learning` command for simple learnings capture (see below)
+- [ ] **[P2 / Low]** Add `/quick-feat` command for very simple features (see below)
+- [ ] **[P1 / Medium]** Enhance `/phase-prep` to show human prep for future phases (see below)
 - [ ] Compare web vs CLI interface for generation workflow (see below)
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues)
 - [ ] Intro commands for each Step — **DEFERRED** (unclear requirements, needs more thought)
@@ -274,6 +277,181 @@ Create a `LEARNINGS.md` file that agents update as they discover project pattern
 - Should this be auto-generated or human-curated?
 - How to prevent the file from growing unbounded?
 - Should learnings be categorized by phase or topic?
+
+### `/capture-learning` Command (Simple Learnings Capture)
+
+A lightweight alternative to a full "compound documentation" system — a simple command to append learnings to a structured file.
+
+**Inspiration:** compound-engineering-plugin's `/workflows:compound` command, but stripped down to essentials.
+
+**Problem:**
+- VISION.md explicitly calls for "capture deferred items, TODOs, and other important learnings"
+- Full "knowledge compounding" systems are complex (YAML frontmatter, cross-references, pattern promotion)
+- Most projects just need a simple way to jot down what was learned
+
+**Proposed Implementation:**
+
+**Command:** `/capture-learning`
+
+**Behavior:**
+1. Prompt for learning content (or accept inline: `/capture-learning "Use vi.mock not jest.mock"`)
+2. Prompt for category (optional): Error Handling, Testing, Conventions, Gotchas, Performance
+3. Append to `LEARNINGS.md` with timestamp and current task context
+
+**Output format in LEARNINGS.md:**
+```markdown
+# Discovered Patterns
+
+> Append-only learnings file. Read at task start.
+
+## Testing
+- Use `vi.mock()` not `jest.mock()` — this is a Vitest project (2026-01-22, Task 1.1.A)
+- Mock auth using `createMockUser()` from test-utils (2026-01-22, Task 1.3.B)
+
+## Gotchas
+- `user.permissions` is lazy-loaded, always await it (2026-01-22, Task 2.3.B)
+```
+
+**Integration:**
+- `/fresh-start` loads LEARNINGS.md into context
+- `/phase-start` reminds agent to check LEARNINGS.md
+- `/phase-checkpoint` prompts: "Any learnings to capture from this phase?"
+
+**Simplicity constraints:**
+- No YAML frontmatter
+- No cross-references or "related issues"
+- No "promotion to required reading"
+- Just structured markdown with timestamps
+
+**Files to create:**
+- `.claude/commands/capture-learning.md`
+
+---
+
+### `/quick-feat` Command for Simple Features
+
+A streamlined version of `/feature-spec` for very simple features that don't warrant full specification ceremony.
+
+**Problem:**
+- `/feature-spec` is designed for substantial features requiring detailed specification
+- For simple features ("add a logout button", "show user avatar in header"), full spec is overkill
+- But skipping specs entirely loses the benefits of planning
+
+**Proposed Implementation:**
+
+**Command:** `/quick-feat <description>`
+
+**Example:**
+```bash
+/quick-feat "Add logout button to navbar"
+```
+
+**Behavior:**
+1. Ask 2-3 clarifying questions max (not the full spec Q&A)
+2. Generate a minimal plan inline (not a separate EXECUTION_PLAN.md)
+3. Execute immediately with verification
+4. Commit with conventional commit message
+
+**Output:**
+```
+QUICK FEATURE: Add logout button to navbar
+
+Clarifications:
+- Location: Right side of navbar, after user name
+- Behavior: Call /api/auth/logout, redirect to /login
+- Style: Match existing navbar buttons
+
+Plan:
+1. Add LogoutButton component
+2. Wire to auth API
+3. Add to Navbar component
+
+Executing...
+✓ Created src/components/LogoutButton.tsx
+✓ Added to Navbar.tsx
+✓ Verified: Button renders, logout API called on click
+
+Committed: feat(auth): add logout button to navbar
+```
+
+**Guardrails:**
+- If feature touches >3 files, suggest `/feature-spec` instead
+- If clarification reveals complexity, escalate to full spec
+- Still runs verification (just inline, not phase-checkpoint)
+
+**Use cases:**
+- UI tweaks
+- Single-endpoint additions
+- Configuration changes
+- Bug fixes that are really small features
+
+**Files to create:**
+- `.claude/commands/quick-feat.md`
+
+---
+
+### Enhanced `/phase-prep` with Future Phase Preview
+
+Add a second section to `/phase-prep` output showing human prep requirements for future phases, allowing users to front-load setup work.
+
+**Problem:**
+- `/phase-prep N` only shows prep for phase N
+- Users often want to knock out all manual setup at once (create all accounts, get all API keys)
+- Currently must run `/phase-prep` for each phase to see what's needed
+- Discovering a Phase 3 blocker mid-project is frustrating
+
+**Proposed Enhancement:**
+
+Update `/phase-prep` output format:
+
+```
+PHASE 2 PREP
+============
+
+## Current Phase Requirements
+
+Pre-Phase Setup:
+- [x] Database migrations run
+- [ ] Stripe API keys in .env
+
+Human Tasks:
+- [ ] Create Stripe test account at https://dashboard.stripe.com
+
+## Future Phase Preview
+
+### Phase 3: Notifications
+Human Setup Required:
+- Create SendGrid account
+- Configure SMTP credentials
+
+### Phase 4: Deployment
+Human Setup Required:
+- Create Vercel project
+- Configure production database
+- Set up domain DNS
+
+---
+TIP: Complete future setup now to avoid blockers later.
+Run `/phase-prep 3` for detailed Phase 3 instructions.
+```
+
+**Implementation:**
+1. Parse EXECUTION_PLAN.md for all phases
+2. Extract "Pre-Phase Setup" and human-required items from each
+3. Display current phase in detail
+4. Display future phases in summary (just the human items, not full instructions)
+5. Offer to show detailed instructions for any future phase
+
+**Benefits:**
+- Users can batch all account creation / credential gathering
+- Reduces mid-project interruptions
+- Surfaces potential blockers early
+- Matches how experienced developers front-load admin work
+
+**Files to modify:**
+- `.claude/commands/phase-prep.md`
+
+---
 
 ### `/list-todos` Command
 
