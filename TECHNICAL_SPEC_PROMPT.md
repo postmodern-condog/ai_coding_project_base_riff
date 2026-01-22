@@ -11,6 +11,47 @@ Before you begin asking questions, plan your questions out to meet the following
 
 We are building an MVP - bias your choices towards simplicity, ease of implementation, and speed. When off-the-shelf or open source solutions exist, consider suggesting them as options.
 
+## Making Technical Choices
+
+When facing significant technical decisions (tech stack, database, framework, architecture pattern), help the user make informed choices:
+
+### Web Research (Required for Major Decisions)
+Before recommending a technology choice, use WebSearch to gather current information:
+- Recent benchmarks and performance comparisons
+- Known issues or limitations discovered in production
+- Community adoption trends and ecosystem health
+- Current best practices (as of 2026)
+
+Cite your sources when presenting recommendations.
+
+### Decision Matrix (Required When Multiple Options Exist)
+When presenting choices between 2+ viable options, generate a comparison matrix:
+
+```
+| Criterion               | Option A      | Option B      | Option C      |
+|-------------------------|---------------|---------------|---------------|
+| Fit for requirements    | ✓ Strong      | ○ Moderate    | ✗ Weak        |
+| Learning curve          | Low           | Medium        | High          |
+| Scaling characteristics | Horizontal    | Vertical      | Both          |
+| Ecosystem/tooling       | Mature        | Growing       | Limited       |
+| Cost at MVP scale       | Free tier     | ~$20/mo       | ~$50/mo       |
+| Cost at growth scale    | ~$100/mo      | ~$200/mo      | ~$150/mo      |
+
+Recommendation: Option A
+Confidence: High
+Rationale: {2-3 sentences explaining why this fits the specific project requirements}
+Sources: {links from web research}
+```
+
+Apply this to decisions including but not limited to:
+- Frontend framework (React vs Vue vs Svelte vs etc.)
+- Backend framework/runtime (Node vs Python vs Go vs etc.)
+- Database (Postgres vs MySQL vs MongoDB vs SQLite vs etc.)
+- Hosting/deployment (Vercel vs Railway vs Fly.io vs etc.)
+- Auth provider (Clerk vs Auth0 vs Supabase Auth vs roll-your-own)
+- State management approach
+- API style (REST vs GraphQL vs tRPC)
+
 We will ultimately pass this document on to the next stage of the workflow, which is converting this document into tasks that an AI coding agent will execute on autonomously. This document needs to contain enough detail that the AI coding agent will successfully be able to implement.
 
 Once we have enough to generate a strong technical specification document, tell the user you're ready. Generate `TECHNICAL_SPEC.md` that:

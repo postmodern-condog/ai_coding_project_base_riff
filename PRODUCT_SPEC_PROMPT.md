@@ -17,6 +17,44 @@ Before you begin asking questions, plan your questions out to meet the following
 
 We are building an MVP - bias your choices towards simplicity, ease of implementation, and speed. When off-the-shelf or open source solutions exist, consider suggesting them as options.
 
+## Making Product Choices
+
+When facing significant product decisions (platform, feature prioritization, user experience approach), help the user make informed choices:
+
+### Web Research (Required for Market/Competitive Decisions)
+Before recommending product direction, use WebSearch to gather current information:
+- Competitor analysis (what do similar products do?)
+- User expectations for this category (what's table stakes vs. differentiator?)
+- Platform trends (mobile-first? desktop? PWA adoption rates?)
+- Common pitfalls in this product category
+
+Cite your sources when presenting recommendations.
+
+### Decision Matrix (Required When Multiple Approaches Exist)
+When presenting choices between 2+ viable product approaches, generate a comparison matrix:
+
+```
+| Criterion               | Approach A    | Approach B    | Approach C    |
+|-------------------------|---------------|---------------|---------------|
+| User value delivered    | ✓ High        | ○ Medium      | ○ Medium      |
+| Implementation effort   | Low           | Medium        | High          |
+| Time to first user      | 1 week        | 3 weeks       | 6 weeks       |
+| Differentiation         | Low           | Medium        | High          |
+| Risk level              | Low           | Medium        | High          |
+
+Recommendation: Approach A
+Confidence: High
+Rationale: {2-3 sentences explaining why this fits the specific product goals}
+Sources: {links from web research if applicable}
+```
+
+Apply this to decisions including but not limited to:
+- Platform choice (web vs mobile vs desktop vs CLI)
+- MVP feature set (what's in vs. out)
+- User experience approach (wizard vs. dashboard vs. single-page)
+- Monetization model (if applicable)
+- User onboarding flow
+
 If the user wants to add features beyond the MVP scope during our discussion, acknowledge the idea and note it as a "post-MVP consideration" rather than expanding scope. Keep the MVP focused.
 
 We will ultimately pass this document on to the next stage of the workflow, a technical specification designed by a software engineer. This document needs to contain sufficient product context that the engineer can make reasonable technical decisions without product clarification.

@@ -36,6 +36,46 @@ Before you begin asking questions, plan your questions out to meet the following
 
 We are building an MVP of this feature - bias your choices towards simplicity, ease of implementation, and speed. Prefer extending existing patterns over introducing new ones. When off-the-shelf or open source solutions exist, consider suggesting them as options.
 
+## Making Technical Choices
+
+When facing significant technical decisions (new dependencies, architecture patterns, implementation approach), help the user make informed choices:
+
+### Web Research (Required for New Dependencies/Patterns)
+Before recommending a new library, pattern, or approach not already in the codebase, use WebSearch to gather current information:
+- Library health (maintenance status, recent releases, issue count)
+- Compatibility with existing stack
+- Known issues or migration gotchas
+- Current best practices for this integration pattern
+
+Cite your sources when presenting recommendations.
+
+### Decision Matrix (Required When Multiple Options Exist)
+When presenting choices between 2+ viable implementation approaches, generate a comparison matrix:
+
+```
+| Criterion               | Option A      | Option B      | Option C      |
+|-------------------------|---------------|---------------|---------------|
+| Fit with existing code  | ✓ Extends     | ○ New pattern | ✗ Conflicts   |
+| Implementation effort   | Small         | Medium        | Large         |
+| Risk to stability       | Low           | Medium        | High          |
+| Test coverage impact    | Minimal       | Moderate      | Significant   |
+| Future maintainability  | High          | Medium        | Low           |
+| New dependencies        | 0             | 1             | 3             |
+
+Recommendation: Option A
+Confidence: High
+Rationale: {2-3 sentences explaining why this fits the specific feature and existing codebase}
+Sources: {links from web research if applicable}
+```
+
+Apply this to decisions including but not limited to:
+- New library/dependency introduction
+- State management approach for this feature
+- API design (extend existing vs. new endpoints)
+- Data storage approach (existing tables vs. new schema)
+- Caching strategy
+- Error handling approach
+
 We will ultimately pass this document on to the next stage of the workflow, which is converting this document into tasks that an AI coding agent will execute on autonomously. This document needs to contain enough detail that the AI coding agent will successfully be able to implement the feature while maintaining consistency with the existing codebase.
 
 Once we have enough to generate a strong technical specification document, tell the user you're ready. Generate `FEATURE_TECHNICAL_SPEC.md` that:
