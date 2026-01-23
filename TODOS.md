@@ -18,6 +18,7 @@
 - [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below) — REMOVED (no clean way to detect permission mode at runtime)
 - [x] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below) — DONE
 - [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
+- [ ] **[P1 / Medium x2]** Read external tool docs before setup instructions — Whenever an external tool is being used (Supabase, Stripe, Firebase, etc.), exhaustively read the latest official documentation before providing setup or testing instructions. Ensures accuracy and catches UI/API changes
 - [ ] **[P1 / Medium x2]** Atomic commits traceable to requirements — Commits are per-task, but no explicit link back to PRODUCT_SPEC requirements in commit messages. Add requirement IDs (e.g., `REQ-001`) to specs and propagate through EXECUTION_PLAN.md to commit messages (see below)
 
 **Clarifications (from Q&A 2026-01-22):**
