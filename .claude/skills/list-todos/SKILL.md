@@ -1,4 +1,5 @@
 ---
+name: list-todos
 description: Analyze and prioritize TODO items from TODOS.md
 allowed-tools: Read, Glob, Grep, AskUserQuestion, Edit
 ---
@@ -69,12 +70,6 @@ Where each factor is scored 1-3 (Low=1, Medium=2, High=3). Value is weighted 2×
   - `[priority: 0.5]` — User considers this half as important
   - `[priority: 1.5]` — User considers this 50% more important
 
-**Ready Tag:**
-- Look for `[ready]` inline in the TODO item
-- Only items with this tag can have "Ready to implement" as their Next Action
-- Users add this tag when adding items, or it's added via the Q&A phase when they confirm readiness
-- Without this tag, even well-specified items default to "Needs clarification"
-
 **If Clarity is LOW, cap the Priority Score at 3/10 maximum** (applied before multiplier).
 
 Adjust score based on:
@@ -102,9 +97,7 @@ Adjust score based on:
 - {Question that would improve requirements clarity}
 - {Another question, if applicable}
 
-**Suggested Next Action:** {One of: "Ready to implement", "Needs clarification", "Needs research", "Consider deferring", "Consider removing"}
-
-**Note on "Ready to implement":** Only use this status if the item has an explicit `[ready]` tag in TODOS.md. This tag is added by the human when they add the item, or via the Q&A phase when they confirm readiness. Without this tag, default to "Needs clarification" for items that otherwise seem actionable.
+**Suggested Next Action:** {One of: "Ready to implement", "Needs research", "Consider deferring", "Consider removing"}
 ```
 
 ### For items with LOW requirements clarity:
@@ -156,7 +149,7 @@ Adjust score based on:
 | 2 | {title} | {N}/10 | {×N or —} | {action} |
 | ... | ... | ... | ... | ... |
 
-**Ready to implement:** {count} (items with `[ready]` tag)
+**Ready to implement:** {count}
 **Needs clarification:** {count}
 **Consider deferring:** {count}
 ```
@@ -233,39 +226,16 @@ Options:
 - The user can always select "Other" to provide a custom answer
 - Wait for each answer before asking the next question
 
-### Step 4: Ask Readiness Question
+### Step 4: Update TODOS.md with Clarifications
 
-After all open questions for an item are answered, always ask the readiness question:
-
-```
-Question: "Is this item ready to implement?"
-Header: "Ready?"
-Options:
-  - Label: "Yes, mark as ready"
-    Description: "I have enough clarity to implement this item"
-  - Label: "No, ask more questions"
-    Description: "I need another round of clarification on this item"
-  - Label: "No, leave as needs clarification"
-    Description: "I'll come back to this item later"
-```
-
-**If "Yes, mark as ready":** Add `[ready]` tag to the item in TODOS.md when updating.
-
-**If "No, ask more questions":** Return to Step 3 and generate new open questions based on the clarifications gathered so far. Continue until the user confirms readiness or chooses to move on.
-
-**If "No, leave as needs clarification":** Proceed to update TODOS.md without the `[ready]` tag.
-
-### Step 5: Update TODOS.md with Clarifications
-
-After the readiness question is answered, update TODOS.md:
+After all questions for an item are answered, update TODOS.md:
 
 1. Find the item's section in TODOS.md
 2. Add a new subsection or update the existing description with the clarifications
-3. If user confirmed ready, add `[ready]` tag to the item title
-4. Format the clarifications clearly:
+3. Format the clarifications clearly:
 
 ```markdown
-### {Item Title} [ready]
+### {Item Title}
 
 {Original description}
 
@@ -277,7 +247,7 @@ After the readiness question is answered, update TODOS.md:
 
 Use the Edit tool to make these updates.
 
-### Step 6: Continue or Exit
+### Step 5: Continue or Exit
 
 After updating TODOS.md, use AskUserQuestion to ask:
 

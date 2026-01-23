@@ -44,26 +44,23 @@ fi
 
 These files are synced from toolkit to target:
 
-**Commands** (`.claude/commands/`):
-- `fresh-start.md`
-- `phase-prep.md`
-- `phase-start.md`
-- `phase-checkpoint.md`
-- `verify-task.md`
-- `criteria-audit.md`
-- `configure-verification.md`
-- `progress.md`
-- `security-scan.md`
-- `list-todos.md`
-- `populate-state.md`
-
 **Skills** (`.claude/skills/`):
+- `fresh-start/`
+- `phase-prep/`
+- `phase-start/`
+- `phase-checkpoint/`
+- `verify-task/`
+- `configure-verification/`
+- `progress/`
+- `populate-state/`
+- `list-todos/`
+- `security-scan/`
+- `criteria-audit/`
 - `code-verification/`
 - `spec-verification/`
-- `criteria-audit/`
-- `security-scan/`
 - `browser-verification/`
 - `tech-debt-check/`
+- `auto-verify/`
 
 **Config** (only if missing):
 - `.claude/verification-config.json`
@@ -80,10 +77,8 @@ Read `TARGET_PATH/.claude/toolkit-version.json` if it exists:
   "toolkit_commit_date": "2026-01-22T10:30:00Z",
   "last_sync": "2026-01-22T12:00:00Z",
   "files": {
-    ".claude/commands/phase-start.md": {
-      "hash": "sha256:...",
-      "synced_at": "2026-01-22T12:00:00Z"
-    }
+    "skills/phase-start/SKILL.md": "sha256:...",
+    "skills/phase-checkpoint/SKILL.md": "sha256:..."
   }
 }
 ```
@@ -141,8 +136,8 @@ For `NEW` and `CLEAN_UPDATE` files:
 ```
 AUTO-APPLIED (no local changes)
 ===============================
-+ .claude/commands/sync.md (NEW)
-~ .claude/commands/phase-start.md (CLEAN_UPDATE)
++ .claude/skills/auto-verify/SKILL.md (NEW)
+~ .claude/skills/phase-start/SKILL.md (CLEAN_UPDATE)
 ~ .claude/skills/browser-verification/SKILL.md (CLEAN_UPDATE)
 ```
 
@@ -153,7 +148,7 @@ For `LOCAL_MODIFIED` and `NEVER_SYNCED` files, show diff and prompt:
 ```
 LOCAL MODIFICATION DETECTED
 ===========================
-File: .claude/commands/phase-start.md
+File: .claude/skills/phase-start/SKILL.md
 
 Your version differs from the toolkit version.
 ```
@@ -169,7 +164,7 @@ How should I handle this file?
 Options:
 1. Overwrite with toolkit version
 2. Keep local version (skip this file)
-3. Backup local and overwrite (.phase-start.md.local.YYYYMMDD)
+3. Backup local and overwrite (SKILL.md.local.YYYYMMDD)
 4. Show full diff
 ```
 
@@ -181,7 +176,7 @@ Check if any files in the version state no longer exist in toolkit:
 FILES REMOVED FROM TOOLKIT
 ==========================
 The following files no longer exist in the toolkit:
-- .claude/commands/old-command.md
+- .claude/skills/old-skill/SKILL.md
 
 Options:
 1. Delete from target (match toolkit)
@@ -202,11 +197,9 @@ After sync completes, write `TARGET_PATH/.claude/toolkit-version.json`:
   "toolkit_commit_date": "{commit date ISO}",
   "last_sync": "{current ISO timestamp}",
   "files": {
-    ".claude/commands/fresh-start.md": {
-      "hash": "{sha256 of synced file}",
-      "synced_at": "{ISO timestamp}"
-    },
-    // ... all synced files
+    "skills/fresh-start/SKILL.md": "{sha256 of synced file}",
+    "skills/phase-start/SKILL.md": "{sha256 of synced file}",
+    // ... all synced skills
   }
 }
 ```
