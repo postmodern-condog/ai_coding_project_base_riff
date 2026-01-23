@@ -32,6 +32,10 @@ Before starting, confirm the required files exist:
 
 - If either is missing, **STOP** and tell the user to `cd` into their project/feature directory (the one containing `EXECUTION_PLAN.md`) and re-run `/phase-start $1`.
 
+## Context Check
+
+**Before starting:** If context is below 40% remaining, run `/compact` first. This ensures the full command instructions remain in context throughout execution. Compaction mid-command loses procedural instructions.
+
 ## Execution Rules
 
 1. **Git Workflow (Auto-Commit)**

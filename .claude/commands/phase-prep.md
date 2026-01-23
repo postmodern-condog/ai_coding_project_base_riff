@@ -28,6 +28,10 @@ Before starting, confirm the required files exist:
   - They are likely in the toolkit repo (or the wrong folder)
   - They should `cd` into their project/feature directory (the one containing `EXECUTION_PLAN.md`) and re-run `/phase-prep $1`
 
+## Context Check
+
+**Before starting:** If context is below 40% remaining, run `/compact` first. This ensures the full command instructions remain in context throughout execution. Compaction mid-command loses procedural instructions.
+
 ## Pre-Flight Checks
 
 1. **Pre-Phase Setup** — Check the "Pre-Phase Setup" section for Phase $1:

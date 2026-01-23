@@ -276,14 +276,15 @@ Task N+1 starts (fresh)
 
 Context pollution degrades response quality. Follow these rules:
 
-1. **Use `/compact` between phases** — After completing a step, run `/compact` to summarize and free context
-2. **Never exceed 60% context capacity** — If responses become repetitive or confused, context is polluted
-3. **Separate concerns by phase:**
+1. **Compact BEFORE steps, not during them** — If context is below 40% remaining, run `/compact` before starting the next command (e.g., before `/phase-start`, `/phase-checkpoint`). This ensures full command instructions are in context during execution.
+2. **Never let compaction occur mid-command** — A summary tells you WHAT was happening but not HOW. If compacted mid-command, you lose procedural instructions and must re-read the command file.
+3. **Never exceed 60% context capacity** — If responses become repetitive or confused, context is polluted
+4. **Separate concerns by phase:**
    - Research (read-only exploration)
    - Plan (design approach)
    - Implement (write code)
    - Validate (verify acceptance criteria)
-4. **When in doubt, start fresh** — A clean context with reloaded documents beats a polluted one
+5. **When in doubt, start fresh** — A clean context with reloaded documents beats a polluted one
 
 ---
 
