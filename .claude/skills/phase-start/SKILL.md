@@ -129,8 +129,12 @@ Before starting, confirm the required files exist:
    After each task completion (sequential commits on same branch):
    ```bash
    git add -A
-   git commit -m "task({id}): {description}"
+   git commit -m "task({id}): {description} [REQ-XXX]"
    ```
+
+   **Requirement traceability:** Check the task's `Requirement:` field in EXECUTION_PLAN.md.
+   - If a REQ-ID exists (e.g., `REQ-002`), include it: `task(1.2.A): Add auth [REQ-002]`
+   - If no REQ-ID or "None", omit brackets: `task(1.1.A): Set up scaffolding`
 
    **Do NOT push.** Leave pushing to the human after manual verification at checkpoint.
 

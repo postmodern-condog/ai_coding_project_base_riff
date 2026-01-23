@@ -64,5 +64,61 @@ Once we have enough to generate a strong one-pager, tell the user that you can g
 1. Addresses all the required questions listed above
 2. Includes any post-MVP considerations that came up during discussion
 3. Is structured in whatever way best communicates this specific product
+4. **Assigns unique requirement IDs** to each distinct requirement (see below)
 
 You have latitude to organize the document as appropriate for the product. A CLI tool will look different from a web app. A simple utility will be shorter than a complex platform. Use your judgment to create a document that gives a software engineer everything they need to make technical decisions.
+
+## Requirement ID Assignment
+
+**CRITICAL:** Assign a unique requirement ID (REQ-XXX) to each distinct requirement in the specification.
+
+### What Gets an ID
+
+- Each MVP feature or capability
+- Each user flow or experience requirement
+- Each data/storage requirement
+- Each access control or permission requirement
+- Each integration requirement
+
+### Format
+
+Use sequential IDs: `REQ-001`, `REQ-002`, `REQ-003`, etc.
+
+### How to Include
+
+Prefix requirement statements with the ID:
+
+```markdown
+### MVP Features
+
+- **REQ-001:** Users can create an account with email and password
+- **REQ-002:** Users can log in to access their dashboard
+- **REQ-003:** Users can create, edit, and delete notes
+- **REQ-004:** Notes are automatically saved as the user types
+- **REQ-005:** Users can search across all their notes
+```
+
+Or use inline IDs for prose sections:
+
+```markdown
+The application must support user authentication (REQ-001) and authorization (REQ-002).
+Users need to be able to create notes (REQ-003) and organize them into folders (REQ-004).
+```
+
+### ID Summary Table
+
+At the end of PRODUCT_SPEC.md, include a requirements summary table:
+
+```markdown
+## Requirements Index
+
+| ID | Requirement | Section |
+|----|-------------|---------|
+| REQ-001 | User account creation | MVP Features |
+| REQ-002 | User authentication | MVP Features |
+| REQ-003 | Note CRUD operations | MVP Features |
+| REQ-004 | Auto-save functionality | MVP Features |
+| REQ-005 | Note search | MVP Features |
+```
+
+This enables downstream traceability from requirements → tasks → commits.

@@ -127,6 +127,8 @@ Human must complete before agents begin:
 
 **What:** {1-2 sentence description}
 
+**Requirement:** {REQ-XXX from PRODUCT_SPEC.md, or "None" if no direct mapping}
+
 **Acceptance Criteria:**
 - [ ] (TEST) {Specific, testable criterion}
   - Verify: `{test command or test name}`
@@ -496,8 +498,18 @@ git checkout -b phase-{N}
 ### Commit Format
 
 ```
-task({id}): {description}
-# Example: task(1.2.A): Add user authentication endpoint
+task({id}): {description} [REQ-XXX]
+# Example: task(1.2.A): Add user authentication endpoint [REQ-002]
+```
+
+**Requirement traceability:** If the task has a `Requirement:` field with a REQ-ID, include it in brackets at the end of the commit message. If the task has no REQ-ID (e.g., infrastructure or tooling tasks), omit the brackets.
+
+```
+# With requirement ID:
+task(1.2.A): Add user authentication endpoint [REQ-002]
+
+# Without requirement ID (tooling/infrastructure):
+task(1.1.A): Set up project scaffolding
 ```
 
 ### Branch and Commit Structure
@@ -575,6 +587,7 @@ Task quality checks:
 ✓ Dependencies explicitly listed
 ✓ References spec section
 ✓ Independent from parallel tasks in same step
+✓ Requirement field links to REQ-XXX from PRODUCT_SPEC.md (or "None" for infrastructure tasks)
 
 Red flags to fix:
 ✗ Vague criteria like "works correctly"
