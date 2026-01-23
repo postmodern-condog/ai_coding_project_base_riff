@@ -4,7 +4,7 @@ argument-hint: [target-or-toolkit-path]
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
 ---
 
-Synchronize a target project with the latest toolkit commands and skills.
+Synchronize a target project with the latest toolkit skills.
 
 ## Direction Detection
 
@@ -111,7 +111,7 @@ shasum -a 256 "$file" | cut -d' ' -f1
 ```bash
 # Get commits since last sync
 cd "$TOOLKIT_PATH"
-git log --oneline "$LAST_SYNC_COMMIT"..HEAD -- .claude/commands .claude/skills
+git log --oneline "$LAST_SYNC_COMMIT"..HEAD -- .claude/skills
 ```
 
 Display:

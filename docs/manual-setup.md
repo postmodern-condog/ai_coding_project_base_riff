@@ -9,9 +9,8 @@ If you're not using Claude Code, you can use this toolkit with any LLM by copyin
    git clone https://github.com/yourusername/ai_coding_project_base.git
    ```
 
-2. **Copy execution assets** to your project:
+2. **Copy execution skills** to your project:
    ```bash
-   cp -r ai_coding_project_base/.claude/commands/ your-project/.claude/commands/
    cp -r ai_coding_project_base/.claude/skills/ your-project/.claude/skills/
    ```
 
