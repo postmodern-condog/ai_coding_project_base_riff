@@ -25,7 +25,11 @@
       "Bash(cp:*)",
       "Bash(mv:*)",
       "Bash(tree:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(curl:*)",
+      "Bash(jq:*)",
+      "Bash(grep:*)",
+      "Bash(test:*)"
     ]
   }
 }

@@ -20,6 +20,7 @@
 - [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
 - [ ] **[P1 / Medium x2]** Read external tool docs before setup instructions — Whenever an external tool is being used (Supabase, Stripe, Firebase, etc.), exhaustively read the latest official documentation before providing setup or testing instructions. Ensures accuracy and catches UI/API changes
 - [ ] **[P1 / Medium x2]** Atomic commits traceable to requirements — Commits are per-task, but no explicit link back to PRODUCT_SPEC requirements in commit messages. Add requirement IDs (e.g., `REQ-001`) to specs and propagate through EXECUTION_PLAN.md to commit messages (see below)
+- [x] **[P0 / High x2]** Attempt automation before manual fallback — Add logic to attempt verification with available tools (curl, browser MCP, file inspection) before falling back to manual (see audit below) — DONE
 
 **Clarifications (from Q&A 2026-01-22):**
 - **`/adopt`**: Does not exist yet. Intended for importing existing non-toolkit projects into the workflow. Add as separate TODO.
@@ -1326,6 +1327,70 @@ Link commits directly to PRODUCT_SPEC requirements for full traceability from bu
 
 ---
 
+### Attempt Automation Before Manual Fallback
+
+Commands and skills list "Human Required" items without checking if available tools could automate them.
+
+**Problem:**
+- `/phase-checkpoint` lists "Human Required" verification items (e.g., "Test API endpoints with curl or browser dev tools")
+- The command provides step-by-step manual instructions instead of attempting automation
+- But we HAVE the tools to automate these checks: Bash (curl), Chrome DevTools MCP, Playwright MCP
+- Result: Unnecessary human interruption for automatable tasks
+
+**Audit Findings (2026-01-22):**
+
+| File | Gap | Available Tools |
+|------|-----|-----------------|
+| `phase-checkpoint.md:183-191` | Manual Local Verification items listed without automation attempt | curl (Bash), browser MCP, file inspection |
+| `phase-checkpoint.md:230-246` | Production verification items listed for human | curl, HTTP checks, log reading |
+| `phase-prep.md:167-206` | Future Phase Preview shows human items without checking if automatable | env checks, service health |
+| `verify-task.md:161-162` | MANUAL type criteria skip automation without re-evaluation | curl, file inspection, browser |
+| `code-verification/SKILL.md:73-75` | Browser fallback to manual doesn't try HTTP alternatives | curl for API checks |
+| `phase-start.md:252-256` | "Manual verification items" detection doesn't re-evaluate | Tool availability check |
+
+**Common Patterns That COULD Be Automated:**
+
+| Manual Item Pattern | Automation Method |
+|---------------------|-------------------|
+| "Test API endpoint with curl" | `curl -sf {url}` via Bash |
+| "Verify page loads at {url}" | Browser MCP snapshot |
+| "Check {element} is visible" | Browser MCP snapshot + selector check |
+| "Confirm {service} is running" | `curl -sf {url}/health` |
+| "Verify response contains {text}" | `curl` + grep/jq |
+| "Check console for errors" | Browser MCP console logs |
+| "Verify redirect to {url}" | `curl -I` to check Location header |
+| "Test login flow" | Browser MCP with auth config |
+
+**Proposed Solution:**
+
+Add a "re-evaluation" step before listing any manual item:
+
+```
+For each "Human Required" item:
+  1. Parse the verification method mentioned (curl, browser, etc.)
+  2. Check if that tool is available (Bash always is; check browser MCP)
+  3. If tool available:
+     a. Attempt automated verification
+     b. If success: Mark as PASS, don't list as manual
+     c. If fails: List as manual WITH the error (helps human debug)
+  4. If tool unavailable:
+     a. List as manual with step-by-step instructions
+```
+
+**Files to modify:**
+- `.claude/commands/phase-checkpoint.md` — Add tool-based automation attempt before manual listing
+- `.claude/commands/verify-task.md` — Re-evaluate MANUAL criteria against available tools
+- `.claude/skills/code-verification/SKILL.md` — Try HTTP-based verification before browser fallback
+- `.claude/skills/browser-verification/SKILL.md` — Add curl fallback for simple HTTP checks
+
+**Implementation approach:**
+1. Create a "verification method parser" that extracts tool hints from criteria text
+2. Add tool availability matrix (Bash=always, browser MCP=check, file ops=always)
+3. Implement automated verification attempts for common patterns
+4. Only fall back to manual after automation attempt fails or tool unavailable
+
+---
+
 ### Create `/gh-init` Command
 
 New command for git repository initialization with smart project detection.
@@ -1369,10 +1434,10 @@ Create GitHub remote? [Yes, public] [Yes, private] [No, done]
 | File Found | Project Type | .gitignore Template |
 |------------|--------------|---------------------|
 | package.json | Node.js | node_modules, dist, .env*, etc. |
-| requirements.txt / pyproject.toml | Python | __pycache__, venv, .env*, etc. |
+| requirements.txt / pyproject.toml | Python | `__pycache__`, venv, `.env*`, etc. |
 | Cargo.toml | Rust | target/, Cargo.lock (if lib), etc. |
 | go.mod | Go | bin/, vendor/ (if used), etc. |
-| (none detected) | Generic | .env*, credentials, *.pem, etc. |
+| (none detected) | Generic | `.env*`, credentials, `*.pem`, etc. |
 
 **Always-included patterns (all project types):**
 - `.env*`

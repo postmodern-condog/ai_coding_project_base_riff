@@ -182,12 +182,42 @@ These checks run only if the required tools are available (detected above).
 
 ### Manual Local Verification
 
-From the "Phase $1 Checkpoint" section in EXECUTION_PLAN.md, extract LOCAL items:
-- List each human-required item for local verification
-- For each item, provide numbered step-by-step instructions that explain:
-  1. What to do (specific actions)
-  2. What to look for (expected outcomes)
-  3. How to confirm success
+From the "Phase $1 Checkpoint" section in EXECUTION_PLAN.md, extract LOCAL items
+marked for manual verification.
+
+**Before listing for human review, attempt automation using the auto-verify skill:**
+
+For each manual item:
+1. Invoke auto-verify skill with item text and available tools
+2. Record attempt result (PASS, FAIL, or MANUAL)
+
+**Categorize and report results:**
+
+```
+Automated Successfully:
+- [x] "{item}" — PASS ({method}, {duration})
+
+Automation Failed (needs human review):
+- [ ] "{item}"
+  - Attempted: {method}
+  - Error: {error message}
+  - Suggested Fix: {if applicable}
+  - Manual Steps:
+    1. {First action to take}
+    2. {What to verify/look for}
+    3. {How to confirm success}
+
+Truly Manual (no automation possible):
+- [ ] "{item}"
+  - Reason: {why automation is not feasible}
+  - Steps:
+    1. {First action to take}
+    2. {What to verify/look for}
+    3. {How to confirm success}
+```
+
+**Note:** Only items in "Truly Manual" genuinely require human action. Items in
+"Automation Failed" may be automatable once the underlying issue is fixed.
 
 ### Approach Review (Human)
 
@@ -327,11 +357,22 @@ Optional Checks:
 - Tech Debt: PASSED | NOTES | SKIPPED
 
 Manual Local Checks:
-- [ ] {item description}
-  - Steps:
-    1. {First action to take}
-    2. {What to verify/look for}
-    3. {How to confirm success}
+- Automated: {X} items verified automatically
+- Failed automation: {Y} items (see details below)
+- Truly manual: {Z} items (human judgment required)
+
+Automated Successfully:
+- [x] "{item}" — PASS ({method}, {duration})
+
+Failed Automation:
+- [ ] "{item}"
+  - Attempted: {method}, Error: {error}
+  - Steps: ...
+
+Truly Manual:
+- [ ] "{item}"
+  - Reason: {why not automatable}
+  - Steps: ...
 
 Approach Review: No issues noted | {list specific issues}
 

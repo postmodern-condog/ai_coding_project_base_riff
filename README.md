@@ -251,6 +251,7 @@ The toolkit enforces quality through multiple mechanisms:
 - **TDD Enforcement** — Verification checks that tests exist, were committed before implementation, and have meaningful assertions.
 - **Security Scanning** — At checkpoints, the toolkit runs dependency audits, secrets detection, and static analysis. Critical issues block progress.
 - **Spec Verification** — After generating specs, automatic verification ensures requirements flow through the document chain without loss.
+- **Auto-Verify** — Before listing items as "manual," the toolkit attempts automation using available tools (curl, browser MCP, file inspection). Only truly subjective criteria (UX, brand tone) require human review.
 - **Stuck Detection** — Agents escalate to humans after repeated failures instead of spinning forever.
 
 For detailed documentation, see [Verification Deep Dive](docs/verification.md).
@@ -287,6 +288,10 @@ ai_coding_project_base/
 ├── .claude/
 │   ├── commands/                    # All slash commands
 │   ├── skills/                      # Verification skills
+│   │   ├── auto-verify/             # Automation-before-manual logic
+│   │   ├── browser-verification/    # Browser MCP verification
+│   │   ├── code-verification/       # Multi-agent code verification
+│   │   └── ...                      # Security, tech-debt, etc.
 │   └── hooks/                       # Git hooks (pre-push doc check)
 ├── docs/                            # Detailed documentation
 ├── extras/                          # Landing page, optional tools

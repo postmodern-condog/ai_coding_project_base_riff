@@ -202,6 +202,76 @@ If no browser MCP is configured, browser-based criteria require manual verificat
 
 **Avoid:** `@playwright/mcp@latest` — includes unstable betas. Use ExecuteAutomation for stability.
 
+## Auto-Verify (Automation Before Manual)
+
+Before marking any verification item as "manual," the toolkit attempts automated verification using available tools. This reduces unnecessary human interruptions.
+
+### How It Works
+
+1. **Pattern Detection** — Criterion text is analyzed for automation hints (keywords like "API," "endpoint," "page loads," "file exists")
+2. **Tool Selection** — Best available tool is chosen (curl is always available; browser MCP conditional)
+3. **Execution** — Verification command runs with appropriate timeout
+4. **Fallback** — Only if automation fails or is genuinely impossible does the item become manual
+
+### Pattern Matching
+
+| Criterion Pattern | Tool Used | Example |
+|-------------------|-----------|---------|
+| API endpoint, returns, status | curl | `curl -sf http://localhost:3000/api/users` |
+| Response contains, JSON | curl + jq/grep | `curl -s {url} \| jq -e '.users'` |
+| Redirect, Location header | curl | `curl -sI {url} \| grep Location` |
+| Page loads, accessible | curl (HTTP-first) | `curl -sf {url}` |
+| Element visible, shows | Browser MCP | Browser snapshot + selector check |
+| File exists, created | bash | `test -f {path}` |
+| Env var, environment | bash | `test -n "${VAR}"` |
+| Looks, feels, UX, intuitive | **None** | Truly manual (subjective) |
+
+### HTTP-First Optimization
+
+Many "browser" criteria can be satisfied with a simple HTTP check. Before launching browser tools, the toolkit checks if the criterion only requires:
+
+- Page accessibility (HTTP 200 status)
+- API response validation
+- Redirect verification
+
+If curl satisfies the criterion and DOM inspection isn't needed, browser tools are skipped entirely — saving time and avoiding MCP dependency issues.
+
+### Manual Verification Report
+
+When running `/phase-checkpoint` or `/verify-task`, manual items are categorized:
+
+```
+Manual Local Checks:
+- Automated: 3 items verified automatically
+- Failed automation: 1 item (see details)
+- Truly manual: 1 item (human judgment required)
+
+Automated Successfully:
+- [x] "Test API endpoints" — PASS (curl, 0.2s)
+- [x] "Page loads at /dashboard" — PASS (HTTP-first, 0.1s)
+
+Failed Automation:
+- [ ] "Verify login form visible"
+  - Attempted: curl (HTTP status)
+  - Error: Element inspection requires browser MCP
+  - Steps: 1. Navigate to /login 2. Verify form is visible
+
+Truly Manual:
+- [ ] "Verify UX feels intuitive"
+  - Reason: subjective judgment required
+  - Steps: 1. Navigate through app 2. Assess user experience
+```
+
+### Truly Manual Patterns
+
+These patterns indicate criteria that genuinely require human judgment:
+
+- `looks`, `appears`, `visual` — Subjective visual assessment
+- `feels`, `intuitive`, `UX` — User experience judgment
+- `brand`, `tone`, `voice` — Brand consistency
+- `professional`, `polished` — Quality perception
+- `appropriate`, `suitable` — Context-dependent evaluation
+
 ## Phase Checkpoint Verification
 
 Phase checkpoints (`/phase-checkpoint N`) run a two-stage verification process.

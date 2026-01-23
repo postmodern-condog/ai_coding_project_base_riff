@@ -159,7 +159,19 @@ Verification method by type:
 - **SECURITY**: Run `/security-scan` (or equivalent for config if defined).
 - **CODE**: Inspect the file, export, or command indicated by `Verify:`.
 - **BROWSER:*:** Use the browser-verification skill with route/selector details.
-- **MANUAL**: Do not attempt to verify; list in report for human review.
+- **MANUAL**: Attempt automation using the auto-verify skill before listing for human:
+  1. Invoke auto-verify skill with criterion text and available tools
+  2. If PASS: Mark as verified (automated), record method used
+  3. If FAIL: Show error and suggested fix, mark as manual with context
+  4. If TRULY_MANUAL: List in report for human review with reason
+
+  Report format for attempted automation:
+  ```
+  [V-XXX] MANUAL → AUTOMATED
+  Method: {tool} ({pattern detected})
+  Result: PASS | FAIL
+  Duration: {ms}
+  ```
 
 ### Step 5: Exit Conditions
 
