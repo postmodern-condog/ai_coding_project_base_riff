@@ -71,12 +71,12 @@ Automatically proceed through the workflow when all prerequisites are met, reduc
 
 | After... | If all green... | Auto-start... |
 |----------|-----------------|---------------|
-| `/phase-checkpoint N` | All criteria verified, no manual items | `/phase-prep N+1` |
-| `/phase-prep N+1` | All setup complete, no human tasks | `/phase-start N+1` |
+| `/phase-checkpoint N` | All criteria verified, no truly manual items | `/phase-prep N+1` |
+| `/phase-prep N+1` | All setup items PASS | `/phase-start N+1` |
 
 **What does NOT auto-advance:**
-- `/phase-prep` with incomplete human setup items (e.g., "Create Stripe account")
-- `/phase-checkpoint` with unverifiable manual items
+- `/phase-prep` with FAIL or BLOCKED setup items
+- `/phase-checkpoint` with truly manual items (subjective criteria requiring human judgment)
 - Any step that encounters errors or failures
 
 **Session report when auto-advance stops:**

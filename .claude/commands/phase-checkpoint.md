@@ -420,13 +420,13 @@ If `autoAdvance` is not configured, use defaults (`enabled: true`, `delaySeconds
 Auto-advance to `/phase-prep {N+1}` ONLY if ALL of these are true:
 
 1. ✓ All automated checks passed (tests, lint, types, security)
-2. ✓ No manual verification items exist (not just unchecked—none at all)
+2. ✓ No "truly manual" verification items remain (auto-verify was attempted above)
 3. ✓ No production verification items exist
 4. ✓ Phase $1 is not the final phase
 5. ✓ `--pause` flag was NOT passed to this command
 6. ✓ `autoAdvance.enabled` is true (or not configured, defaulting to true)
 
-**Rationale:** Auto-advance is for fully automated workflows. If human intervention was required (manual checks, production verification), the human is already involved and can manually trigger the next phase.
+**Rationale:** Auto-verify (run in Manual Local Verification above) attempts automation before blocking. Only items that genuinely require human judgment block auto-advance. Production verification items always require human presence to confirm deployed behavior.
 
 ### If Auto-Advance Conditions Met
 
@@ -434,7 +434,7 @@ Auto-advance to `/phase-prep {N+1}` ONLY if ALL of these are true:
    ```
    AUTO-ADVANCE
    ============
-   All Phase $1 criteria verified. Preparing next phase...
+   All Phase $1 criteria verified (no truly manual items remain).
 
    Auto-advancing to /phase-prep {N+1} in 15s...
    (Press Enter to pause)
@@ -467,7 +467,7 @@ AUTO-ADVANCE STOPPED
 ====================
 
 Reason: {one of below}
-- Manual verification items exist (human intervention required)
+- Truly manual verification items remain (human judgment required)
 - Production verification items exist (human intervention required)
 - Phase $1 is the final phase
 - Auto-advance disabled via --pause flag
