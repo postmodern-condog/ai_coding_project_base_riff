@@ -18,7 +18,7 @@
 - [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below) — REMOVED (no clean way to detect permission mode at runtime)
 - [x] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below) — DONE
 - [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
-- [ ] **[P1 / Medium]** [ready] Ensure Codex has access to the same MCPs as Claude Code — Need a way to sync or share MCP server configurations between Claude Code and OpenAI Codex CLI so both tools have equivalent capabilities (browser automation, etc.)
+- [x] **[P1 / Medium]** [ready] Ensure Codex has access to the same MCPs as Claude Code — Need a way to sync or share MCP server configurations between Claude Code and OpenAI Codex CLI so both tools have equivalent capabilities (browser automation, etc.) — DONE (fbac8b5)
 
 **Clarifications (from Q&A 2026-01-23):**
 - **Protocol compatibility**: Both tools support the same MCP standard — servers work with both

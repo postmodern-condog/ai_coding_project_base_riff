@@ -123,6 +123,28 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
 
    **Note:** Using symlinks means Codex skills auto-update when user runs `git pull` on the toolkit.
 
+6a. **Codex MCP Configuration (if Codex detected and skills installed)**
+
+   After installing Codex skills, offer to configure essential MCPs:
+   - Use AskUserQuestion to prompt:
+     ```
+     Question: "Configure essential MCP servers for Codex? (Playwright for browser verification)"
+     Options:
+       - "Yes, configure" — Add Playwright MCP to ~/.codex/config.toml
+       - "No, skip" — Skip MCP configuration
+     ```
+
+   If user selects "Yes, configure":
+   - Run from this toolkit directory:
+     ```bash
+     ./scripts/configure-codex-mcp.sh
+     ```
+   - Report the configuration result
+
+   **Why this matters:** Both Claude Code and Codex CLI support the same MCP protocol.
+   This ensures Codex has access to browser automation for verification workflows,
+   matching Claude Code's capabilities when using the Playwright MCP.
+
 7. **Report success and next steps**
 
    For Greenfield:
