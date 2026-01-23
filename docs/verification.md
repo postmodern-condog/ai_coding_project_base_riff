@@ -317,7 +317,7 @@ Auto-advance conditions for each command:
 
 | Command | Auto-Advances When |
 |---------|-------------------|
-| `/phase-prep N` | All setup items pass, no human setup tasks required |
+| `/phase-prep N` | All Pre-Phase Setup items are PASS |
 | `/phase-start N` | All tasks complete AND zero manual items in checkpoint section |
 | `/phase-checkpoint N` | All automated checks pass AND no manual verification items |
 

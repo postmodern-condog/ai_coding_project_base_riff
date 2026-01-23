@@ -291,14 +291,13 @@ If `autoAdvance` is not configured, use defaults (`enabled: true`, `delaySeconds
 Auto-advance to `/phase-start $1` ONLY if ALL of these are true:
 
 1. ✓ All Pre-Phase Setup items are PASS (none FAIL or BLOCKED)
-2. ✓ No human setup tasks exist (not just incomplete—none at all)
-3. ✓ Dependencies (prior phases) are complete
-4. ✓ Verification config is properly configured
-5. ✓ Criteria audit passed (for Phase 1)
-6. ✓ `--pause` flag was NOT passed to this command
-7. ✓ `autoAdvance.enabled` is true (or not configured, defaulting to true)
+2. ✓ Dependencies (prior phases) are complete
+3. ✓ Verification config is properly configured
+4. ✓ Criteria audit passed (for Phase 1)
+5. ✓ `--pause` flag was NOT passed to this command
+6. ✓ `autoAdvance.enabled` is true (or not configured, defaulting to true)
 
-**Rationale:** Auto-advance is for fully automated workflows. If human intervention was required (manual setup, external service configuration), the human is already involved and can manually trigger the next step.
+**Rationale:** Auto-advance only proceeds when all prerequisites are verified (PASS). Re-running `/phase-prep` after completing human setup confirms readiness and allows auto-advance.
 
 ### If Auto-Advance Conditions Met
 
@@ -339,7 +338,6 @@ AUTO-ADVANCE STOPPED
 ====================
 
 Reason: {one of below}
-- Human setup tasks exist (human intervention required)
 - Pre-Phase Setup items failed or blocked
 - Prior phases not complete
 - Verification config not configured

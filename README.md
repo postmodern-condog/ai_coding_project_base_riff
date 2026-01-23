@@ -221,7 +221,7 @@ The toolkit automatically chains phase commands when no human intervention is re
 
 | Command | Auto-Advances To | Conditions |
 |---------|------------------|------------|
-| `/phase-prep N` | `/phase-start N` | All setup items pass, no human setup tasks |
+| `/phase-prep N` | `/phase-start N` | All setup items pass (including human setup when complete) |
 | `/phase-start N` | `/phase-checkpoint N` | All tasks complete, zero manual checkpoint items |
 | `/phase-checkpoint N` | `/phase-prep N+1` | All checks pass, no manual items, more phases exist |
 
