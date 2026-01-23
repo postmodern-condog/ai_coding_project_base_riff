@@ -35,9 +35,14 @@
   "hooks": {
     "SessionEnd": [
       {
-        "type": "command",
-        "command": "bash .claude/hooks/session-end-logger.sh",
-        "timeout": 30000
+        "matcher": {},
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-end-logger.sh",
+            "timeout": 30000
+          }
+        ]
       }
     ]
   }
