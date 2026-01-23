@@ -233,7 +233,37 @@ This prevents wasted cycles on production checks when basic issues exist locally
 
 ### Auto-Advance
 
-When both local and production verification pass, the checkpoint can automatically advance to the next phase. See the main README for auto-advance details.
+When verification passes with no manual items, the workflow automatically advances:
+
+```
+/phase-prep → /phase-start → /phase-checkpoint → /phase-prep N+1
+     ↓              ↓               ↓
+  (if ready)   (if no manual)  (if all pass)
+```
+
+**Core Principle:** If AI completes verification → AI auto-advances. If human completes verification → human triggers next step.
+
+Auto-advance conditions for each command:
+
+| Command | Auto-Advances When |
+|---------|-------------------|
+| `/phase-prep N` | All setup items pass, no human setup tasks required |
+| `/phase-start N` | All tasks complete AND zero manual items in checkpoint section |
+| `/phase-checkpoint N` | All automated checks pass AND no manual verification items |
+
+Each transition shows a 15-second countdown. Press Enter to pause and take manual control.
+
+**Configuration** (`.claude/settings.local.json`):
+```json
+{
+  "autoAdvance": {
+    "enabled": true,      // default: true
+    "delaySeconds": 15    // default: 15
+  }
+}
+```
+
+**Session Tracking:** During auto-advance chains, progress is logged to `.claude/auto-advance-session.json`. When the chain stops, a summary report shows all completed steps and why it stopped.
 
 ## Security Scanning
 

@@ -134,6 +134,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | Command | Description |
 |---------|-------------|
 | `/setup [path]` | Initialize new project with toolkit structure |
+| `/sync [path]` | Sync target project with latest toolkit commands/skills |
 | `/gh-init [path]` | Initialize git repo with smart .gitignore and optional GitHub remote |
 | `/install-hooks [path]` | Install git hooks (pre-push doc sync check) |
 
@@ -182,18 +183,35 @@ These documents persist across sessions, enabling any AI agent to pick up where 
 
 ### Auto-Advance
 
-After checkpoint verification passes, the toolkit can automatically advance to the next phase:
+The toolkit automatically chains phase commands when no human intervention is required:
 
 ```
-/phase-start 1 → /phase-checkpoint 1 → [15s countdown] → /phase-prep 2 → ...
+/phase-prep 1 → /phase-start 1 → /phase-checkpoint 1 → /phase-prep 2 → ...
+      ↓              ↓                  ↓
+  (if ready)    (if no manual)    (if all pass)
 ```
 
-Auto-advance triggers when:
-- All local verification passes (tests, lint, build)
-- All production verification passes (deployment, integration)
-- `/phase-prep` shows all prerequisites are green
+**Core Principle:** If AI completes verification → AI auto-advances. If human intervention is needed → human triggers the next step.
 
-The countdown can be interrupted with Ctrl+C. When the sequence stops (prerequisite fails, verification fails, or interrupted), a session report shows all completed phases and blocking issues.
+| Command | Auto-Advances To | Conditions |
+|---------|------------------|------------|
+| `/phase-prep N` | `/phase-start N` | All setup items pass, no human setup tasks |
+| `/phase-start N` | `/phase-checkpoint N` | All tasks complete, zero manual checkpoint items |
+| `/phase-checkpoint N` | `/phase-prep N+1` | All checks pass, no manual items, more phases exist |
+
+Each auto-advance shows a 15-second countdown (configurable). Press Enter to pause and take manual control.
+
+**Configuration** (`.claude/settings.local.json`):
+```json
+{
+  "autoAdvance": {
+    "enabled": true,
+    "delaySeconds": 15
+  }
+}
+```
+
+When auto-advance stops (manual items exist, check fails, or interrupted), a session report shows all completed steps and blocking issues.
 
 ### Local-First Verification
 
