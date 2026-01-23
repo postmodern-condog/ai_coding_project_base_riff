@@ -1,12 +1,17 @@
 # Codex CLI Setup
 
-This toolkit includes a Codex CLI skill pack that mirrors the execution slash commands.
+This toolkit includes a Codex CLI skill pack that provides the same execution workflow as Claude Code.
+
+## Architecture
+
+Both Claude Code and Codex CLI use the same skill files from `.claude/skills/`. This ensures:
+- Single source of truth for all skill definitions
+- Feature parity between platforms (including auto-advance)
+- Easier maintenance and updates
+
+The skills follow the [Agent Skills open standard](https://developers.openai.com/codex/skills/), which both platforms support. Claude Code-specific fields (like `allowed-tools`) are simply ignored by Codex.
 
 ## Installation
-
-### Auto-Detection (Recommended)
-
-When running `/setup` to initialize a new project, the toolkit automatically detects if Codex CLI is installed. If found, it offers to install the skill pack via symlinks—keeping commands in sync as the toolkit updates.
 
 ### Manual Installation
 
@@ -16,26 +21,44 @@ From the toolkit repo root:
 ./scripts/install-codex-skill-pack.sh
 ```
 
+This creates symlinks from `~/.codex/skills/` to the toolkit's `.claude/skills/` directory.
+
 Then restart Codex CLI.
+
+### Installation Options
+
+```bash
+# Default: symlinks (recommended)
+./scripts/install-codex-skill-pack.sh
+
+# Force overwrite existing skills
+./scripts/install-codex-skill-pack.sh --force
+
+# Copy instead of symlink
+./scripts/install-codex-skill-pack.sh --method copy
+
+# Custom destination
+./scripts/install-codex-skill-pack.sh --dest /custom/path/skills
+```
 
 ### Symlinks vs Copy
 
-The recommended installation uses symlinks. This means:
-- Skill content stays in sync when you update the toolkit
-- No need to reinstall after toolkit updates for existing skills
+The default installation uses symlinks. This means:
+- Skills auto-update when you update the toolkit
+- No need to reinstall after toolkit updates
 - Single source of truth for skill definitions
+
+If you use `--method copy`, you'll need to re-run with `--force` to get updates.
 
 ### New Skills
 
-Symlinks are created per-skill, not for the entire skills directory. This means:
+Symlinks are created per-skill, not for the entire skills directory:
 
 | Change | Auto-updates? |
 |--------|:-------------:|
-| Skill content modified | ✅ Yes |
+| Skill content modified | ✅ Yes (with symlinks) |
 | New skill added to toolkit | ❌ No — re-run needed |
 | Skill renamed | ❌ No — re-run needed |
-
-When you run `/feature-plan` (or `/setup`), the toolkit automatically detects new skills and prompts you to install them. You don't need to manually track toolkit updates.
 
 ## Usage
 
@@ -48,27 +71,47 @@ In any target project directory, you can use the same commands:
 /phase-checkpoint 1
 ```
 
-## Available Commands
+## Available Skills
 
 The Codex skill pack includes:
 
-| Command | Description |
-|---------|-------------|
+| Skill | Description |
+|-------|-------------|
 | `/fresh-start` | Orient to project, load context |
 | `/phase-prep N` | Check prerequisites for phase N |
-| `/phase-start N` | Execute phase N |
+| `/phase-start N` | Execute phase N (with auto-advance) |
 | `/phase-checkpoint N` | Run tests, security scan, verify completion |
 | `/verify-task X.Y.Z` | Verify specific task |
-| `/security-scan` | Run security checks |
+| `/configure-verification` | Set up verification commands |
 | `/progress` | Show execution progress |
+| `/populate-state` | Generate phase-state.json |
+| `/list-todos` | Analyze and prioritize TODOs |
+| `/security-scan` | Run security checks |
+| `/criteria-audit` | Audit execution plan criteria |
+
+Plus supporting skills:
+- `code-verification` — Multi-agent verification workflow
+- `browser-verification` — Browser-based UI verification
+- `spec-verification` — Specification document verification
+- `tech-debt-check` — Technical debt analysis
+- `auto-verify` — Attempt automation before manual verification
+
+## Feature Parity
+
+Both platforms now support:
+- ✅ Auto-advance between phases
+- ✅ Auto-verify for manual items
+- ✅ Browser verification fallback chain
+- ✅ State tracking in `.claude/phase-state.json`
+- ✅ Verification logging
 
 ## Differences from Claude Code
 
-The Codex skill pack provides equivalent functionality, but:
+The skill files are identical, but runtime behavior may differ:
 
-- MCP tool detection may behave differently
-- Some skills may have reduced capability without Claude Code's native integrations
-- File paths and working directory handling follow Codex conventions
+- MCP tool detection may behave differently between platforms
+- Some Claude Code features (like `allowed-tools` permission scoping) are ignored by Codex
+- Subagent execution (`context: fork`) may work differently
 
 ## Troubleshooting
 
@@ -76,4 +119,5 @@ If commands aren't recognized after installation:
 
 1. Ensure the install script completed successfully
 2. Restart Codex CLI completely
-3. Verify the skills are in the expected Codex skills directory
+3. Verify skills exist in `~/.codex/skills/`
+4. Check that symlinks point to valid paths: `ls -la ~/.codex/skills/`
