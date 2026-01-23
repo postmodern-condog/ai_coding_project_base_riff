@@ -318,7 +318,7 @@ Auto-advance conditions for each command:
 | Command | Auto-Advances When |
 |---------|-------------------|
 | `/phase-prep N` | All Pre-Phase Setup items are PASS |
-| `/phase-start N` | All tasks complete AND zero manual items in checkpoint section |
+| `/phase-start N` | All tasks complete AND no truly manual items (auto-verify attempted first) |
 | `/phase-checkpoint N` | All automated checks pass AND no manual verification items |
 
 Each transition shows a 15-second countdown. Press Enter to pause and take manual control.

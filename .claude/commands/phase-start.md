@@ -245,17 +245,27 @@ Read `.claude/settings.local.json` for auto-advance configuration:
 
 If `autoAdvance` is not configured, use defaults (`enabled: true`, `delaySeconds: 15`).
 
+### Pre-Check: Attempt Automation on Manual Items
+
+Before evaluating auto-advance conditions, attempt automation on checkpoint manual items:
+
+1. Extract manual verification items from "Phase $1 Checkpoint" section in EXECUTION_PLAN.md
+2. For each manual item, invoke auto-verify skill with item text and available tools
+3. Categorize results:
+   - **Automated**: Item can be verified automatically (PASS/FAIL)
+   - **Truly Manual**: No automation possible (subjective criteria like "feels intuitive")
+
 ### Auto-Advance Conditions
 
 Auto-advance to `/phase-checkpoint $1` ONLY if ALL of these are true:
 
 1. ✓ All tasks in Phase $1 are complete
-2. ✓ The "Phase $1 Checkpoint" section in EXECUTION_PLAN.md has ZERO manual verification items
+2. ✓ No "truly manual" checkpoint items remain (automated items are OK)
 3. ✓ No tasks were marked as blocked or skipped
 4. ✓ `--pause` flag was NOT passed to this command
 5. ✓ `autoAdvance.enabled` is true (or not configured, defaulting to true)
 
-**Rationale:** If the checkpoint has manual verification items, human intervention is required anyway. The human should trigger `/phase-checkpoint` after they're ready to verify.
+**Rationale:** Auto-verify attempts automation before blocking. Only items that genuinely require human judgment (UX, visual aesthetics, brand tone) block auto-advance. Items that can be verified with curl, file checks, or browser automation don't require human presence.
 
 ### If Auto-Advance Conditions Met
 
@@ -263,7 +273,8 @@ Auto-advance to `/phase-checkpoint $1` ONLY if ALL of these are true:
    ```
    AUTO-ADVANCE
    ============
-   All Phase $1 tasks complete. No manual verification items.
+   All Phase $1 tasks complete. No truly manual verification items.
+   {N} checkpoint items can be auto-verified.
 
    Auto-advancing to /phase-checkpoint $1 in 15s...
    (Press Enter to pause)
@@ -296,11 +307,16 @@ PHASE $1 COMPLETE
 All tasks finished.
 
 Cannot auto-advance because:
-- {reason: e.g., "Phase has manual verification items"}
+- {reason: e.g., "Phase has truly manual verification items"}
 
-Manual items requiring human verification:
-- [ ] {item 1}
-- [ ] {item 2}
+Checkpoint Verification Preview:
+--------------------------------
+Automatable ({N} items):
+- [auto] "{item}" — can verify with {method}
+
+Truly Manual ({N} items requiring human judgment):
+- [ ] "{item}"
+  - Reason: {why automation not possible, e.g., "subjective UX assessment"}
 
 Next: Run /phase-checkpoint $1 when ready to verify
 ```
