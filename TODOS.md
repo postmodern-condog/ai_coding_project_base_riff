@@ -48,7 +48,7 @@
 - [x] Verify that the Playwright MCP integration works — **REMOVED** (per user decision 2026-01-22)
 - [x] **[P2 / Low]** Add Codex skill pack installation option to `/setup` or `/generate-plan` — Allow users to opt-in to copying the codex commands via `scripts/install-codex-skill-pack.sh` (see below) — DONE
 - [ ] Git worktrees for parallel task execution (see below) — **DEFERRED** (Task Tool parallelism is sufficient for most cases)
-- [ ] [ready] Session logging for automation opportunity discovery (see below)
+- [x] [ready] Session logging for automation opportunity discovery (see below) — DONE (79054cc)
 
 **Clarifications (from Q&A 2026-01-23):**
 - **Log location**: Centralized in toolkit's .claude/logs/ for cross-project analysis
