@@ -18,7 +18,19 @@
 - [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below) — REMOVED (no clean way to detect permission mode at runtime)
 - [x] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below) — DONE
 - [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
-- [ ] **[P1 / Medium]** Ensure Codex has access to the same MCPs as Claude Code — Need a way to sync or share MCP server configurations between Claude Code and OpenAI Codex CLI so both tools have equivalent capabilities (browser automation, etc.)
+- [ ] **[P1 / Medium]** [ready] Ensure Codex has access to the same MCPs as Claude Code — Need a way to sync or share MCP server configurations between Claude Code and OpenAI Codex CLI so both tools have equivalent capabilities (browser automation, etc.)
+
+**Clarifications (from Q&A 2026-01-23):**
+- **Protocol compatibility**: Both tools support the same MCP standard — servers work with both
+- **Config formats differ**: Claude Code uses JSON (`.mcp.json`), Codex uses TOML (`~/.codex/config.toml`)
+- **Sync mechanism**: Convert on demand — create a script that converts Claude Code's config to Codex format
+- **Priority MCPs**: Browser automation (Playwright) is the critical MCP for verification
+- **Trigger point**: During `/setup` — when setting up a new target project, detect Codex and generate config.toml with essential MCPs
+- **Implementation approach**:
+  1. In `/setup`, check if `codex` command is available
+  2. If detected, offer to configure essential MCPs for Codex
+  3. Generate `~/.codex/config.toml` entries for Playwright MCP
+  4. Use same pattern as existing Codex skill pack installation
 - [x] **[P1 / Medium x2]** [ready] Read external tool docs before setup instructions — Whenever an external tool is being used (Supabase, Stripe, Firebase, etc.), exhaustively read the latest official documentation before providing setup or testing instructions. Ensures accuracy and catches UI/API changes — DONE (c2861cc)
 
 **Clarifications (from Q&A 2026-01-23):**
