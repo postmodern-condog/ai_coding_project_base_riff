@@ -30,7 +30,7 @@
   - `/phase-start` — when implementing code that integrates with external services
   - Any time an external service (Supabase, Stripe, Firebase, etc.) is mentioned
 - **Implementation**: Add instructions directly to the command files themselves (phase-prep.md, phase-checkpoint.md, phase-start.md). This ensures behavior at execution point and works for existing projects without regeneration.
-- [ ] **[P1 / Medium x2]** [ready] Atomic commits traceable to requirements — Commits are per-task, but no explicit link back to PRODUCT_SPEC requirements in commit messages. Add requirement IDs (e.g., `REQ-001`) to specs and propagate through EXECUTION_PLAN.md to commit messages (see below)
+- [x] **[P1 / Medium x2]** [ready] Atomic commits traceable to requirements — Commits are per-task, but no explicit link back to PRODUCT_SPEC requirements in commit messages. Add requirement IDs (e.g., `REQ-001`) to specs and propagate through EXECUTION_PLAN.md to commit messages (see below) — DONE (74fd827)
 
 **Clarifications (from Q&A 2026-01-23):**
 - **REQ-ID generation**: Auto-generated during /product-spec (sequential: REQ-001, REQ-002, etc.)
