@@ -123,14 +123,18 @@ Run verification manually anytime:
 
 For acceptance criteria that require browser interaction (UI rendering, user flows, visual checks), the toolkit supports automated browser verification with authentication.
 
-### Supported Tools
+### Supported Tools (in fallback order)
 
-| Tool | Type | Best For |
-|------|------|----------|
-| **Chrome DevTools MCP** | MCP server | Real-time interaction, debugging, already integrated |
-| **Playwright MCP** | MCP server | Cross-browser automated verification, headless |
+| Tool | Package | Best For |
+|------|---------|----------|
+| **ExecuteAutomation Playwright** | `@executeautomation/playwright-mcp-server` | Primary choice — most stable, 143 device presets |
+| **Browser MCP** | [browsermcp.io](https://browsermcp.io/) extension | Uses existing browser sessions (stays logged in) |
+| **Microsoft Playwright MCP** | `@anthropic-ai/mcp-server-playwright` | Official, but avoid `@latest` (includes unstable betas) |
+| **Chrome DevTools MCP** | Built-in | Basic fallback, good for debugging |
 
 The toolkit auto-detects available tools and uses the best option. Configure via `/configure-verification`.
+
+**Note:** Avoid `@playwright/mcp@latest` — it includes unstable beta releases that cause "undefined" errors. Use ExecuteAutomation Playwright or a pinned Microsoft version instead.
 
 ### Authentication
 
@@ -150,27 +154,53 @@ The auth state is cached in `.claude/verification/auth-state.json` to avoid repe
 
 ### Fallback Chain
 
-When browser verification runs:
+When browser verification runs, tools are tried in order:
 
-1. Try primary tool (auto-selected or configured)
-2. If unavailable, try fallback tool
-3. If no tools available, mark as MANUAL verification needed
+1. **ExecuteAutomation Playwright MCP** — Primary, most stable
+2. **Browser MCP** — If extension installed (uses existing sessions)
+3. **Microsoft Playwright MCP** — If pinned version configured
+4. **Chrome DevTools MCP** — Basic fallback, often pre-installed
+5. **Manual verification** — If no tools available (with soft block prompt)
+
+### Soft Block Behavior
+
+When browser-based acceptance criteria exist but no browser MCP tools are available, the toolkit prompts before continuing:
+
+```
+⚠️  BROWSER VERIFICATION BLOCKED
+
+This phase has {N} browser-based acceptance criteria but no browser
+MCP tools are available.
+
+Options:
+1. Continue anyway (browser criteria become manual verification)
+2. Stop and configure browser tools first
+```
+
+This prevents silent failures and ensures you're aware when automated browser verification can't run.
 
 ### No Browser Tools?
 
-If no browser MCP is configured, browser-based criteria require manual verification. To enable automation:
+If no browser MCP is configured, browser-based criteria require manual verification. To enable automation, add to `~/.mcp.json`:
 
 ```json
-// .claude/settings.json
 {
   "mcpServers": {
-    "playwright": {
+    "executeautomation-playwright": {
       "command": "npx",
-      "args": ["-y", "@anthropic-ai/mcp-server-playwright"]
+      "args": ["-y", "@executeautomation/playwright-mcp-server"]
+    },
+    "browsermcp": {
+      "command": "npx",
+      "args": ["@browsermcp/mcp@latest"]
     }
   }
 }
 ```
+
+**Note:** Browser MCP also requires the Chrome extension from [browsermcp.io](https://browsermcp.io/).
+
+**Avoid:** `@playwright/mcp@latest` — includes unstable betas. Use ExecuteAutomation for stability.
 
 ## Phase Checkpoint Verification
 

@@ -68,9 +68,14 @@ Before starting, confirm the required files exist:
 
    | Tool | Check | If Unavailable |
    |------|-------|----------------|
-   | Playwright MCP | Attempt a harmless Playwright MCP call (e.g., list pages) | Manual browser verification |
+   | ExecuteAutomation Playwright | Check for `mcp__playwright__*` or `mcp__executeautomation__*` | Next in chain |
+   | Browser MCP | Check for `mcp__browsermcp__*` tools | Next in chain |
+   | Microsoft Playwright MCP | Check for `mcp__playwright__*` tools | Next in chain |
+   | Chrome DevTools MCP | Call `mcp__chrome-devtools__list_pages` | Manual verification |
    | code-simplifier | Check agent type available | Skip code simplification |
    | Trigger.dev MCP | `mcp__trigger__list_projects` | Skip Trigger.dev features |
+
+   **Browser tool fallback chain:** ExecuteAutomation Playwright → Browser MCP → Microsoft Playwright → Chrome DevTools → Manual
 
    Only check tools relevant to this project's tech stack.
 
@@ -228,7 +233,10 @@ Environment:
 - {env vars or "None required"}
 
 Tools:
-- Playwright MCP: ✓ | ✗
+- ExecuteAutomation Playwright: ✓ | ✗ (primary)
+- Browser MCP Extension: ✓ | ✗
+- Microsoft Playwright MCP: ✓ | ✗
+- Chrome DevTools MCP: ✓ | ✗
 - code-simplifier: ✓ | ✗
 - Trigger.dev MCP: ✓ | ✗ | N/A
 

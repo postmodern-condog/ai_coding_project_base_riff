@@ -50,9 +50,20 @@ If either is missing, stop and instruct the user to `cd` into the directory cont
      - clean vs dirty working tree
 
 4. **Tool Availability (Optional)**
-   - Chrome DevTools MCP (browser verification fallback):
-     - Attempt a harmless call: `mcp__chrome-devtools__list_pages`
-     - If unavailable: note "Browser verification will be manual"
+   Check browser tools in fallback order:
+   - ExecuteAutomation Playwright MCP:
+     - Check for `mcp__playwright__*` or `mcp__executeautomation__*` tools
+     - Recommended primary if available
+   - Browser MCP:
+     - Check for `mcp__browsermcp__*` tools
+   - Microsoft Playwright MCP:
+     - Check for `mcp__playwright__*` tools
+   - Chrome DevTools MCP:
+     - Attempt: `mcp__chrome-devtools__list_pages`
+     - Basic fallback
+   - If no browser tools: note "Browser verification will be manual"
+
+   Other tools:
    - Trigger.dev MCP (optional):
      - Attempt: `mcp__trigger__list_projects`
      - If unavailable: note "Trigger.dev checks skipped"
@@ -85,6 +96,9 @@ Environment:
 - <env vars or "None required">
 
 Tools:
+- ExecuteAutomation Playwright: ✓ | ✗ (primary)
+- Browser MCP Extension: ✓ | ✗
+- Microsoft Playwright MCP: ✓ | ✗
 - Chrome DevTools MCP: ✓ | ✗
 - Trigger.dev MCP: ✓ | ✗ | N/A
 

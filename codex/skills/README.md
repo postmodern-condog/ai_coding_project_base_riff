@@ -57,5 +57,6 @@ If Codex doesn't auto-trigger the right skill from a slash command, use the expl
 
 ## Notes / Differences vs Claude Code
 
-- Browser checks use **Chrome DevTools MCP** if available (instead of Playwright MCP).
+- Browser checks use a **fallback chain**: ExecuteAutomation Playwright → Browser MCP → Microsoft Playwright → Chrome DevTools → Manual.
+- ExecuteAutomation Playwright MCP (`@executeautomation/playwright-mcp-server`) is recommended for stability.
 - This pack follows the toolkit convention of storing state in `.claude/phase-state.json` (same as Claude Code workflows).

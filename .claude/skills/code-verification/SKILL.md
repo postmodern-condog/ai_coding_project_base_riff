@@ -53,18 +53,34 @@ Flag untestable instructions immediately rather than attempting verification.
 
 For instructions with `browser: true`:
 
-1. **Check Playwright MCP availability**
-   - If unavailable, mark instruction as BLOCKED with reason: "Playwright MCP not available"
-   - Suggest: "Ensure the Playwright MCP server is running (see tool docs)"
+1. **Check browser tool availability (fallback chain)**
+   - Try tools in order: ExecuteAutomation Playwright → Browser MCP → Microsoft Playwright → Chrome DevTools
+   - Use first available tool for browser verification
 
-2. **Verify dev server is running**
+   **If NO tools available (SOFT BLOCK):**
+   - Display warning:
+     ```
+     ⚠️  NO BROWSER TOOLS AVAILABLE
+
+     This verification includes browser-based criteria but no browser
+     MCP tools are available.
+
+     Options:
+     1. Continue anyway (browser criteria become manual verification)
+     2. Stop and configure browser tools first
+     ```
+   - Use AskUserQuestion to let user choose:
+     - "Continue with manual verification" → Mark browser instructions as BLOCKED, continue with non-browser criteria
+     - "Stop to configure tools" → Halt verification, provide setup instructions
+
+2. **Verify dev server is running** (if browser tools available)
    - Check if configured dev server URL responds (e.g., `http://localhost:3000`)
    - If not running, attempt to start using the configured dev server command
    - Wait for configured startup time before proceeding
    - If unable to start, mark as BLOCKED: "Dev server not accessible at {URL}"
 
-3. **Confirm target route exists**
-   - Navigate to the page specified in the instruction using `browser_navigate`
+3. **Confirm target route exists** (if browser tools available)
+   - Navigate to the page specified in the instruction using the selected browser tool
    - If 404 or error, mark as BLOCKED: "Target route not found: {route}"
 
 ## Step 3: Sub-Agent Verification Protocol

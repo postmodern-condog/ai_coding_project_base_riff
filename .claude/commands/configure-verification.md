@@ -31,22 +31,26 @@ project directory.
 ## Check Browser Tool Availability
 
 Before configuring, verify that browser verification tools are available.
-Attempt harmless calls to detect installed MCPs:
+Attempt harmless calls to detect installed MCPs (in priority order):
 
 | Tool | Check Method | Install Instructions |
 |------|--------------|---------------------|
-| Chrome DevTools MCP | Call `mcp__chrome-devtools__list_pages` | Already available if you see this tool |
-| Playwright MCP | Check for `mcp__playwright__*` tools | Add to `.claude/settings.json` mcpServers |
+| ExecuteAutomation Playwright | Check for `mcp__playwright__*` or `mcp__executeautomation__*` tools | `npx -y @executeautomation/playwright-mcp-server` |
+| Browser MCP | Check for `mcp__browsermcp__*` tools | Install extension from browsermcp.io |
+| Microsoft Playwright MCP | Check for `mcp__playwright__*` tools | `npx -y @anthropic-ai/mcp-server-playwright` |
+| Chrome DevTools MCP | Call `mcp__chrome-devtools__list_pages` | Often pre-installed |
 
 **Report availability:**
 
 ```
-BROWSER TOOLS
-=============
+BROWSER TOOLS (in fallback order)
+=================================
+ExecuteAutomation Playwright: Available | Not detected  (recommended)
+Browser MCP Extension: Available | Not detected
+Microsoft Playwright MCP: Available | Not detected
 Chrome DevTools MCP: Available | Not detected
-Playwright MCP: Available | Not detected
 
-{If neither available}
+{If none available}
 WARNING: No browser MCP tools detected.
 Browser verification will require manual verification.
 
@@ -56,12 +60,13 @@ To enable automated browser verification, add to .claude/settings.json:
   "mcpServers": {
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@anthropic-ai/mcp-server-playwright"]
+      "args": ["-y", "@executeautomation/playwright-mcp-server"]
     }
   }
 }
 
-Or use Chrome DevTools MCP which may already be configured.
+NOTE: Avoid @playwright/mcp@latest — it includes unstable betas.
+Use @executeautomation/playwright-mcp-server for stability.
 ```
 
 Continue with configuration even if no browser tools are available (browser
@@ -164,9 +169,11 @@ VERIFICATION CONFIGURED
 =======================
 Project Root: {path}
 
-Browser Tools:
+Browser Tools (in fallback order):
+- ExecuteAutomation Playwright: {Available | Not detected} (recommended)
+- Browser MCP Extension: {Available | Not detected}
+- Microsoft Playwright MCP: {Available | Not detected}
 - Chrome DevTools MCP: {Available | Not detected}
-- Playwright MCP: {Available | Not detected}
 
 Commands:
 - test: {value or ""}

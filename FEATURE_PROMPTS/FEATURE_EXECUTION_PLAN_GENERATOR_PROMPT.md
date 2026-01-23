@@ -152,7 +152,7 @@ Manual criteria (only if automation is not feasible):
   - Reason: {why human review is required}
 
 **Browser Verification (if applicable):**
-- [ ] All UI acceptance criteria verified via Playwright MCP
+- [ ] All UI acceptance criteria verified via browser MCP tools
 - [ ] No console errors on key pages
 - [ ] Screenshots captured for visual changes
 

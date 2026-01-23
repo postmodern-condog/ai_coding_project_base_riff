@@ -1,6 +1,6 @@
 ---
 name: browser-verification
-description: Verify browser-based acceptance criteria using Playwright MCP with Chrome DevTools MCP fallback.
+description: Verify browser-based acceptance criteria using ExecuteAutomation Playwright MCP with multi-tool fallback chain.
 ---
 
 # Browser Verification Skill
@@ -46,7 +46,7 @@ Read `.claude/verification-config.json` for:
 - `auth.storageState` — Path to save/load session state
 
 **Browser:**
-- `browser.tool` — `auto`, `executeautomation`, `playwright`, `browsermcp`
+- `browser.tool` — `auto`, `executeautomation`, `browsermcp`, `playwright`, `chromedevtools`
 - `browser.headless` — Run headless (default: true)
 - `browser.timeout` — Default timeout in ms (default: 30000)
 - `browser.navigationTimeout` — Navigation timeout in ms (default: 60000)
@@ -59,24 +59,67 @@ Automatically detect and use the best available browser tool. Try tools in
 order until one responds:
 
 ```
-1. Chrome DevTools MCP (if available)
+1. ExecuteAutomation Playwright MCP (primary)
+   - Package: @executeautomation/playwright-mcp-server
+   - Test: Check for mcp__playwright__* or mcp__executeautomation__* tools
+   - Why primary: Most stable, actively maintained (312+ commits), 143 device presets
+   - Avoids @playwright/mcp@latest beta instability issues
+
+2. Browser MCP (if extension installed)
+   - Source: browsermcp.io browser extension
+   - Test: Check for mcp__browsermcp__* tools
+   - Advantage: Uses existing browser profile (stays logged in, avoids bot detection)
+   - Requires: User has Browser MCP extension installed
+
+3. Microsoft Playwright MCP (pinned version)
+   - Package: @anthropic-ai/mcp-server-playwright (pinned, NOT @latest)
+   - Test: Check for mcp__playwright__* tools (if not already found)
+   - Why fallback: Official but @latest includes unstable betas
+   - Use pinned version only
+
+4. Chrome DevTools MCP (basic fallback)
    - Test: Call mcp__chrome-devtools__list_pages
-   - Preferred because it's commonly pre-installed
+   - Often pre-installed with Claude Code
+   - Limited: Not designed for automation, less stable for complex workflows
+   - Use for: Simple navigation, screenshots, basic interactions
 
-2. Playwright MCP (ExecuteAutomation or Microsoft)
-   - Test: Attempt harmless call (list pages / navigate)
-   - Check for mcp__playwright__* tools
+5. Manual Verification (last resort) — SOFT BLOCK
+   - If all tools fail, do NOT silently continue
+   - Display warning and prompt user:
+     ```
+     ⚠️  NO BROWSER TOOLS AVAILABLE
 
-3. Manual Verification (last resort)
-   - If all tools fail
-   - Mark criteria as BLOCKED (not FAIL)
-   - Report which tools were tried and why they failed
+     Attempted to detect browser MCP tools but none responded:
+     - ExecuteAutomation Playwright: {status}
+     - Browser MCP: {status}
+     - Microsoft Playwright: {status}
+     - Chrome DevTools: {status}
+
+     Browser criteria cannot be verified automatically.
+
+     Options:
+     1. Continue anyway (criteria become manual verification)
+     2. Stop and configure browser tools first
+
+     To enable automated browser verification, add to ~/.mcp.json:
+     {
+       "mcpServers": {
+         "executeautomation-playwright": {
+           "command": "npx",
+           "args": ["-y", "@executeautomation/playwright-mcp-server"]
+         }
+       }
+     }
+     ```
+   - Use AskUserQuestion to let user choose:
+     - "Continue with manual verification" → Mark criteria as BLOCKED, list for human
+     - "Stop to configure tools" → Halt and provide detailed setup instructions
 ```
 
 **Log tool selection:**
 ```
-Browser Tool: Chrome DevTools MCP (auto-detected)
-Fallback: Manual verification if tool fails mid-session
+Browser Tool: ExecuteAutomation Playwright MCP (auto-detected)
+Fallback chain: Browser MCP → Microsoft Playwright → Chrome DevTools → Manual (soft block)
 ```
 
 ## Step 3: Authentication
@@ -172,6 +215,8 @@ Save evidence under `.claude/verification/` with stable names:
    - Mark remaining criteria as BLOCKED
    - Report: "Browser tools unavailable after trying:
      - ExecuteAutomation Playwright: {error}
+     - Browser MCP: {error or 'not installed'}
+     - Microsoft Playwright: {error}
      - Chrome DevTools: {error}
      Manual verification required."
 ```
@@ -219,14 +264,47 @@ Suggested Fix: [If FAIL]
 
 ## Tool-Specific Notes
 
-### Chrome DevTools MCP
-- Often pre-installed with Claude Code
-- Good for debugging and basic automation
-- Use `mcp__chrome-devtools__*` tools
+### ExecuteAutomation Playwright MCP (Recommended Primary)
+- Package: `@executeautomation/playwright-mcp-server`
+- Most stable option, actively maintained (312+ commits)
+- 143 device presets for responsive testing
+- Cross-browser support (Chrome, Firefox, Safari)
+- Install: Add to `.claude/settings.json` mcpServers:
+  ```json
+  {
+    "mcpServers": {
+      "playwright": {
+        "command": "npx",
+        "args": ["-y", "@executeautomation/playwright-mcp-server"]
+      }
+    }
+  }
+  ```
 
-### Playwright MCP
-- More powerful automation capabilities
-- Better for complex multi-step workflows
-- Install: Add to `.claude/settings.json` mcpServers
-- Prefer `@anthropic-ai/mcp-server-playwright` or pinned versions
-- Avoid `@playwright/mcp@latest` (known stability issues with beta releases)
+### Browser MCP (Best for Auth-Heavy Apps)
+- Source: [browsermcp.io](https://browsermcp.io/)
+- Uses your existing browser profile (stays logged in to services)
+- Local execution (no network latency, better privacy)
+- Bot-detection resistant (uses real browser fingerprint)
+- Requires: Browser MCP Chrome extension installed
+- Best for: Apps where maintaining login sessions matters
+
+### Microsoft Playwright MCP (Use Pinned Version)
+- Package: `@anthropic-ai/mcp-server-playwright` (recommended)
+- Official implementation with accessibility tree support
+- **AVOID** `@playwright/mcp@latest` — includes unstable betas causing "undefined" errors
+- If you must use Microsoft's version, pin to a specific stable version
+
+### Chrome DevTools MCP (Basic Fallback)
+- Often pre-installed with Claude Code
+- Good for debugging and simple automation
+- Use `mcp__chrome-devtools__*` tools
+- **Limitations:** Not designed for complex automation, less stable for multi-step workflows
+- Best for: Quick screenshots, simple navigation, debugging
+
+### Browserbase + Stagehand (Cloud Option)
+- Package: `@browserbasehq/mcp-server-browserbase`
+- Cloud-hosted browsers (no local browser needed)
+- Stealth mode, proxy support, concurrent sessions
+- Requires: Browserbase API key (external service)
+- Best for: CI/CD pipelines, high-volume testing, anti-detection needs

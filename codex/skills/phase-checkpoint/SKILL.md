@@ -28,9 +28,26 @@ Confirm `EXECUTION_PLAN.md` exists in the current working directory. If not, sto
 
 ## Tool Availability Check (Optional)
 
+Check browser tools in fallback order:
+- ExecuteAutomation Playwright MCP:
+  - Check for `mcp__playwright__*` or `mcp__executeautomation__*` tools
+  - Recommended primary if available
+- Browser MCP:
+  - Check for `mcp__browsermcp__*` tools
+  - Uses existing browser sessions
+- Microsoft Playwright MCP:
+  - Check for `mcp__playwright__*` tools
 - Chrome DevTools MCP:
   - Attempt: `mcp__chrome-devtools__list_pages`
-  - If unavailable: browser verification becomes manual.
+  - Basic fallback, often pre-installed
+
+**If phase has BROWSER:* criteria but NO browser tools available (SOFT BLOCK):**
+- Display warning listing the browser criteria that cannot be verified
+- Prompt user to choose:
+  - "Continue with manual verification" → Add browser checks to Manual Verification section
+  - "Stop to configure tools" → Halt checkpoint and provide setup instructions
+
+Other tools:
 - Trigger.dev MCP:
   - Attempt: `mcp__trigger__list_projects`
   - If unavailable: skip Trigger.dev checks.
@@ -91,6 +108,9 @@ Phase <N> Checkpoint Results
 ===========================
 
 Tool Availability:
+- ExecuteAutomation Playwright: ✓ | ✗ (primary)
+- Browser MCP Extension: ✓ | ✗
+- Microsoft Playwright MCP: ✓ | ✗
 - Chrome DevTools MCP: ✓ | ✗
 - Trigger.dev MCP: ✓ | ✗ | N/A
 

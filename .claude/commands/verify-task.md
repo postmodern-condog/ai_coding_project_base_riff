@@ -65,6 +65,34 @@ Confirm each criterion is testable:
 
 Flag untestable criteria immediately.
 
+**Browser Tool Availability Check (SOFT BLOCK):**
+
+If any criteria are type `BROWSER:*`:
+
+1. Check tool availability (fallback chain):
+   - ExecuteAutomation Playwright → Browser MCP → Microsoft Playwright → Chrome DevTools
+
+2. **If at least one tool available:** Continue to verification.
+
+3. **If NO browser tools available:**
+   - Display warning:
+     ```
+     ⚠️  BROWSER VERIFICATION BLOCKED
+
+     Task $1 has {N} browser-based acceptance criteria but no browser
+     MCP tools are available.
+
+     Browser criteria:
+     - {list each BROWSER:* criterion}
+
+     Options:
+     1. Continue anyway (browser criteria become manual verification)
+     2. Stop and configure browser tools first
+     ```
+   - Use AskUserQuestion to let user choose:
+     - "Continue with manual verification" → Mark browser criteria as MANUAL, proceed
+     - "Stop to configure tools" → Halt verification, provide setup instructions
+
 ### Step 3: TDD Compliance Check
 
 Verify that Test-Driven Development was followed:

@@ -30,9 +30,14 @@ Before running checks, detect which optional tools are available by attempting a
 
 | Tool | Check Method | Fallback |
 |------|--------------|----------|
-| Playwright MCP | Attempt a harmless Playwright MCP call (e.g., list pages) | Manual browser verification |
+| ExecuteAutomation Playwright | Check for `mcp__playwright__*` or `mcp__executeautomation__*` | Next in chain |
+| Browser MCP | Check for `mcp__browsermcp__*` tools | Next in chain |
+| Microsoft Playwright MCP | Check for `mcp__playwright__*` tools | Next in chain |
+| Chrome DevTools MCP | Call `mcp__chrome-devtools__list_pages` | Manual verification |
 | code-simplifier | Check if agent type available | Skip code simplification |
 | Trigger.dev MCP | `mcp__trigger__list_projects` | Skip Trigger.dev checks |
+
+**Browser tool fallback chain:** ExecuteAutomation Playwright → Browser MCP → Microsoft Playwright → Chrome DevTools → Manual
 
 Read `.claude/verification-config.json` from PROJECT_ROOT. Use it to determine
 commands for tests, lint, typecheck, build, coverage, and dev server.
@@ -127,16 +132,43 @@ These checks run only if the required tools are available (detected above).
 
    Focus: reduce complexity, improve naming, eliminate redundancy. Preserve all functionality.
 
-9. **Browser Verification - Local** (requires: Playwright MCP or Chrome DevTools MCP)
+9. **Browser Verification - Local** (requires browser MCP tools)
 
-   If browser tools are available and phase includes UI work:
-   - Parse Phase $1 tasks for acceptance criteria marked `BROWSER:*`
-   - Use the browser-verification skill with each criterion's `Verify:` metadata
-   - Take snapshots for verification
-   - Test against local dev server (localhost)
+   First, check if phase includes UI work by scanning for `BROWSER:*` criteria.
 
-   If unavailable:
-   - Add browser checks to Human Required section instead
+   **If browser criteria exist:**
+
+   a. Check tool availability (fallback chain):
+      - ExecuteAutomation Playwright → Browser MCP → Microsoft Playwright → Chrome DevTools
+
+   b. **If at least one tool available:**
+      - Use the browser-verification skill with each criterion's `Verify:` metadata
+      - Take snapshots for verification
+      - Test against local dev server (localhost)
+
+   c. **If NO browser tools available (SOFT BLOCK):**
+      - Display warning:
+        ```
+        ⚠️  BROWSER VERIFICATION BLOCKED
+
+        This phase has {N} browser-based acceptance criteria but no browser
+        MCP tools are available.
+
+        Criteria requiring browser verification:
+        - {list each BROWSER:* criterion}
+
+        Options:
+        1. Continue anyway (browser criteria become manual verification)
+        2. Stop and configure browser tools first
+
+        To enable automated browser verification, install one of:
+        - ExecuteAutomation Playwright: Add to .mcp.json
+        - Browser MCP: Install extension from browsermcp.io
+        - Chrome DevTools MCP: Often pre-installed
+        ```
+      - Use AskUserQuestion to let user choose:
+        - "Continue with manual verification" → Add browser checks to Human Required section
+        - "Stop to configure tools" → Halt checkpoint, provide setup instructions
 
 10. **Technical Debt Check** (optional)
 
@@ -271,7 +303,9 @@ Phase $1 Checkpoint Results
 ===========================
 
 Tool Availability:
-- Playwright MCP: ✓ | ✗
+- ExecuteAutomation Playwright: ✓ | ✗ (primary)
+- Browser MCP Extension: ✓ | ✗
+- Microsoft Playwright MCP: ✓ | ✗
 - Chrome DevTools MCP: ✓ | ✗
 - code-simplifier: ✓ | ✗
 - Trigger.dev MCP: ✓ | ✗ | N/A
