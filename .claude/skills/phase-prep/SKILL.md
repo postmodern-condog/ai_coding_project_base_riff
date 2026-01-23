@@ -2,10 +2,61 @@
 name: phase-prep
 description: Check prerequisites before starting a phase
 argument-hint: [phase-number]
-allowed-tools: Bash, Read, Glob, Grep, AskUserQuestion
+allowed-tools: Bash, Read, Glob, Grep, AskUserQuestion, WebFetch, WebSearch
 ---
 
 I want to execute Phase $1 from EXECUTION_PLAN.md. Before starting, read EXECUTION_PLAN.md and check:
+
+## External Tool Documentation Protocol
+
+**CRITICAL:** Before providing setup instructions for any external service (Supabase, Stripe, Firebase, Auth0, Vercel, etc.), you MUST read the latest official documentation first.
+
+### When to Fetch Docs
+
+Fetch documentation when ANY of these apply:
+- Pre-Phase Setup mentions an external service
+- You're about to provide step-by-step setup instructions
+- The phase involves integrating with a third-party API
+- Environment variables reference external services (e.g., `STRIPE_API_KEY`, `SUPABASE_URL`)
+
+### How to Fetch Docs
+
+1. **Identify the service** from Pre-Phase Setup items or EXECUTION_PLAN.md
+2. **Fetch official docs** using WebFetch or WebSearch:
+   - Primary: Official quickstart/setup guide
+   - Secondary: API reference for specific integrations
+3. **Cache per session** — Don't re-fetch the same docs within one session
+4. **Handle failures gracefully:**
+   - Retry with exponential backoff (2-3 attempts)
+   - If all retries fail: warn user and proceed with best available info
+   - Never block entirely on doc fetch failure
+
+### Documentation URLs by Service
+
+| Service | Primary Doc URL |
+|---------|----------------|
+| Supabase | https://supabase.com/docs/guides/getting-started |
+| Firebase | https://firebase.google.com/docs/web/setup |
+| Stripe | https://stripe.com/docs/development/quickstart |
+| Auth0 | https://auth0.com/docs/quickstart |
+| Vercel | https://vercel.com/docs/getting-started |
+| Netlify | https://docs.netlify.com/get-started/ |
+| Clerk | https://clerk.com/docs/quickstarts |
+| Resend | https://resend.com/docs/introduction |
+| Neon | https://neon.tech/docs/get-started-with-neon |
+| PlanetScale | https://planetscale.com/docs |
+| Turso | https://docs.turso.tech/quickstart |
+
+For services not listed, use WebSearch: `{service name} official documentation quickstart`
+
+### Integration with Setup Instructions
+
+When generating detailed setup guides (see "Detailed Setup Instructions" section below):
+1. Fetch docs FIRST
+2. Cross-reference fetched content with your instructions
+3. Update any outdated steps (UI changes, renamed fields, new requirements)
+4. Include version/date context: "As of {date}, the Supabase dashboard..."
+
 
 ## Context Detection
 

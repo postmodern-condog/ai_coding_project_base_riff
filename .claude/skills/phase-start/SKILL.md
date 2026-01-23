@@ -2,10 +2,59 @@
 name: phase-start
 description: Execute all tasks in a phase autonomously
 argument-hint: [phase-number]
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Task
+allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Task, WebFetch, WebSearch
 ---
 
 Execute all steps and tasks in Phase $1 from EXECUTION_PLAN.md.
+
+## External Tool Documentation Protocol
+
+**CRITICAL:** Before implementing code that integrates with external services, you MUST read the latest official documentation first.
+
+### When to Fetch Docs
+
+Fetch documentation when ANY of these apply:
+- Task involves integrating with a third-party API (Supabase, Stripe, Firebase, etc.)
+- You're writing code that calls external service endpoints
+- Task references SDK usage for an external service
+- You need to implement webhooks, authentication, or data sync with external services
+
+### How to Fetch Docs
+
+1. **Identify external services** from task description and acceptance criteria
+2. **Fetch relevant docs** using WebFetch or WebSearch:
+   - SDK/library installation and setup
+   - API reference for specific endpoints being used
+   - Code examples for the integration pattern
+3. **Cache per session** — Don't re-fetch docs already fetched in this session
+4. **Handle failures gracefully:**
+   - Retry with exponential backoff (2-3 attempts)
+   - If all retries fail: warn user and proceed with best available info
+
+### Documentation URLs by Service
+
+| Service | SDK/API Documentation |
+|---------|----------------------|
+| Supabase | https://supabase.com/docs/reference/javascript |
+| Firebase | https://firebase.google.com/docs/reference/js |
+| Stripe | https://stripe.com/docs/api |
+| Auth0 | https://auth0.com/docs/api |
+| Clerk | https://clerk.com/docs/references/javascript |
+| Resend | https://resend.com/docs/api-reference |
+| OpenAI | https://platform.openai.com/docs/api-reference |
+| Anthropic | https://docs.anthropic.com/en/api |
+| Trigger.dev | https://trigger.dev/docs |
+
+For services not listed, use WebSearch: `{service name} {language} SDK documentation`
+
+### Integration with Task Execution
+
+When implementing external service integrations:
+1. Fetch docs FIRST before writing integration code
+2. Use the official SDK patterns (not outdated examples)
+3. Follow current authentication methods from docs
+4. Reference error handling patterns from official documentation
+5. Check for breaking changes if using a newer SDK version
 
 ## Context Detection
 
