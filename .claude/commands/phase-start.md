@@ -223,3 +223,84 @@ When done, provide:
 - Ready for /phase-checkpoint $1
 
 **Note:** Branches are not pushed automatically. After `/phase-checkpoint` passes, the human will review and push.
+
+---
+
+## Auto-Advance (After Phase Completes)
+
+Check if auto-advance is enabled and this phase completes with no manual items.
+
+### Configuration Check
+
+Read `.claude/settings.local.json` for auto-advance configuration:
+
+```json
+{
+  "autoAdvance": {
+    "enabled": true,      // default: true
+    "delaySeconds": 15    // default: 15
+  }
+}
+```
+
+If `autoAdvance` is not configured, use defaults (`enabled: true`, `delaySeconds: 15`).
+
+### Auto-Advance Conditions
+
+Auto-advance to `/phase-checkpoint $1` ONLY if ALL of these are true:
+
+1. ✓ All tasks in Phase $1 are complete
+2. ✓ The "Phase $1 Checkpoint" section in EXECUTION_PLAN.md has ZERO manual verification items
+3. ✓ No tasks were marked as blocked or skipped
+4. ✓ `--pause` flag was NOT passed to this command
+5. ✓ `autoAdvance.enabled` is true (or not configured, defaulting to true)
+
+**Rationale:** If the checkpoint has manual verification items, human intervention is required anyway. The human should trigger `/phase-checkpoint` after they're ready to verify.
+
+### If Auto-Advance Conditions Met
+
+1. **Show countdown:**
+   ```
+   AUTO-ADVANCE
+   ============
+   All Phase $1 tasks complete. No manual verification items.
+
+   Auto-advancing to /phase-checkpoint $1 in 15s...
+   (Press Enter to pause)
+   ```
+
+2. **Wait for delay or interrupt:**
+   - Wait `autoAdvance.delaySeconds` (default 15)
+   - If user presses Enter during countdown, cancel auto-advance
+   - Show countdown updates: `14s... 13s... 12s...`
+
+3. **If not interrupted:**
+   - Track this command in auto-advance session log
+   - Execute `/phase-checkpoint $1`
+   - Checkpoint will continue the chain if it passes
+
+4. **If interrupted:**
+   ```
+   Auto-advance paused by user.
+   Run manually when ready:
+     /phase-checkpoint $1
+   ```
+
+### If Auto-Advance Conditions NOT Met
+
+Stop and report why:
+
+```
+PHASE $1 COMPLETE
+=================
+All tasks finished.
+
+Cannot auto-advance because:
+- {reason: e.g., "Phase has manual verification items"}
+
+Manual items requiring human verification:
+- [ ] {item 1}
+- [ ] {item 2}
+
+Next: Run /phase-checkpoint $1 when ready to verify
+```
