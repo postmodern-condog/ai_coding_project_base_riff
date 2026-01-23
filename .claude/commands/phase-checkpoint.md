@@ -345,11 +345,13 @@ If `autoAdvance` is not configured, use defaults (`enabled: true`, `delaySeconds
 Auto-advance to `/phase-prep {N+1}` ONLY if ALL of these are true:
 
 1. ✓ All automated checks passed (tests, lint, types, security)
-2. ✓ No manual verification items remain unchecked
-3. ✓ No production verification items require attention
+2. ✓ No manual verification items exist (not just unchecked—none at all)
+3. ✓ No production verification items exist
 4. ✓ Phase $1 is not the final phase
 5. ✓ `--pause` flag was NOT passed to this command
 6. ✓ `autoAdvance.enabled` is true (or not configured, defaulting to true)
+
+**Rationale:** Auto-advance is for fully automated workflows. If human intervention was required (manual checks, production verification), the human is already involved and can manually trigger the next phase.
 
 ### If Auto-Advance Conditions Met
 
@@ -390,20 +392,20 @@ AUTO-ADVANCE STOPPED
 ====================
 
 Reason: {one of below}
-- Manual verification items require human attention
-- Production verification items pending
+- Manual verification items exist (human intervention required)
+- Production verification items exist (human intervention required)
 - Phase $1 is the final phase
 - Auto-advance disabled via --pause flag
 - Auto-advance disabled in settings
 
-{If manual items exist:}
-Requires attention:
-- [ ] {manual item 1}
-- [ ] {manual item 2}
+{If manual/production items exist:}
+Human verification required:
+- [ ] {item 1}
+- [ ] {item 2}
 
 Next steps:
-1. Complete the items above
-2. Run /phase-checkpoint $1 again (or proceed to /phase-prep {N+1} manually)
+1. Complete the verification items above
+2. Run /phase-prep {N+1} manually when ready
 ```
 
 ### Auto-Advance Session Tracking
