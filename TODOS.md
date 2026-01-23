@@ -18,7 +18,8 @@
 - [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below) — REMOVED (no clean way to detect permission mode at runtime)
 - [x] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below) — DONE
 - [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
-- [ ] **[P1 / Medium x2]** Read external tool docs before setup instructions — Whenever an external tool is being used (Supabase, Stripe, Firebase, etc.), exhaustively read the latest official documentation before providing setup or testing instructions. Ensures accuracy and catches UI/API changes
+- [ ] **[P1 / Medium]** Ensure Codex has access to the same MCPs as Claude Code — Need a way to sync or share MCP server configurations between Claude Code and OpenAI Codex CLI so both tools have equivalent capabilities (browser automation, etc.)
+- [ ] **[P1 / Medium x2]** [ready] Read external tool docs before setup instructions — Whenever an external tool is being used (Supabase, Stripe, Firebase, etc.), exhaustively read the latest official documentation before providing setup or testing instructions. Ensures accuracy and catches UI/API changes
 
 **Clarifications (from Q&A 2026-01-23):**
 - **Caching**: Cache fetched docs per session to avoid redundant fetches
@@ -28,8 +29,12 @@
   - `/phase-checkpoint` — when guiding manual verification of external integrations
   - `/phase-start` — when implementing code that integrates with external services
   - Any time an external service (Supabase, Stripe, Firebase, etc.) is mentioned
-- **Implementation**: ~~Add as a principle in AGENTS.md~~ — NEEDS CLARIFICATION: Should apply to target projects, not the toolkit repo itself. Need to determine correct implementation location.
-- [ ] **[P1 / Medium x2]** Atomic commits traceable to requirements — Commits are per-task, but no explicit link back to PRODUCT_SPEC requirements in commit messages. Add requirement IDs (e.g., `REQ-001`) to specs and propagate through EXECUTION_PLAN.md to commit messages (see below)
+- **Implementation**: Add instructions directly to the command files themselves (phase-prep.md, phase-checkpoint.md, phase-start.md). This ensures behavior at execution point and works for existing projects without regeneration.
+- [ ] **[P1 / Medium x2]** [ready] Atomic commits traceable to requirements — Commits are per-task, but no explicit link back to PRODUCT_SPEC requirements in commit messages. Add requirement IDs (e.g., `REQ-001`) to specs and propagate through EXECUTION_PLAN.md to commit messages (see below)
+
+**Clarifications (from Q&A 2026-01-23):**
+- **REQ-ID generation**: Auto-generated during /product-spec (sequential: REQ-001, REQ-002, etc.)
+- **Existing projects**: Skip gracefully — if no REQ-ID exists for a task, omit [REQ-XXX] from commit message
 - [x] **[P0 / High x2]** Attempt automation before manual fallback — Add logic to attempt verification with available tools (curl, browser MCP, file inspection) before falling back to manual (see audit below) — DONE
 
 **Clarifications (from Q&A 2026-01-22):**
@@ -43,7 +48,14 @@
 - [x] Verify that the Playwright MCP integration works — **REMOVED** (per user decision 2026-01-22)
 - [x] **[P2 / Low]** Add Codex skill pack installation option to `/setup` or `/generate-plan` — Allow users to opt-in to copying the codex commands via `scripts/install-codex-skill-pack.sh` (see below) — DONE
 - [ ] Git worktrees for parallel task execution (see below) — **DEFERRED** (Task Tool parallelism is sufficient for most cases)
-- [ ] Session logging for automation opportunity discovery (see below)
+- [ ] [ready] Session logging for automation opportunity discovery (see below)
+
+**Clarifications (from Q&A 2026-01-23):**
+- **Log location**: Centralized in toolkit's .claude/logs/ for cross-project analysis
+- **Data scope**: Full transcripts stored for detailed analysis
+- **Analysis frequency**: Auto-analyze after every 5 sessions
+- **Transcript format**: JSONL (one JSON object per session, append-friendly)
+- **Analysis output**: Markdown report (ANALYSIS_REPORT.md) with patterns found and suggested automations
 - [ ] **[P1 / High x0.5]** Parallel Agent Orchestration (see below)
 - [ ] **[P2 / Medium]** Spec Diffing and Plan Regeneration (see below)
 - [ ] **[P2 / Medium x0.6]** Human Review Queue (see below)
