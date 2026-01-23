@@ -169,7 +169,8 @@ your-project/
 ├── .claude/
 │   ├── commands/            # Execution commands (auto-copied)
 │   ├── skills/              # Verification skills (auto-copied)
-│   └── verification-config.json
+│   ├── verification-config.json
+│   └── toolkit-version.json # Tracks toolkit sync state
 └── [your code]
 ```
 
@@ -178,6 +179,31 @@ These documents persist across sessions, enabling any AI agent to pick up where 
 `LEARNINGS.md` is created as you work—use `/capture-learning` to save project-specific patterns, conventions, and gotchas. The `/fresh-start` command loads these learnings into context for each new task.
 
 `DEFERRED.md` is populated during specification Q&A. When you mention something is "out of scope," "v2," or "for later," the toolkit prompts you to capture it with clarifying context so nothing gets lost.
+
+### Keeping Projects Updated
+
+When the toolkit receives updates (new commands, improved skills, bug fixes), sync them to your projects:
+
+```bash
+# From your project directory (uses stored toolkit location)
+/sync
+
+# From the toolkit directory (specify target)
+/sync ~/Projects/my-app
+```
+
+The sync command:
+- **Detects changes** by comparing file hashes against the last sync
+- **Auto-applies** new files and clean updates (no local modifications)
+- **Prompts for conflicts** when you've customized a file locally
+- **Tracks state** in `.claude/toolkit-version.json`
+
+| Change Type | Action |
+|-------------|--------|
+| New toolkit file | Auto-copy without prompting |
+| Toolkit updated, no local changes | Auto-copy without prompting |
+| Toolkit updated, local changes exist | Show diff, ask: overwrite / skip / backup |
+| File removed from toolkit | Warn, offer to delete (default: keep) |
 
 ## Workflow Automation
 

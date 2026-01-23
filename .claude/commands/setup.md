@@ -47,18 +47,55 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    Copy verification config (if missing):
    - `.claude/verification-config.json` → target's `.claude/verification-config.json`
 
+4. **Create toolkit-version.json**
+
+   After copying files, create `.claude/toolkit-version.json` in the target to enable future syncs:
+
+   ```json
+   {
+     "schema_version": "1.0",
+     "toolkit_location": "{absolute path to this toolkit}",
+     "toolkit_commit": "{current git HEAD commit hash}",
+     "toolkit_commit_date": "{commit date in ISO format}",
+     "last_sync": "{current ISO timestamp}",
+     "files": {
+       ".claude/commands/fresh-start.md": {
+         "hash": "{sha256 hash of copied file}",
+         "synced_at": "{ISO timestamp}"
+       }
+       // ... entry for each copied command and skill
+     }
+   }
+   ```
+
+   Get toolkit info:
+   ```bash
+   TOOLKIT_PATH=$(pwd)
+   COMMIT_HASH=$(git rev-parse HEAD)
+   COMMIT_DATE=$(git log -1 --format=%cI HEAD)
+   ```
+
+   Calculate file hashes:
+   ```bash
+   shasum -a 256 "$file" | cut -d' ' -f1
+   ```
+
+   Include entries for:
+   - All copied commands (`.claude/commands/*.md`)
+   - All copied skills (`.claude/skills/*/SKILL.md`)
+
    **Do NOT copy:**
    - Generation commands (setup.md, product-spec.md, etc.) — these run from the toolkit
    - Prompt files — these stay in the toolkit
 
-4. **Create CLAUDE.md if it doesn't exist**
+5. **Create CLAUDE.md if it doesn't exist**
 
    Create a minimal CLAUDE.md that references AGENTS.md:
    ```
    @AGENTS.md
    ```
 
-5. **Codex CLI Detection (Optional)**
+6. **Codex CLI Detection (Optional)**
 
    Check if OpenAI Codex CLI is installed:
    ```bash
@@ -86,7 +123,7 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
 
    **Note:** Using symlinks means Codex skills auto-update when user runs `git pull` on the toolkit.
 
-6. **Report success and next steps**
+7. **Report success and next steps**
 
    For Greenfield:
    ```

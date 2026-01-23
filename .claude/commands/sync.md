@@ -1,0 +1,275 @@
+---
+description: Synchronize target projects with toolkit updates
+argument-hint: [target-or-toolkit-path]
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
+---
+
+Synchronize a target project with the latest toolkit commands and skills.
+
+## Direction Detection
+
+Determine sync direction by checking for toolkit markers:
+
+```bash
+# Check if current directory is the toolkit
+if [[ -f "GENERATOR_PROMPT.md" && -f "START_PROMPTS.md" ]]; then
+  SYNC_FROM="toolkit"  # Current dir is toolkit, $1 is target
+else
+  SYNC_FROM="target"   # Current dir is target, resolve toolkit location
+fi
+```
+
+## Resolve Paths
+
+### If running from toolkit (`SYNC_FROM="toolkit"`):
+- `TOOLKIT_PATH` = current working directory
+- `TARGET_PATH` = `$1` (required argument)
+- If `$1` is empty, ask user for target directory path
+
+### If running from target (`SYNC_FROM="target"`):
+- `TARGET_PATH` = current working directory
+- Resolve `TOOLKIT_PATH` in order:
+  1. Use `$1` if provided
+  2. Check `.claude/toolkit-version.json` → `toolkit_location`
+  3. Check `$AI_TOOLKIT_PATH` environment variable
+  4. Search common paths: `~/Projects/ai_coding_project_base`, `~/ai_coding_project_base`
+  5. Ask user if none found
+
+### Validate Paths
+- Confirm `TOOLKIT_PATH` contains `GENERATOR_PROMPT.md` (toolkit marker)
+- Confirm `TARGET_PATH` exists and is a directory
+- If validation fails, **STOP** with clear error message
+
+## Files to Sync
+
+These files are synced from toolkit to target:
+
+**Commands** (`.claude/commands/`):
+- `fresh-start.md`
+- `phase-prep.md`
+- `phase-start.md`
+- `phase-checkpoint.md`
+- `verify-task.md`
+- `criteria-audit.md`
+- `configure-verification.md`
+- `progress.md`
+- `security-scan.md`
+- `list-todos.md`
+- `populate-state.md`
+
+**Skills** (`.claude/skills/`):
+- `code-verification/`
+- `spec-verification/`
+- `criteria-audit/`
+- `security-scan/`
+- `browser-verification/`
+- `tech-debt-check/`
+
+**Config** (only if missing):
+- `.claude/verification-config.json`
+
+## Load Version State
+
+Read `TARGET_PATH/.claude/toolkit-version.json` if it exists:
+
+```json
+{
+  "schema_version": "1.0",
+  "toolkit_location": "/path/to/toolkit",
+  "toolkit_commit": "abc123...",
+  "toolkit_commit_date": "2026-01-22T10:30:00Z",
+  "last_sync": "2026-01-22T12:00:00Z",
+  "files": {
+    ".claude/commands/phase-start.md": {
+      "hash": "sha256:...",
+      "synced_at": "2026-01-22T12:00:00Z"
+    }
+  }
+}
+```
+
+If the file doesn't exist, this is the first sync — treat all files as `NEVER_SYNCED`.
+
+## Change Detection
+
+For each file in the sync list, calculate hashes and classify:
+
+```bash
+# Calculate SHA-256 hash
+shasum -a 256 "$file" | cut -d' ' -f1
+```
+
+**Classification logic:**
+
+| Condition | Status | Action |
+|-----------|--------|--------|
+| Toolkit hash = Target hash | `CURRENT` | Skip (already up to date) |
+| Target file doesn't exist | `NEW` | Auto-copy |
+| Toolkit changed, Target = Last synced hash | `CLEAN_UPDATE` | Auto-copy |
+| Toolkit changed, Target ≠ Last synced hash | `LOCAL_MODIFIED` | Prompt user |
+| No version file, Target ≠ Toolkit | `NEVER_SYNCED` | Prompt user |
+
+## Interactive Sync
+
+### 1. Show Toolkit Changes Summary
+
+```bash
+# Get commits since last sync
+cd "$TOOLKIT_PATH"
+git log --oneline "$LAST_SYNC_COMMIT"..HEAD -- .claude/commands .claude/skills
+```
+
+Display:
+```
+TOOLKIT UPDATES SINCE LAST SYNC
+===============================
+Last sync: 2026-01-15 (abc123)
+Current:   2026-01-22 (def456)
+
+Recent changes:
+- def456 fix: phase-start auto-advance logic
+- cde345 feat: add browser fallback chain
+- bcd234 docs: clarify criteria-audit usage
+```
+
+### 2. Auto-Apply Safe Updates
+
+For `NEW` and `CLEAN_UPDATE` files:
+- Copy from toolkit to target without prompting
+- Report what was updated
+
+```
+AUTO-APPLIED (no local changes)
+===============================
++ .claude/commands/sync.md (NEW)
+~ .claude/commands/phase-start.md (CLEAN_UPDATE)
+~ .claude/skills/browser-verification/SKILL.md (CLEAN_UPDATE)
+```
+
+### 3. Prompt for Conflicts
+
+For `LOCAL_MODIFIED` and `NEVER_SYNCED` files, show diff and prompt:
+
+```
+LOCAL MODIFICATION DETECTED
+===========================
+File: .claude/commands/phase-start.md
+
+Your version differs from the toolkit version.
+```
+
+Show abbreviated diff (first 20 lines of changes):
+```bash
+diff -u "$TARGET_FILE" "$TOOLKIT_FILE" | head -40
+```
+
+Then ask:
+```
+How should I handle this file?
+Options:
+1. Overwrite with toolkit version
+2. Keep local version (skip this file)
+3. Backup local and overwrite (.phase-start.md.local.YYYYMMDD)
+4. Show full diff
+```
+
+### 4. Handle Removed Files
+
+Check if any files in the version state no longer exist in toolkit:
+
+```
+FILES REMOVED FROM TOOLKIT
+==========================
+The following files no longer exist in the toolkit:
+- .claude/commands/old-command.md
+
+Options:
+1. Delete from target (match toolkit)
+2. Keep in target (may become stale)
+```
+
+Default: Keep (don't delete without confirmation).
+
+## Update Version File
+
+After sync completes, write `TARGET_PATH/.claude/toolkit-version.json`:
+
+```json
+{
+  "schema_version": "1.0",
+  "toolkit_location": "{TOOLKIT_PATH}",
+  "toolkit_commit": "{current toolkit HEAD commit}",
+  "toolkit_commit_date": "{commit date ISO}",
+  "last_sync": "{current ISO timestamp}",
+  "files": {
+    ".claude/commands/fresh-start.md": {
+      "hash": "{sha256 of synced file}",
+      "synced_at": "{ISO timestamp}"
+    },
+    // ... all synced files
+  }
+}
+```
+
+Get toolkit commit info:
+```bash
+cd "$TOOLKIT_PATH"
+COMMIT_HASH=$(git rev-parse HEAD)
+COMMIT_DATE=$(git log -1 --format=%cI HEAD)
+```
+
+## Report
+
+```
+SYNC COMPLETE
+=============
+Toolkit: {TOOLKIT_PATH}
+Target:  {TARGET_PATH}
+
+Files synced: {count}
+- New:           {count}
+- Updated:       {count}
+- Skipped:       {count}
+- Conflicts:     {count resolved} / {count total}
+
+Toolkit version: {commit} ({date})
+
+{If any files were skipped due to local modifications}
+NOTE: Some files with local modifications were skipped.
+Run /sync again to review these files.
+```
+
+## Edge Cases
+
+### Invalid Stored Toolkit Path
+
+If `toolkit_location` in version file doesn't exist or isn't a valid toolkit:
+
+```
+TOOLKIT PATH INVALID
+====================
+Stored path: /old/path/to/toolkit
+This path no longer contains a valid toolkit.
+
+Please provide the current toolkit location:
+```
+
+Update `toolkit_location` in version file after successful sync.
+
+### First Sync (No Version File)
+
+Treat all differing files as `NEVER_SYNCED`:
+- Show each file that differs
+- Ask user to confirm overwrite or keep local
+- Create version file after sync
+
+### Partial Sync (Interrupted)
+
+If sync is interrupted, the version file won't be updated.
+Next sync will re-detect and re-apply needed changes (safe).
+
+### Skills Directories
+
+For skill directories, compare the `SKILL.md` file as the primary indicator:
+- If `SKILL.md` changed → sync entire skill directory
+- Use `cp -r` to copy skill directories

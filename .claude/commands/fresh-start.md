@@ -131,6 +131,30 @@ If MODE = "feature", check for and offer to merge workflow additions:
    - Report: "Skipped. You can manually apply AGENTS_ADDITIONS.md changes later."
    - Continue with fresh-start (don't block)
 
+## Verification Configuration (First Run)
+
+Check if verification is configured:
+
+1. Check if `PROJECT_ROOT/.claude/verification-config.json` exists and is non-empty
+2. If it exists and has content, skip this section
+3. If missing or empty, check for a `"skipped": true` marker — if present, skip
+4. Otherwise, prompt the user:
+
+```
+Verification not configured. Configure now?
+
+[Y] Yes - run /configure-verification (recommended)
+[n] No - remind me later
+[s] Skip - don't ask again for this project
+```
+
+**Handling:**
+- **Y (default):** Invoke `/configure-verification` with PROJECT_ROOT, then continue
+- **n:** Report "Run `/configure-verification` before `/phase-prep` to enable automated verification." and continue
+- **s:** Create `.claude/verification-config.json` with `{"skipped": true}` and continue
+
+**Note:** In non-interactive/CI environments, if no response is possible, treat as "n" (remind later) and continue without blocking.
+
 ## Required Context
 
 Read these files first:
@@ -159,7 +183,5 @@ Check which of these exist and read them:
    - Tech stack and key patterns
    - Key learnings to follow (if LEARNINGS.md exists)
 3. Confirm you're ready to begin execution
-4. If `.claude/verification-config.json` is missing or empty, recommend running
-   `/configure-verification` before `/phase-prep`
 
 **Important:** If LEARNINGS.md exists, apply those patterns throughout your work. These are project-specific conventions discovered during development that override general defaults.

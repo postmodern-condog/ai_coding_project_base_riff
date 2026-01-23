@@ -91,7 +91,43 @@ cp .claude/verification-config.json "$1/.claude/verification-config.json"
 
 If it already exists, do not overwrite it.
 
-### 4. Create CLAUDE.md
+### 4. Create toolkit-version.json
+
+Create `$1/.claude/toolkit-version.json` to enable future syncs with `/sync`:
+
+```json
+{
+  "schema_version": "1.0",
+  "toolkit_location": "{absolute path to this toolkit}",
+  "toolkit_commit": "{current git HEAD commit hash}",
+  "toolkit_commit_date": "{commit date in ISO format}",
+  "last_sync": "{current ISO timestamp}",
+  "files": {
+    ".claude/commands/fresh-start.md": {
+      "hash": "{sha256 hash of copied file}",
+      "synced_at": "{ISO timestamp}"
+    }
+  }
+}
+```
+
+Get toolkit info:
+```bash
+TOOLKIT_PATH=$(pwd)
+COMMIT_HASH=$(git rev-parse HEAD)
+COMMIT_DATE=$(git log -1 --format=%cI HEAD)
+```
+
+Calculate file hashes for each copied file:
+```bash
+shasum -a 256 "$file" | cut -d' ' -f1
+```
+
+Include entries for all copied commands and skills (`.claude/commands/*.md` and `.claude/skills/*/SKILL.md`).
+
+If the file already exists, **update it** with current hashes and commit info (this handles re-running generate-plan on an existing project).
+
+### 5. Create CLAUDE.md
 
 If `$1/CLAUDE.md` does not exist, create it with:
 
