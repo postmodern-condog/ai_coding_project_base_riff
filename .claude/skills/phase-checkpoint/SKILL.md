@@ -224,6 +224,50 @@ Truly Manual (no automation possible):
 **Note:** Only items in "Truly Manual" genuinely require human action. Items in
 "Automation Failed" may be automatable once the underlying issue is fixed.
 
+### Update EXECUTION_PLAN.md Checkboxes (Auto-Verified Items)
+
+After auto-verify passes items, immediately update their checkboxes in EXECUTION_PLAN.md:
+
+1. **For each item that auto-verify marked PASS:**
+   - Read EXECUTION_PLAN.md
+   - Find the "### Phase $1 Checkpoint" section
+   - Locate the exact line: `- [ ] {criterion text}`
+   - Edit: change `- [ ]` to `- [x]`
+   - Verify edit succeeded
+
+2. **Matching rules:**
+   - Match the exact checkbox text (criterion may be truncated in reports)
+   - Use the phase section as anchor to avoid updating wrong items
+   - Skip items already checked (`- [x]`)
+
+### Human Confirmation (Batch)
+
+For items in "Automation Failed" or "Truly Manual" categories, ask human for batch confirmation:
+
+1. **List all items needing human verification:**
+   ```
+   Manual verification needed for {N} items:
+   1. {item 1 text}
+   2. {item 2 text}
+   ...
+   ```
+
+2. **Ask ONE question using AskUserQuestion:**
+   - Question: "Which items have you verified?"
+   - Options:
+     - "All verified" → Update ALL remaining checkboxes at once
+     - "Some verified" → Follow up asking which ones (comma-separated numbers)
+     - "None yet" → Leave all unchecked, continue to next section
+
+3. **Accept natural language responses:**
+   - "they're all good", "verified", "all done" → Treat as "All verified"
+   - "all except 2" or "1 and 3 only" → Update specified items only
+
+4. **Update checkboxes:**
+   - For confirmed items, edit EXECUTION_PLAN.md to change `- [ ]` to `- [x]`
+   - Use a single Edit call when updating multiple items in sequence
+   - Do NOT ask follow-up confirmation questions after user says "all verified"
+
 ### Approach Review (Human)
 
 Ask the human to review the phase's implementation approach against these criteria:
