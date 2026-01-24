@@ -112,19 +112,58 @@ Ask the human about authentication requirements:
    - If NO: Set `auth.strategy` to `"none"` and skip remaining auth questions
    - If YES: Continue with auth configuration
 
-2. "What is the login route?" (default: `/login`)
+2. "What authentication method does your app use?"
+
+   Use AskUserQuestion:
+   ```
+   Question: "What authentication method does your app use?"
+   Header: "Auth method"
+   Options:
+     - Label: "Email/Password (Recommended)"
+       Description: "Standard login form with email and password fields"
+     - Label: "Google OAuth"
+       Description: "Sign in with Google button"
+     - Label: "GitHub OAuth"
+       Description: "Sign in with GitHub button"
+   ```
+
+### If Email/Password:
+
+3. "What is the login route?" (default: `/login`)
    - Set `auth.loginRoute`
 
-3. "What environment variable holds the test username/email?"
+4. "What environment variable holds the test username/email?"
    - Default: `TEST_USER_EMAIL`
    - Set `auth.credentials.usernameVar`
 
-4. "What environment variable holds the test password?"
+5. "What environment variable holds the test password?"
    - Default: `TEST_USER_PASSWORD`
    - Set `auth.credentials.passwordVar`
 
-5. Set `auth.strategy` to `"env"` and `auth.storageState` to
+6. Set `auth.strategy` to `"env"` and `auth.storageState` to
    `.claude/verification/auth-state.json`
+
+### If Google or GitHub OAuth:
+
+3. Set `auth.strategy` to `"oauth"` and `auth.provider` to `"google"` or `"github"`
+
+4. Ask: "Would you like to complete OAuth setup now?"
+
+   Use AskUserQuestion:
+   ```
+   Question: "Complete OAuth login now? You'll need your OAuth app credentials ready."
+   Header: "OAuth setup"
+   Options:
+     - Label: "Yes, set up now (Recommended)"
+       Description: "Run /oauth-login to complete OAuth flow and store tokens"
+     - Label: "No, I'll do it later"
+       Description: "Skip for now - run /oauth-login {provider} later"
+   ```
+
+   If YES: Invoke the `/oauth-login` skill with the selected provider.
+   If NO: Continue without tokens (verification will fail until tokens are set up).
+
+5. Set `auth.storageState` to `.claude/verification/auth-state.json`
 
 ## Ensure .gitignore Protection
 
@@ -189,10 +228,12 @@ Dev Server:
 - startupSeconds: {value}
 
 Authentication:
-- strategy: {none | env}
-- loginRoute: {value or "N/A"}
-- usernameVar: {value or "N/A"}
-- passwordVar: {value or "N/A"}
+- strategy: {none | env | oauth}
+- loginRoute: {value or "N/A"} (env strategy only)
+- usernameVar: {value or "N/A"} (env strategy only)
+- passwordVar: {value or "N/A"} (env strategy only)
+- provider: {google | github | N/A} (oauth strategy only)
+- tokens: {Configured | Not configured} (oauth strategy only)
 
 Git Protection:
 - .gitignore includes .env.verification: {Yes | Added | WARNING: No .gitignore}
@@ -203,7 +244,7 @@ Notes: {missing commands, auth setup needed, no browser tools, etc.}
 
 ## Post-Configuration Reminders
 
-If authentication was configured:
+If email/password authentication was configured:
 
 ```
 AUTHENTICATION SETUP REQUIRED
@@ -212,6 +253,21 @@ AUTHENTICATION SETUP REQUIRED
 2. Fill in TEST_USER_EMAIL and TEST_USER_PASSWORD
 3. Verify .env.verification is in .gitignore (should be auto-added)
 4. Run a browser verification to test login works
+```
+
+If OAuth was configured but tokens not set up:
+
+```
+OAUTH SETUP REQUIRED
+====================
+Run /oauth-login {provider} to complete OAuth setup.
+
+You will need:
+1. OAuth app credentials (Client ID and Secret)
+2. Redirect URI configured: http://localhost:3847/oauth/callback
+
+For Google: https://console.cloud.google.com/apis/credentials
+For GitHub: https://github.com/settings/developers
 ```
 
 If no browser tools detected:

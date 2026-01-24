@@ -17,7 +17,7 @@
 - [x] **[P1 / Medium]** Enhance `/phase-prep` to show human prep for future phases (clarified, see below) — DONE
 - [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below) — REMOVED (no clean way to detect permission mode at runtime)
 - [x] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below) — DONE
-- [x] **[P1 / Medium x2]** [ready] Post-commit hook to run target project sync commands — Create a hook that runs after every commit to automatically execute `/update-target-projects` and any other commands that intermittently update target projects. This would eliminate the manual step of remembering to sync after skill changes. Implementation: Add to `.claude/settings.json` hooks with a post-commit trigger that detects skill file changes and runs sync automatically. — DONE
+- [x] **[P1 / Medium x2]** [ready] Post-commit hook to run target project sync commands — Create a hook that runs after every commit to automatically execute `/update-target-projects` and any other commands that intermittently update target projects. This would eliminate the manual step of remembering to sync after skill changes. Implementation: Add to `.claude/settings.json` hooks with a post-commit trigger that detects skill file changes and runs sync automatically. — DONE (058868a)
 
 **Clarifications (from Q&A 2026-01-23):**
 - **Execution**: Background (non-blocking) — sync runs after commit completes, user can continue
@@ -25,7 +25,7 @@
 - **Commands to run**: Just `/update-target-projects` — Codex skills are symlinks (auto-update)
 - **Scope**: Toolkit repo only — hook lives in ai_coding_project_base, syncs to target projects
 - [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
-- [ ] **[P2 / Medium]** [ready] Add OAuth support to `/configure-verification` and examples — Currently auth configuration only supports email/password via env vars. Need to handle OAuth flows (particularly Google OAuth) which require browser redirects, token storage, and session persistence. Key challenges: automating the OAuth consent flow in headless browser, storing refresh tokens, handling token expiration during verification runs
+- [x] **[P2 / Medium]** [ready] Add OAuth support to `/configure-verification` and examples — Currently auth configuration only supports email/password via env vars. Need to handle OAuth flows (particularly Google OAuth) which require browser redirects, token storage, and session persistence. Key challenges: automating the OAuth consent flow in headless browser, storing refresh tokens, handling token expiration during verification runs — DONE (0664a33)
 
 **Clarifications (from Q&A 2026-01-23):**
 - **Providers**: Google + GitHub initially — the two most common OAuth providers
