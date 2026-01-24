@@ -17,9 +17,27 @@
 - [x] **[P1 / Medium]** Enhance `/phase-prep` to show human prep for future phases (clarified, see below) — DONE
 - [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below) — REMOVED (no clean way to detect permission mode at runtime)
 - [x] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below) — DONE
-- [ ] **[P1 / Medium x2]** Post-commit hook to run target project sync commands — Create a hook that runs after every commit to automatically execute `/update-target-projects` and any other commands that intermittently update target projects. This would eliminate the manual step of remembering to sync after skill changes. Implementation: Add to `.claude/settings.json` hooks with a post-commit trigger that detects skill file changes and runs sync automatically.
+- [ ] **[P1 / Medium x2]** [ready] Post-commit hook to run target project sync commands — Create a hook that runs after every commit to automatically execute `/update-target-projects` and any other commands that intermittently update target projects. This would eliminate the manual step of remembering to sync after skill changes. Implementation: Add to `.claude/settings.json` hooks with a post-commit trigger that detects skill file changes and runs sync automatically.
+
+**Clarifications (from Q&A 2026-01-23):**
+- **Execution**: Background (non-blocking) — sync runs after commit completes, user can continue
+- **Trigger condition**: Only when `.claude/skills/` files change — check git diff before running
+- **Commands to run**: Just `/update-target-projects` — Codex skills are symlinks (auto-update)
+- **Scope**: Toolkit repo only — hook lives in ai_coding_project_base, syncs to target projects
 - [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
-- [ ] **[P2 / Medium]** Add OAuth support to `/configure-verification` and examples — Currently auth configuration only supports email/password via env vars. Need to handle OAuth flows (particularly Google OAuth) which require browser redirects, token storage, and session persistence. Key challenges: automating the OAuth consent flow in headless browser, storing refresh tokens, handling token expiration during verification runs
+- [ ] **[P2 / Medium]** [ready] Add OAuth support to `/configure-verification` and examples — Currently auth configuration only supports email/password via env vars. Need to handle OAuth flows (particularly Google OAuth) which require browser redirects, token storage, and session persistence. Key challenges: automating the OAuth consent flow in headless browser, storing refresh tokens, handling token expiration during verification runs
+
+**Clarifications (from Q&A 2026-01-23):**
+- **Providers**: Google + GitHub initially — the two most common OAuth providers
+- **Token storage**: Project `.env` file alongside other credentials — simple, per-project
+- **Consent flow**: Manual first, then automated — user completes OAuth once in browser, tokens stored, future runs use refresh tokens
+- **Token refresh**: Auto-refresh before expiry — check token expiry before verification, refresh if <5 min remaining, update .env
+- **Trigger point**: During `/configure-verification` — when user selects OAuth as auth method, immediately prompt to complete OAuth flow
+- **Implementation approach**:
+  1. Add `/oauth-login <provider>` command that opens browser, waits for callback, stores tokens
+  2. Update `/configure-verification` to support OAuth as auth method and trigger /oauth-login
+  3. Before verification runs, check token expiry and refresh if needed
+  4. Store `OAUTH_ACCESS_TOKEN`, `OAUTH_REFRESH_TOKEN`, `OAUTH_TOKEN_EXPIRY` in .env
 - [x] **[P1 / Medium]** [ready] Ensure Codex has access to the same MCPs as Claude Code — Need a way to sync or share MCP server configurations between Claude Code and OpenAI Codex CLI so both tools have equivalent capabilities (browser automation, etc.) — DONE (fbac8b5)
 
 **Clarifications (from Q&A 2026-01-23):**
