@@ -22,6 +22,9 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOOLKIT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
+# Log file for background sync
+SYNC_LOG="$TOOLKIT_DIR/.claude/sync-log.txt"
+
 # Get files changed in the last commit
 CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null || true)
 
@@ -32,7 +35,7 @@ SKILL_CHANGES=$(echo "$CHANGED_FILES" | grep -E "^\.claude/skills/" || true)
 if [ -n "$SKILL_CHANGES" ]; then
     echo ""
     echo -e "${CYAN}╭─────────────────────────────────────────────────────────────╮${NC}"
-    echo -e "${CYAN}│${NC}              ${YELLOW}TOOLKIT SYNC REMINDER${NC}                         ${CYAN}│${NC}"
+    echo -e "${CYAN}│${NC}              ${YELLOW}TOOLKIT AUTO-SYNC${NC}                             ${CYAN}│${NC}"
     echo -e "${CYAN}╰─────────────────────────────────────────────────────────────╯${NC}"
     echo ""
 
@@ -40,13 +43,37 @@ if [ -n "$SKILL_CHANGES" ]; then
     echo "$SKILL_CHANGES" | sed 's/^/  /'
     echo ""
 
-    echo -e "Projects using this toolkit may need syncing."
-    echo ""
-    echo -e "To discover and sync target projects, run:"
-    echo -e "  ${GREEN}/update-target-projects${NC}"
-    echo ""
-    echo -e "${DIM}Or sync a specific project:${NC}"
-    echo -e "  ${DIM}/sync /path/to/project${NC}"
+    # Check if claude CLI is available
+    if command -v claude &> /dev/null; then
+        echo -e "${GREEN}Starting background sync of target projects...${NC}"
+        echo -e "${DIM}Log: $SYNC_LOG${NC}"
+        echo ""
+
+        # Run sync in background, redirecting output to log file
+        # Use nohup to ensure it continues even if terminal closes
+        (
+            echo "=== Sync started: $(date) ===" >> "$SYNC_LOG"
+            echo "Skills changed:" >> "$SYNC_LOG"
+            echo "$SKILL_CHANGES" >> "$SYNC_LOG"
+            echo "" >> "$SYNC_LOG"
+
+            # Run claude with the update-target-projects command
+            # --print flag runs non-interactively
+            cd "$TOOLKIT_DIR" && claude -p "/update-target-projects" >> "$SYNC_LOG" 2>&1
+
+            echo "" >> "$SYNC_LOG"
+            echo "=== Sync completed: $(date) ===" >> "$SYNC_LOG"
+            echo "" >> "$SYNC_LOG"
+        ) &
+
+        # Disown the background process so it's not tied to the terminal
+        disown
+
+        echo -e "${DIM}Sync running in background. Check $SYNC_LOG for results.${NC}"
+    else
+        echo -e "${YELLOW}Claude CLI not found. Manual sync required:${NC}"
+        echo -e "  ${GREEN}/update-target-projects${NC}"
+    fi
     echo ""
 fi
 
