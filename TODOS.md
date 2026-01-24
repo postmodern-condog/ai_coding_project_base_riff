@@ -25,7 +25,7 @@
 - **Commands to run**: Just `/update-target-projects` — Codex skills are symlinks (auto-update)
 - **Scope**: Toolkit repo only — hook lives in ai_coding_project_base, syncs to target projects
 - [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
-- [x] **[P2 / Medium]** [ready] Add OAuth support to `/configure-verification` and examples — Currently auth configuration only supports email/password via env vars. Need to handle OAuth flows (particularly Google OAuth) which require browser redirects, token storage, and session persistence. Key challenges: automating the OAuth consent flow in headless browser, storing refresh tokens, handling token expiration during verification runs — DONE (0664a33)
+- [x] **[P2 / Medium]** [ready] Add OAuth support to `/configure-verification` and examples — Currently auth configuration only supports email/password via env vars. Need to handle OAuth flows (particularly Google OAuth) which require browser redirects, token storage, and session persistence. Key challenges: automating the OAuth consent flow in headless browser, storing refresh tokens, handling token expiration during verification runs — DONE (7de0d20)
 
 **Clarifications (from Q&A 2026-01-23):**
 - **Providers**: Google + GitHub initially — the two most common OAuth providers
