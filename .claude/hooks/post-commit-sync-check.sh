@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# Post-commit hook for toolkit sync reminders
+# Post-commit hook for automatic toolkit sync
 #
-# When skills or commands are modified, reminds user to sync target projects.
-# This hook is non-blocking and only displays a reminder message.
+# When skills are modified, automatically syncs target projects in background.
+# This hook is non-blocking - sync runs asynchronously after commit completes.
 #
 # Installation:
 #   ln -sf ../../.claude/hooks/post-commit-sync-check.sh .git/hooks/post-commit
@@ -18,30 +18,27 @@ GREEN='\033[0;32m'
 DIM='\033[2m'
 NC='\033[0m' # No Color
 
+# Get the toolkit directory (where this script lives)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TOOLKIT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 # Get files changed in the last commit
 CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null || true)
 
-# Check for skill/command changes
-SKILL_CHANGES=$(echo "$CHANGED_FILES" | grep -E "^\.claude/skills/.*\.md$" || true)
-COMMAND_CHANGES=$(echo "$CHANGED_FILES" | grep -E "^\.claude/commands/.*\.md$" || true)
+# Check for skill changes (only .claude/skills/ files trigger sync)
+SKILL_CHANGES=$(echo "$CHANGED_FILES" | grep -E "^\.claude/skills/" || true)
 
-# Filter out non-syncable commands (these are toolkit-only, not synced to projects)
-# Syncable items are skills only - commands stay in the toolkit
-SYNCABLE_SKILL_CHANGES="$SKILL_CHANGES"
-
-# If relevant files changed, show reminder
-if [ -n "$SYNCABLE_SKILL_CHANGES" ]; then
+# If skill files changed, run sync in background
+if [ -n "$SKILL_CHANGES" ]; then
     echo ""
     echo -e "${CYAN}╭─────────────────────────────────────────────────────────────╮${NC}"
     echo -e "${CYAN}│${NC}              ${YELLOW}TOOLKIT SYNC REMINDER${NC}                         ${CYAN}│${NC}"
     echo -e "${CYAN}╰─────────────────────────────────────────────────────────────╯${NC}"
     echo ""
 
-    if [ -n "$SYNCABLE_SKILL_CHANGES" ]; then
-        echo -e "${YELLOW}Skills modified:${NC}"
-        echo "$SYNCABLE_SKILL_CHANGES" | sed 's/^/  /'
-        echo ""
-    fi
+    echo -e "${YELLOW}Skills modified:${NC}"
+    echo "$SKILL_CHANGES" | sed 's/^/  /'
+    echo ""
 
     echo -e "Projects using this toolkit may need syncing."
     echo ""

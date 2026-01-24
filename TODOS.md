@@ -17,7 +17,7 @@
 - [x] **[P1 / Medium]** Enhance `/phase-prep` to show human prep for future phases (clarified, see below) — DONE
 - [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below) — REMOVED (no clean way to detect permission mode at runtime)
 - [x] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below) — DONE
-- [ ] **[P1 / Medium x2]** [ready] Post-commit hook to run target project sync commands — Create a hook that runs after every commit to automatically execute `/update-target-projects` and any other commands that intermittently update target projects. This would eliminate the manual step of remembering to sync after skill changes. Implementation: Add to `.claude/settings.json` hooks with a post-commit trigger that detects skill file changes and runs sync automatically.
+- [x] **[P1 / Medium x2]** [ready] Post-commit hook to run target project sync commands — Create a hook that runs after every commit to automatically execute `/update-target-projects` and any other commands that intermittently update target projects. This would eliminate the manual step of remembering to sync after skill changes. Implementation: Add to `.claude/settings.json` hooks with a post-commit trigger that detects skill file changes and runs sync automatically. — DONE
 
 **Clarifications (from Q&A 2026-01-23):**
 - **Execution**: Background (non-blocking) — sync runs after commit completes, user can continue
