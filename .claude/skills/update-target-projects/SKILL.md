@@ -1,3 +1,8 @@
+---
+name: update-target-projects
+description: Discover and sync all toolkit-using projects with the latest skills
+---
+
 # Update Target Projects
 
 Discover and sync all toolkit-using projects and the Codex CLI skill pack with the latest skills.
