@@ -57,3 +57,22 @@ This repository is a **toolkit** (prompts, slash commands, skills). It is not a
 
 - Do not rewrite history (`reset --hard`, force push) unless explicitly requested.
 - Avoid broad formatting churn; keep diffs reviewable.
+
+## Post-Commit Sync Prompt
+
+When you see `TOOLKIT SYNC PENDING` in git commit output, it means skills were
+modified and target projects may need syncing. You MUST:
+
+1. Use `AskUserQuestion` to prompt:
+   - Question: "Skills were modified. Sync target projects now?"
+   - Options: "Yes, sync now" / "No, skip for now"
+
+2. If user says yes, run `/update-target-projects`
+
+3. After sync (or skip), delete the marker file:
+   ```bash
+   rm -f .claude/sync-pending.json
+   ```
+
+This replaces the previous background sync approach which couldn't access other
+project directories due to sandboxing.
