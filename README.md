@@ -258,6 +258,44 @@ The toolkit enforces quality through multiple mechanisms:
 - **Auto-Verify** — Before listing items as "manual," the toolkit attempts automation using available tools (curl, browser MCP, file inspection). Only truly subjective criteria (UX, brand tone) require human review.
 - **Manual Verification Guides** — When human verification is required, the toolkit generates comprehensive step-by-step guides with prerequisites, exact commands, expected results, and troubleshooting tips.
 - **Stuck Detection** — Agents escalate to humans after repeated failures instead of spinning forever.
+- **Vercel Preview Integration** — Browser tests can run against Vercel preview deployments instead of localhost, providing real HTTPS and working OAuth callbacks.
+
+### Vercel Preview URL Integration
+
+For projects deployed to Vercel, browser verification can run against preview deployments instead of localhost:
+
+**Benefits:**
+- Real HTTPS environment (matches production)
+- OAuth callbacks work correctly
+- Tests production-like build output
+- No need to run local dev server
+
+**Setup:**
+```bash
+# During configure-verification, enable deployment verification
+/configure-verification
+# Answer "Yes" to "Do you deploy to Vercel?"
+```
+
+**How it works:**
+1. Push changes to trigger Vercel deployment
+2. Run `/phase-checkpoint` — it resolves the preview URL automatically
+3. Browser tests run against `https://your-app-xyz.vercel.app`
+4. If no preview found, falls back to localhost (configurable)
+
+**Configuration in `.claude/verification-config.json`:**
+```json
+{
+  "deployment": {
+    "enabled": true,
+    "service": "vercel",
+    "useForBrowserVerification": true,
+    "fallbackToLocal": true,
+    "waitForDeployment": true,
+    "deploymentTimeout": 300
+  }
+}
+```
 
 For detailed documentation, see [Verification Deep Dive](docs/verification.md).
 
@@ -297,6 +335,7 @@ ai_coding_project_base/
 │   │   ├── browser-verification/    # Browser MCP verification
 │   │   ├── code-verification/       # Multi-agent code verification
 │   │   ├── oauth-login/             # OAuth flow for browser verification
+│   │   ├── vercel-preview/          # Vercel preview URL resolution
 │   │   └── ...                      # Security, tech-debt, etc.
 │   └── hooks/                       # Git hooks (pre-push doc check)
 ├── docs/                            # Detailed documentation

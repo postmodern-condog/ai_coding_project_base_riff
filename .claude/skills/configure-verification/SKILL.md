@@ -165,6 +165,71 @@ Ask the human about authentication requirements:
 
 5. Set `auth.storageState` to `.claude/verification/auth-state.json`
 
+## Configure Deployment Verification
+
+Ask the human about deployment verification for browser tests:
+
+1. **Detect Vercel project** by checking for:
+   - `.vercel/project.json` (linked project)
+   - `vercel.json` (Vercel config)
+   - `package.json` scripts containing "vercel"
+
+2. **If Vercel detected, ask:**
+
+   Use AskUserQuestion:
+   ```
+   Question: "Do you deploy to Vercel and want to run browser tests against preview URLs?"
+   Header: "Deployment"
+   Options:
+     - Label: "Yes, use preview URLs (Recommended)"
+       Description: "Browser tests run against Vercel preview deployments (HTTPS, OAuth works)"
+     - Label: "No, use localhost"
+       Description: "Browser tests run against local dev server only"
+   ```
+
+3. **If Yes, ask about fallback behavior:**
+
+   Use AskUserQuestion:
+   ```
+   Question: "How should we handle missing preview deployments?"
+   Header: "Fallback"
+   Options:
+     - Label: "Fall back to localhost (Recommended)"
+       Description: "If no preview URL found, use local dev server with a warning"
+     - Label: "Block until deployment ready"
+       Description: "Wait for deployment or fail verification if unavailable"
+   ```
+
+4. **Configure deployment settings:**
+
+   ```json
+   {
+     "deployment": {
+       "enabled": true,
+       "service": "vercel",
+       "useForBrowserVerification": true,
+       "fallbackToLocal": true,
+       "waitForDeployment": true,
+       "deploymentTimeout": 300,
+       "tokenVar": "VERCEL_TOKEN"
+     }
+   }
+   ```
+
+   | Setting | Default | Description |
+   |---------|---------|-------------|
+   | `enabled` | false | Enable deployment URL resolution |
+   | `service` | "vercel" | Deployment service (currently only Vercel supported) |
+   | `useForBrowserVerification` | true | Use preview URL for browser tests |
+   | `fallbackToLocal` | true | Fall back to localhost if no preview |
+   | `waitForDeployment` | true | Wait for deployment to be ready |
+   | `deploymentTimeout` | 300 | Max seconds to wait for deployment |
+   | `tokenVar` | "VERCEL_TOKEN" | Env var for Vercel auth token (CI/CD) |
+
+5. **If No (localhost only):**
+
+   Set `deployment.enabled` to `false` (or omit the section entirely).
+
 ## Ensure .gitignore Protection
 
 If authentication is configured, verify `.env.verification` won't be committed:
@@ -235,6 +300,14 @@ Authentication:
 - provider: {google | github | N/A} (oauth strategy only)
 - tokens: {Configured | Not configured} (oauth strategy only)
 
+Deployment Verification:
+- enabled: {true | false}
+- service: {vercel | N/A}
+- useForBrowserVerification: {true | false}
+- fallbackToLocal: {true | false}
+- waitForDeployment: {true | false}
+- deploymentTimeout: {value}s
+
 Git Protection:
 - .gitignore includes .env.verification: {Yes | Added | WARNING: No .gitignore}
 
@@ -279,4 +352,24 @@ No browser MCP tools were detected. Browser-based acceptance criteria
 will require manual verification until a browser MCP is configured.
 
 Recommended: Add Playwright MCP to your Claude settings.
+```
+
+If deployment verification was configured:
+
+```
+DEPLOYMENT VERIFICATION CONFIGURED
+==================================
+Browser tests will run against Vercel preview deployments.
+
+How it works:
+1. Push changes to trigger Vercel deployment
+2. Run /phase-checkpoint — it resolves the preview URL automatically
+3. Browser tests run against the preview (HTTPS, OAuth callbacks work)
+
+Fallback: {Enabled - will use localhost if no preview | Disabled - will block}
+
+To test manually:
+1. Push your branch to GitHub
+2. Wait for Vercel deployment (check dashboard or `vercel ls`)
+3. Run /phase-checkpoint to verify against preview
 ```
