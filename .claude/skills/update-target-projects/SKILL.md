@@ -50,26 +50,13 @@ Check if the Codex CLI skill pack is installed:
 CODEX_SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills"
 TOOLKIT_SKILLS_DIR="$(pwd)/.claude/skills"
 
-# Skills that should be in Codex
-CODEX_SKILLS=(
-  "fresh-start"
-  "phase-prep"
-  "phase-start"
-  "phase-checkpoint"
-  "verify-task"
-  "configure-verification"
-  "progress"
-  "populate-state"
-  "list-todos"
-  "security-scan"
-  "criteria-audit"
-  "code-verification"
-  "browser-verification"
-  "spec-verification"
-  "tech-debt-check"
-  "auto-verify"
-)
+# Dynamically discover all skills from toolkit directory
+# This ensures new skills are automatically included
+CODEX_SKILLS=($(ls -1 "$TOOLKIT_SKILLS_DIR" | grep -v "^\\."))
 ```
+
+**Note:** Skills are discovered dynamically from the toolkit's `.claude/skills/` directory.
+This ensures new skills are automatically included without updating this document.
 
 For each skill, determine its status:
 
@@ -375,22 +362,9 @@ SYNCING TARGET PROJECTS
 3. Update `toolkit-version.json` with new commit and hashes
 
 **Skills to sync:**
-- fresh-start
-- phase-prep
-- phase-start
-- phase-checkpoint
-- verify-task
-- configure-verification
-- progress
-- populate-state
-- list-todos
-- security-scan
-- criteria-audit
-- code-verification
-- spec-verification
-- browser-verification
-- tech-debt-check
-- auto-verify
+
+All skills from the toolkit's `.claude/skills/` directory are synced dynamically.
+This includes any new skills added to the toolkit without requiring manual updates.
 
 ### Phase 7: Summary Report
 
@@ -449,7 +423,7 @@ CODEX CLI SKILL PACK
 Location: ~/.codex/skills
 Status:   CURRENT (all symlinks - auto-updating)
 
-All 16 skills are symlinked to this toolkit. No sync needed.
+All {N} skills are symlinked to this toolkit. No sync needed.
 ```
 
 No sync action needed - symlinks auto-update.
