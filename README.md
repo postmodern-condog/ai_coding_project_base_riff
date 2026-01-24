@@ -135,6 +135,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 |---------|-------------|
 | `/setup [path]` | Initialize new project with toolkit structure |
 | `/sync [path]` | Sync target project with latest toolkit commands/skills |
+| `/update-target-projects` | Discover and sync all toolkit-using projects at once |
 | `/gh-init [path]` | Initialize git repo with smart .gitignore and optional GitHub remote |
 | `/install-hooks [path]` | Install git hooks (pre-push doc sync check) |
 
@@ -143,7 +144,8 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | Command | Description |
 |---------|-------------|
 | `/fresh-start` | Orient to project, load context |
-| `/configure-verification` | Set test/lint/build commands for your stack |
+| `/configure-verification` | Set test/lint/build/auth commands for your stack |
+| `/oauth-login <provider>` | Complete OAuth flow (Google/GitHub) for browser verification |
 | `/phase-prep N` | Check prerequisites, preview future human items |
 | `/phase-start N` | Execute phase N (creates branch, commits per task) |
 | `/phase-checkpoint N` | Local-first verification, then production checks |
@@ -152,6 +154,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/security-scan` | Run security checks (deps, secrets, code) |
 | `/progress` | Show progress through execution plan |
 | `/list-todos` | Analyze and prioritize TODO items |
+| `/run-todos` | Implement [ready]-tagged TODO items with commits |
 | `/capture-learning` | Save project patterns to LEARNINGS.md |
 
 See [Recovery Commands](docs/recovery-commands.md) for failure handling (`/phase-analyze`, `/phase-rollback`, `/task-retry`).
@@ -185,12 +188,14 @@ These documents persist across sessions, enabling any AI agent to pick up where 
 When the toolkit receives updates (new commands, improved skills, bug fixes), sync them to your projects:
 
 ```bash
-# From your project directory (uses stored toolkit location)
-/sync
+# Sync all toolkit-using projects at once (from toolkit directory)
+/update-target-projects
 
-# From the toolkit directory (specify target)
+# Sync a specific project
 /sync ~/Projects/my-app
 ```
+
+**Note:** After committing skill changes to the toolkit, a post-commit hook reminds you to sync. Codex CLI skills are symlinked and update automatically.
 
 The sync command:
 - **Detects changes** by comparing file hashes against the last sync
@@ -225,19 +230,18 @@ The toolkit automatically chains phase commands when no human intervention is re
 | `/phase-start N` | `/phase-checkpoint N` | All tasks complete, no truly manual checkpoint items |
 | `/phase-checkpoint N` | `/phase-prep N+1` | All checks pass, no truly manual items, more phases exist |
 
-Each auto-advance shows a 15-second countdown (configurable). Press Enter to pause and take manual control.
+Auto-advance executes immediately when conditions are met. No countdown or delay.
 
 **Configuration** (`.claude/settings.local.json`):
 ```json
 {
   "autoAdvance": {
-    "enabled": true,
-    "delaySeconds": 15
+    "enabled": true
   }
 }
 ```
 
-When auto-advance stops (manual items exist, check fails, or interrupted), a session report shows all completed steps and blocking issues.
+When auto-advance stops (manual items exist, check fails, or final phase complete), a session report shows all completed steps and any blocking issues.
 
 ### Local-First Verification
 
@@ -252,6 +256,7 @@ The toolkit enforces quality through multiple mechanisms:
 - **Security Scanning** — At checkpoints, the toolkit runs dependency audits, secrets detection, and static analysis. Critical issues block progress.
 - **Spec Verification** — After generating specs, automatic verification ensures requirements flow through the document chain without loss.
 - **Auto-Verify** — Before listing items as "manual," the toolkit attempts automation using available tools (curl, browser MCP, file inspection). Only truly subjective criteria (UX, brand tone) require human review.
+- **Manual Verification Guides** — When human verification is required, the toolkit generates comprehensive step-by-step guides with prerequisites, exact commands, expected results, and troubleshooting tips.
 - **Stuck Detection** — Agents escalate to humans after repeated failures instead of spinning forever.
 
 For detailed documentation, see [Verification Deep Dive](docs/verification.md).
@@ -291,6 +296,7 @@ ai_coding_project_base/
 │   │   ├── auto-verify/             # Automation-before-manual logic
 │   │   ├── browser-verification/    # Browser MCP verification
 │   │   ├── code-verification/       # Multi-agent code verification
+│   │   ├── oauth-login/             # OAuth flow for browser verification
 │   │   └── ...                      # Security, tech-debt, etc.
 │   └── hooks/                       # Git hooks (pre-push doc check)
 ├── docs/                            # Detailed documentation
