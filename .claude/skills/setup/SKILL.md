@@ -307,3 +307,30 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
 - Generation skills run from toolkit, execution skills run from target
 - Use `cp -r` for directory copies to preserve structure
 - Do not overwrite existing files without asking
+
+## When Setup Cannot Complete
+
+**If LOCAL_MODIFIED files conflict during incremental sync:**
+- List all conflicting files with their local vs toolkit versions
+- Ask user: "Keep local changes, overwrite with toolkit, or diff each file?"
+- If "Keep local": Skip those files, complete rest of sync, warn about version mismatch
+- If "Overwrite": Back up local files to `.claude/backup/` before overwriting
+- If "Diff each": Show side-by-side diff, let user choose per file
+
+**If target directory doesn't exist and can't be created:**
+- Report: "Cannot create directory: {path}"
+- Check parent directory permissions
+- Suggest: Create manually with `mkdir -p {path}`
+- Exit cleanly without partial state
+
+**If Codex CLI skill installation fails:**
+- Do NOT fail the entire setup
+- Report: "Codex skill installation failed: {error}"
+- Continue with rest of setup
+- Note at end: "Codex skills not installed. Run `./scripts/install-codex-skill-pack.sh` manually."
+
+**If toolkit-version.json cannot be written:**
+- Report: "Cannot write toolkit-version.json"
+- Complete the file copies (primary goal)
+- Warn: "Future incremental syncs will not work until version file is created"
+- Suggest: Check .claude/ directory permissions

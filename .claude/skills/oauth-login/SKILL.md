@@ -351,6 +351,33 @@ curl -s -X POST https://oauth2.googleapis.com/token \
 | Token exchange fails | Show API error, suggest checking credentials |
 | Browser MCP unavailable | Provide manual URL, ask user to paste code |
 
+## When Login Cannot Complete
+
+**If user is still in browser after 120s timeout:**
+- Do NOT close the browser or kill the callback server
+- Report: "OAuth callback timeout reached (120s)"
+- Ask user:
+  - "Extend timeout by 60s" — Continue waiting
+  - "Paste authorization code manually" — Fallback to manual entry
+  - "Cancel and retry later" — Clean up and exit
+
+**If browser MCP is completely unavailable:**
+- Display the full authorization URL for manual copy
+- Provide instructions: "Open this URL in your browser, then paste the authorization code when prompted"
+- Wait for manual code entry
+- Proceed with token exchange using manually provided code
+
+**If OAuth app credentials are invalid:**
+- Report the specific error from the provider (invalid_client, unauthorized, etc.)
+- Suggest: "Verify client ID and secret match your OAuth app settings"
+- Provide link to OAuth app settings page for the provider
+- Exit cleanly without partial state
+
+**If callback server cannot start on any port:**
+- Report: "Unable to start callback server on ports 3847-3849"
+- Suggest: "Check for processes using these ports: lsof -i :3847"
+- Exit cleanly
+
 ## Security Notes
 
 - Client secrets are stored in `.env` which should be in `.gitignore`

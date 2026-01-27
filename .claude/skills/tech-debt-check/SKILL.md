@@ -233,6 +233,32 @@ When invoked from `/phase-checkpoint`:
 - Manual review still needed for semantic duplication
 - Cannot detect architectural debt or design issues
 
+## When Check Cannot Complete
+
+**If multiple CRITICAL thresholds are exceeded:**
+- Report all CRITICAL issues, not just the first
+- Prioritize by impact: duplication first (compounds fastest), then complexity, then file size
+- Ask user: "Fix issues incrementally or address all before proceeding?"
+- If incremental: suggest tackling one category at a time
+
+**If required tools are not installed:**
+- Report which tools are missing and why they're needed
+- Provide installation commands: `npm install -g jscpd`, `pip install radon`, etc.
+- Fall back to manual pattern matching where possible
+- Mark checks as SKIPPED (not FAILED) when tool unavailable
+
+**If codebase is too large for analysis:**
+- Report: "Codebase exceeds analysis threshold ({N} files)"
+- Suggest: Focus on recently modified files: `git diff --name-only HEAD~10`
+- Offer to run on specific directories instead
+- Provide incremental analysis option
+
+**If analysis reveals overwhelming debt:**
+- Do NOT suggest fixing everything at once
+- Prioritize: Top 3 highest-impact fixes only
+- Suggest: Create tracking issue for remaining items
+- Recommend: `/add-todo` for each deferred fix
+
 ## Example
 
 Given a TypeScript project:

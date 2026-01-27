@@ -170,4 +170,35 @@ See [AUTO_ADVANCE.md](AUTO_ADVANCE.md) for auto-advance logic.
 
 ---
 
+## When Checkpoint Cannot Pass
+
+**If both local AND production verification fail:**
+- Report all failures clearly, separated by category
+- Do NOT suggest skipping checks
+- Prioritize: Fix local failures first (they often cause production failures)
+- Suggest: Run `/phase-start $1` to address failing tasks before re-running checkpoint
+
+**If manual verification items cannot be completed:**
+- Ask user: "Skip this item and document reason?" vs "Block until complete"
+- If skipping: Record in DEFERRED.md with reason and timestamp
+- Note: Skipped items don't count as PASSED for auto-advance
+
+**If verification config is missing critical commands:**
+- STOP and run `/configure-verification`
+- Do NOT substitute or guess commands
+- Report which commands are missing
+
+**If auto-advance chain should stop:**
+- Report: "Auto-advance stopped at Phase $1 checkpoint"
+- List specific blocking items
+- Provide: "Run `/phase-checkpoint $1` again after resolving issues"
+
+**If a tool consistently fails mid-checkpoint:**
+- Mark that specific check as FAILED (not SKIPPED)
+- Continue with remaining checks
+- Report tool failure in final summary
+- Suggest troubleshooting steps for the failing tool
+
+---
+
 **REMINDER**: Local verification must pass before production verification. If any local check fails, stop and report — do not proceed to production checks.
