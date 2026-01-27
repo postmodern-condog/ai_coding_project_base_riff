@@ -26,9 +26,21 @@ Check each skill against these criteria. Record violations with the criterion ID
 
 ### C1: Multi-step workflow lacks checklist
 - **Severity**: High
-- **Check**: Has 3+ sequential steps but no copyable `- [ ]` checklist
+- **Check**: Has 3+ sequential steps but no checklist in a code block
 - **Why**: Agent skips steps when working from memory on long workflows
-- **Fix**: Add checklist block at start of workflow section
+- **Fix**: Add checklist per Anthropic's recommended format:
+
+```markdown
+Copy this checklist and track progress:
+
+```
+Task Progress:
+- [ ] Step 1: First step
+- [ ] Step 2: Second step
+```
+```
+
+**Note**: Checklists belong INSIDE code blocks (not raw markdown). Claude copies the block into its response and checks items off as it works. This is the official Anthropic pattern from their [best practices docs](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices).
 
 ### C2: No verification after critical actions
 - **Severity**: High
