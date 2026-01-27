@@ -1,4 +1,5 @@
 ---
+name: setup
 description: Initialize a new project with the AI Coding Toolkit
 argument-hint: [target-directory]
 allowed-tools: Bash, Read, Write, AskUserQuestion
@@ -48,21 +49,9 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
     - Create `$1/features/<feature-name>/` directory
     - Store the feature path as `FEATURE_PATH` = `$1/features/<feature-name>`
 
-3. **Copy execution commands and skills**
+3. **Copy skills to target**
 
-   Copy only the execution-phase commands to the target's `.claude/commands/`:
-   - `fresh-start.md`
-   - `phase-prep.md`
-   - `phase-start.md`
-   - `phase-checkpoint.md`
-   - `verify-task.md`
-   - `criteria-audit.md`
-   - `configure-verification.md`
-   - `progress.md`
-   - `security-scan.md`
-   - `list-todos.md`
-
-   Copy skills directory:
+   Copy all skills to the target's `.claude/skills/`:
    - `.claude/skills/` → target's `.claude/skills/`
 
    Copy verification config (if missing):
@@ -77,7 +66,7 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    STORED_HASHES=$(jq '.files' "$1/.claude/toolkit-version.json")
    ```
 
-   For each file in the copy list (commands and skills from Step 3):
+   For each skill in the copy list:
 
    1. Calculate toolkit file hash:
       ```bash
@@ -135,11 +124,11 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
      "toolkit_commit_date": "{commit date in ISO format}",
      "last_sync": "{current ISO timestamp}",
      "files": {
-       ".claude/commands/fresh-start.md": {
+       ".claude/skills/fresh-start/SKILL.md": {
          "hash": "{sha256 hash of copied file}",
          "synced_at": "{ISO timestamp}"
        }
-       // ... entry for each copied command and skill
+       // ... entry for each copied skill
      }
    }
    ```
@@ -171,11 +160,10 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    ```
 
    Include entries for:
-   - All copied commands (`.claude/commands/*.md`)
    - All copied skills (`.claude/skills/*/SKILL.md`)
 
    **Do NOT copy:**
-   - Generation commands (setup.md, product-spec.md, etc.) — these run from the toolkit
+   - Generation skills (setup, product-spec, etc.) — these run from the toolkit
    - Prompt files — these stay in the toolkit
 
 5. **Create CLAUDE.md if it doesn't exist**
@@ -257,7 +245,7 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
 
    {Summary from Step 3a showing files synced/skipped}
 
-   All toolkit skills and commands are now up to date.
+   All toolkit skills are now up to date.
    ```
 
    **For SETUP_MODE=full, Greenfield:**
@@ -303,7 +291,7 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
 
 ## Important
 
-- This command must be run from the ai_coding_project_base toolkit directory
-- Generation commands run from toolkit, execution commands run from target
+- This skill must be run from the ai_coding_project_base toolkit directory
+- Generation skills run from toolkit, execution skills run from target
 - Use `cp -r` for directory copies to preserve structure
 - Do not overwrite existing files without asking

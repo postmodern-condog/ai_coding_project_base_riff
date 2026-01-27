@@ -1,11 +1,12 @@
 ---
+name: bootstrap
 description: Generate feature plan with codebase-aware context
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 ---
 
 # Bootstrap
 
-Generate a feature plan with codebase-aware context. This command scans your codebase, understands existing patterns, and creates a targeted feature specification and execution plan.
+Generate a feature plan with codebase-aware context. This skill scans your codebase, understands existing patterns, and creates a targeted feature specification and execution plan.
 
 ## When to Use
 
