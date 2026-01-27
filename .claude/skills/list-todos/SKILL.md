@@ -168,9 +168,41 @@ Adjust score based on:
 **Consider deferring:** {count}
 ```
 
+## Error Handling
+
+**If TODOS.md doesn't exist:**
+- Report: "No TODOS.md found in project root."
+- Offer to create one with the standard template
+- Suggest using `/add-todo` to add the first item
+
+**If TODOS.md is empty or contains no TODO items:**
+- Report: "TODOS.md exists but contains no actionable items"
+- Show the file's current content (if any)
+- Suggest using `/add-todo` to add items
+
+**If TODOS.md uses non-standard format:**
+- Attempt to parse what exists
+- Report items that couldn't be parsed
+- Show: "X items parsed, Y items skipped (non-standard format)"
+- Offer to reformat to standard format
+
+**If context files (VISION.md, etc.) can't be read:**
+- Continue without that context
+- Note in output: "Project context limited (VISION.md not found)"
+- Score Value based on TODO content alone
+
+**If priority tag has invalid value:**
+- Use default multiplier (1.0)
+- Report: "Invalid priority multiplier '{value}' ignored, using 1.0"
+- Valid range reminder: 0.5 to 2.0
+
+**If Edit tool fails during Q&A updates:**
+- Report the edit failure
+- Output the clarifications to terminal so they're not lost
+- Suggest manually adding to TODOS.md
+
 ## Notes
 
-- If TODOS.md doesn't exist, report: "No TODOS.md found in project root."
 - Skip items that are clearly completed (checked boxes)
 - Group related items if they should be tackled together
 - Consider project phase — items relevant to current phase score higher

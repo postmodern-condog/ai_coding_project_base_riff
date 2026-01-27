@@ -167,6 +167,40 @@ Show full report with all findings and options.
 If required tools are missing, instruct the user to install them based on the
 project's documentation or security policy.
 
+## Error Handling
+
+**If no project documentation is found:**
+- Report: "No security tooling documentation found"
+- Ask the user for the correct commands
+- Proceed with default secrets detection (always available)
+
+**If a security tool command fails:**
+- Report the specific error from the tool
+- Mark that check as FAILED (not SKIPPED)
+- Continue with other checks
+- Include the failure in the final report
+
+**If tool is not installed:**
+- Report: "{tool} not found"
+- Provide installation instructions if known
+- Mark check as SKIPPED with reason
+- Continue with available tools
+
+**If secrets scan finds too many results (>100):**
+- Truncate results with: "Showing first 100 of {N} findings"
+- Suggest the user may have sensitive data that should be gitignored
+- Recommend running on specific directories
+
+**If project has no package manager (dependency scan N/A):**
+- Mark dependency scan as NOT APPLICABLE
+- Note: "No package.json, requirements.txt, go.mod, or similar found"
+- Proceed with other checks
+
+**If scan is interrupted:**
+- Report partial results obtained
+- Mark interrupted checks clearly
+- Suggest re-running the scan
+
 ## Example Invocations
 
 ```bash

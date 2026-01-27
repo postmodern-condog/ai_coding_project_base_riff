@@ -193,6 +193,33 @@ Recommended next steps:
 3. Update AGENTS.md with guidance for common questions
 ```
 
+## Error Handling
+
+**If `.claude/logs/` directory doesn't exist:**
+- Create the directory structure: `mkdir -p .claude/logs`
+- Report that no sessions have been logged yet
+- Suggest running a few sessions first
+
+**If session log file is malformed:**
+- Skip malformed lines and continue processing valid entries
+- Report the count of skipped entries in the output
+- Note: "X entries skipped due to malformed data"
+
+**If transcript files are inaccessible:**
+- Continue analysis without transcript data
+- Mark transcript-dependent insights as "Limited (transcripts unavailable)"
+- Report which transcripts couldn't be read
+
+**If no patterns are found:**
+- Report "No automation opportunities identified"
+- Suggest that more sessions may be needed for meaningful patterns
+- Provide guidance: "Run /analyze-sessions again after 5+ additional sessions"
+
+**If ANALYSIS_REPORT.md cannot be written:**
+- Output the report to the terminal instead
+- Report the write failure with the specific error
+- Suggest checking directory permissions
+
 ## Limitations
 
 - Transcript files may not be accessible (permissions, deleted)
