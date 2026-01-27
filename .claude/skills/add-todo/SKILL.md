@@ -1,6 +1,6 @@
 ---
 name: add-todo
-description: Add a properly formatted TODO item to TODOS.md
+description: Add a properly formatted TODO item to TODOS.md. Use when you need to capture a new task, bug, or feature request during development.
 allowed-tools: Read, Write, Edit, AskUserQuestion
 ---
 

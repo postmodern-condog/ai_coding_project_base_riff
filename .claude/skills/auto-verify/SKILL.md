@@ -1,6 +1,6 @@
 ---
 name: auto-verify
-description: Attempt automated verification of criteria before falling back to manual. Parses criterion text for automation hints and executes appropriate tool (curl, browser, file check).
+description: Attempt automated verification of criteria before falling back to manual. Parses criterion text for automation hints and executes appropriate tool (curl, browser, file check). Invoked by verify-task and phase-checkpoint for MANUAL criteria.
 ---
 
 # Auto-Verify Skill

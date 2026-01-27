@@ -1,6 +1,6 @@
 ---
 name: analyze-sessions
-description: Analyze session logs to discover automation opportunities
+description: Analyze session logs to discover automation opportunities. Use periodically to find patterns in your Claude Code usage that could be automated.
 allowed-tools: Read, Write, Glob, Grep, Bash
 ---
 

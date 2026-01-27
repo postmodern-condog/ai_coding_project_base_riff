@@ -1,6 +1,6 @@
 ---
 name: bootstrap
-description: Generate feature plan with codebase-aware context
+description: Generate feature plan with codebase-aware context. Use when starting a new feature in an existing codebase to skip full spec workflow.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 ---
 

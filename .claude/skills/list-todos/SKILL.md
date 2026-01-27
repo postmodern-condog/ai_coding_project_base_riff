@@ -1,6 +1,6 @@
 ---
 name: list-todos
-description: Analyze and prioritize TODO items from TODOS.md
+description: Analyze and prioritize TODO items from TODOS.md. Use when planning work or deciding what to implement next.
 allowed-tools: Read, Glob, Grep, AskUserQuestion, Edit
 ---
 

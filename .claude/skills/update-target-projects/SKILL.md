@@ -1,6 +1,6 @@
 ---
 name: update-target-projects
-description: Discover and sync all toolkit-using projects with the latest skills
+description: Discover and sync all toolkit-using projects with the latest skills. Use after modifying skills to propagate changes to target projects.
 ---
 
 # Update Target Projects

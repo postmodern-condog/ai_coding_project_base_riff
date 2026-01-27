@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Initialize a new project with the AI Coding Toolkit
+description: Initialize a new project with the AI Coding Toolkit. Use when setting up toolkit skills in a new or existing project.
 argument-hint: [target-directory]
 allowed-tools: Bash, Read, Write, AskUserQuestion
 ---

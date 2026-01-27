@@ -1,6 +1,6 @@
 ---
 name: progress
-description: Show progress through EXECUTION_PLAN.md and feature plans
+description: Show progress through EXECUTION_PLAN.md and feature plans. Use to check completion status and identify remaining work.
 allowed-tools: Read, Grep, Glob
 ---
 

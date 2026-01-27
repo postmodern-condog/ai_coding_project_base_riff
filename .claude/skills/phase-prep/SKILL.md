@@ -1,6 +1,6 @@
 ---
 name: phase-prep
-description: Check prerequisites before starting a phase
+description: Check prerequisites before starting a phase. Use before /phase-start to verify dependencies are met and context is loaded.
 argument-hint: [phase-number]
 allowed-tools: Bash, Read, Glob, Grep, AskUserQuestion, WebFetch, WebSearch
 ---

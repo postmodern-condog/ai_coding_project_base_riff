@@ -1,6 +1,6 @@
 ---
 name: run-todos
-description: Implement [ready]-tagged TODO items with commits
+description: Implement [ready]-tagged TODO items with commits. Use after /list-todos has clarified requirements and marked items as ready.
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Task
 ---
 

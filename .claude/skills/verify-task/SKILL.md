@@ -1,6 +1,6 @@
 ---
 name: verify-task
-description: Run code-verification on a specific task
+description: Run code-verification on a specific task. Use to verify a single task's acceptance criteria after implementation.
 argument-hint: [task-id]
 allowed-tools: Read, Edit, Bash, Grep, Glob, AskUserQuestion
 ---

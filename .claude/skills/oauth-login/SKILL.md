@@ -1,6 +1,6 @@
 ---
 name: oauth-login
-description: Complete OAuth login flow and store tokens for verification
+description: Complete OAuth login flow and store tokens for verification. Use when browser verification requires authenticated sessions.
 argument-hint: <provider>
 allowed-tools: Bash, Read, Edit, Write, AskUserQuestion, WebFetch, mcp__playwright__*
 ---
