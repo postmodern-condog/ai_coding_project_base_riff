@@ -395,7 +395,7 @@ ai_coding_project_base/
 │   │   ├── oauth-login/             # OAuth flow for browser verification
 │   │   ├── vercel-preview/          # Vercel preview URL resolution
 │   │   └── ...                      # Security, tech-debt, etc.
-│   └── hooks/                       # Git hooks (pre-push doc check)
+│   └── hooks/                       # Git hooks (doc check, sync, doc-update)
 ├── docs/                            # Detailed documentation
 ├── extras/                          # Landing page, optional tools
 └── AGENTS.md                        # Toolkit contributor guidelines
