@@ -12,6 +12,27 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    - Confirm `START_PROMPTS.md` and `GENERATOR_PROMPT.md` exist in the current working directory
    - If either is missing, **STOP** and tell the user to `cd` into the `ai_coding_project_base` toolkit repo and re-run `/setup $1`
 
+0.5. **Idempotency Check**
+
+   Check if target already has toolkit installed:
+
+   ```bash
+   if [[ -f "$1/.claude/toolkit-version.json" ]]; then
+     EXISTING_COMMIT=$(jq -r '.toolkit_commit' "$1/.claude/toolkit-version.json")
+     CURRENT_COMMIT=$(git rev-parse HEAD)
+   fi
+   ```
+
+   Decision logic:
+   - If `toolkit-version.json` doesn't exist → proceed with **full setup** (existing flow)
+   - If exists and `toolkit_commit` = current HEAD → report "Already up to date" and skip to Step 7 (success report)
+   - If exists and `toolkit_commit` ≠ current HEAD → proceed with **incremental update** (Step 3a)
+
+   Store the result as `SETUP_MODE`:
+   - `SETUP_MODE=full` — new installation
+   - `SETUP_MODE=current` — already up to date
+   - `SETUP_MODE=incremental` — updating existing installation
+
 1. **Validate target directory**
    - If `$1` is empty, ask the user for the target directory path
    - Check if the directory exists; if not, offer to create it
@@ -47,9 +68,64 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    Copy verification config (if missing):
    - `.claude/verification-config.json` → target's `.claude/verification-config.json`
 
-4. **Create toolkit-version.json**
+3a. **Incremental Sync (When SETUP_MODE=incremental)**
 
-   After copying files, create `.claude/toolkit-version.json` in the target to enable future syncs:
+   Skip Step 3 entirely and use this incremental approach instead:
+
+   Load the stored file hashes from `$1/.claude/toolkit-version.json`:
+   ```bash
+   STORED_HASHES=$(jq '.files' "$1/.claude/toolkit-version.json")
+   ```
+
+   For each file in the copy list (commands and skills from Step 3):
+
+   1. Calculate toolkit file hash:
+      ```bash
+      TOOLKIT_HASH=$(shasum -a 256 "$TOOLKIT_FILE" | cut -d' ' -f1)
+      ```
+
+   2. Get stored hash from toolkit-version.json (hash at last sync)
+
+   3. Calculate target file hash (if exists):
+      ```bash
+      TARGET_HASH=$(shasum -a 256 "$TARGET_FILE" | cut -d' ' -f1)
+      ```
+
+   **Classification and Action:**
+
+   | Condition | Classification | Action |
+   |-----------|----------------|--------|
+   | Target doesn't exist | `NEW` | Copy from toolkit |
+   | Target hash = Toolkit hash | `CURRENT` | Skip (already up to date) |
+   | Target hash = Stored hash | `CLEAN_UPDATE` | Copy from toolkit (no local changes) |
+   | Target hash ≠ Stored hash | `LOCAL_MODIFIED` | Skip with warning |
+
+   Track counts for each classification and report summary:
+   ```
+   INCREMENTAL SYNC
+   ================
+   New files:      {count} copied
+   Updated files:  {count} copied
+   Current files:  {count} skipped (already up to date)
+   Modified files: {count} skipped (local changes preserved)
+   ```
+
+   If any files are `LOCAL_MODIFIED`, list them:
+   ```
+   WARNING: These files have local modifications and were NOT updated:
+   - .claude/skills/phase-start/SKILL.md
+   - .claude/skills/fresh-start/SKILL.md
+
+   To update these files, either:
+   - Run /sync for interactive conflict resolution
+   - Manually backup and delete them, then re-run /setup
+   ```
+
+4. **Create or Update toolkit-version.json**
+
+   **For full setup (SETUP_MODE=full):**
+
+   Create `.claude/toolkit-version.json` in the target to enable future syncs:
 
    ```json
    {
@@ -68,14 +144,28 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    }
    ```
 
-   Get toolkit info:
+   **For incremental update (SETUP_MODE=incremental):**
+
+   Update the existing `toolkit-version.json`:
+   - Update `toolkit_commit` to current HEAD
+   - Update `toolkit_commit_date` to current commit date
+   - Update `last_sync` to current timestamp
+   - For each file that was copied (NEW or CLEAN_UPDATE):
+     - Update the file's `hash` and `synced_at`
+   - Keep existing entries for files that were skipped (CURRENT or LOCAL_MODIFIED)
+
+   **For already current (SETUP_MODE=current):**
+
+   Skip this step entirely.
+
+   **Get toolkit info:**
    ```bash
    TOOLKIT_PATH=$(pwd)
    COMMIT_HASH=$(git rev-parse HEAD)
    COMMIT_DATE=$(git log -1 --format=%cI HEAD)
    ```
 
-   Calculate file hashes:
+   **Calculate file hashes:**
    ```bash
    shasum -a 256 "$file" | cut -d' ' -f1
    ```
@@ -147,9 +237,34 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
 
 7. **Report success and next steps**
 
-   For Greenfield:
+   **For SETUP_MODE=current (already up to date):**
    ```
-   Toolkit initialized at $1
+   ALREADY UP TO DATE
+   ==================
+   Target: $1
+   Toolkit commit: {COMMIT_HASH} ({COMMIT_DATE})
+
+   No changes needed — toolkit files are current.
+   ```
+
+   **For SETUP_MODE=incremental (updated existing):**
+   ```
+   TOOLKIT UPDATED
+   ===============
+   Target: $1
+   Previous commit: {OLD_COMMIT_HASH}
+   Current commit:  {COMMIT_HASH}
+
+   {Summary from Step 3a showing files synced/skipped}
+
+   All toolkit skills and commands are now up to date.
+   ```
+
+   **For SETUP_MODE=full, Greenfield:**
+   ```
+   TOOLKIT INITIALIZED
+   ===================
+   Target: $1
 
    Next steps (run from THIS toolkit directory):
    1. /product-spec $1
@@ -164,10 +279,12 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    8. /phase-start 1
    ```
 
-   For Feature:
+   **For SETUP_MODE=full, Feature:**
    ```
-   Toolkit initialized at $1
-   Feature directory created at FEATURE_PATH
+   TOOLKIT INITIALIZED
+   ===================
+   Target: $1
+   Feature directory: FEATURE_PATH
 
    Next steps (run from THIS toolkit directory):
    1. /feature-spec FEATURE_PATH
