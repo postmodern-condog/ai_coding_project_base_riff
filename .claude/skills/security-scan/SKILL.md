@@ -18,14 +18,17 @@ Scan the codebase for security issues across three categories:
 
 ## Workflow Overview
 
+Copy this checklist and track progress:
+
 ```
-1. Discover security tooling from project docs
-2. Run dependency audit (if configured)
-3. Run secrets detection
-4. Run static analysis (if configured)
-5. Aggregate and deduplicate findings
-6. Present issues with severity and fix suggestions
-7. Offer to apply fixes where possible
+Security Scan Progress:
+- [ ] Step 1: Discover security tooling from project docs
+- [ ] Step 2: Run dependency audit
+- [ ] Step 3: Run secrets detection
+- [ ] Step 4: Run static analysis
+- [ ] Step 5: Aggregate and deduplicate findings
+- [ ] Step 6: Present issues with severity
+- [ ] Step 7: Offer to apply fixes
 ```
 
 ## Step 1: Discover Project Security Tooling

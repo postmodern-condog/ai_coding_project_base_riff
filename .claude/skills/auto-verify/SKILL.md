@@ -18,12 +18,16 @@ executes verification commands before marking items as truly manual.
 
 ## Workflow Overview
 
+Copy this checklist and track progress:
+
 ```
-1. Parse criterion for automation hints (keywords, patterns)
-2. Check tool availability (Bash always, browser conditional)
-3. Select best available tool and generate command
-4. Execute with appropriate timeout
-5. Interpret result and return structured output
+Auto-Verify Progress:
+- [ ] Step 1: Parse criterion for automation hints
+- [ ] Step 2: Check tool availability
+- [ ] Step 3: Select tool and generate command
+- [ ] Step 4: Execute with timeout
+- [ ] Step 5: Interpret result
+- [ ] Step 6: Return structured output
 ```
 
 ## Step 1: Pattern Detection

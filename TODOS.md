@@ -88,6 +88,7 @@
 - **Analysis frequency**: Auto-analyze after every 5 sessions
 - **Transcript format**: JSONL (one JSON object per session, append-friendly)
 - **Analysis output**: Markdown report (ANALYSIS_REPORT.md) with patterns found and suggested automations
+- [ ] **[P1 / High]** Claude Code + Codex CLI Orchestration Integration (see below)
 - [ ] **[P1 / High x0.5]** Parallel Agent Orchestration (see below)
 - [ ] **[P2 / Medium]** Spec Diffing and Plan Regeneration (see below)
 - [ ] **[P2 / Medium x0.6]** Human Review Queue (see below)
@@ -407,9 +408,100 @@ Comprehensive review of the toolkit's verification system to ensure fully autono
 - Orchestrator can determine project health without parsing conversations
 - Clear separation between "automation-ready" and "human-required" verification
 
+### Claude Code + Codex CLI Orchestration Integration
+
+Enable using Claude Code as the orchestration harness (skills, hooks, MCPs, UX) while delegating implementation tasks to Codex CLI for OpenAI model pricing benefits (CLI pricing vs API costs).
+
+**Architecture (recommended by both Claude and Codex investigations):**
+
+Orchestrator/Worker pattern with thin wrapper:
+1. Claude Code acts as planner/reviewer, maintains session context
+2. Codex CLI acts as implementation worker via shell-out
+3. Git repo is shared state between them
+
+**Implementation approach:**
+
+1. **Work-order/result contract:**
+   - Orchestrator writes `.claude/work-orders/<id>.md` (task, scope, files, constraints, acceptance criteria)
+   - Codex runs with `--approval-mode full-auto`, applies edits
+   - Wrapper captures output to `.claude/work-results/<id>.json` (exit code, stdout, diff stats, files touched, tests run)
+   - Orchestrator reviews results, merges or requests fixes
+
+2. **New skill: `/phase-start-codex`** that uses this pattern instead of Claude subagents
+
+3. **Optional evolution:** Convert wrapper to Codex MCP server (`mcp__codex__execute`) for richer tool chaining
+
+**Key findings from investigation:**
+
+| Finding | Detail |
+|---------|--------|
+| Codex CLI JSON output | None built-in — need custom wrapper |
+| Non-interactive mode | `--approval-mode full-auto` confirmed |
+| Skills sharing | Already works via symlinks (no divergence risk) |
+| State tracking | Existing `.claude/phase-state.json` can track cross-tool progress |
+| MCP compatibility | Both tools support same MCP standard |
+
+**Work-order schema (`.claude/work-orders/<id>.md`):**
+
+```markdown
+# Work Order: {id}
+
+**Task:** {task description from EXECUTION_PLAN.md}
+**Scope:** {files to modify}
+**Constraints:** {do not touch these files, follow these patterns}
+**Acceptance Criteria:**
+- [ ] {criterion 1}
+- [ ] {criterion 2}
+
+**Context Files:**
+- AGENTS.md (conventions)
+- LEARNINGS.md (patterns)
+- {relevant source files}
+```
+
+**Result schema (`.claude/work-results/<id>.json`):**
+
+```json
+{
+  "id": "{work-order-id}",
+  "exit_code": 0,
+  "stdout": "{captured output}",
+  "stderr": "{any errors}",
+  "files_changed": ["src/foo.ts", "src/bar.ts"],
+  "diff_stats": { "insertions": 45, "deletions": 12 },
+  "tests_run": true,
+  "tests_passed": true,
+  "duration_seconds": 127,
+  "open_questions": []
+}
+```
+
+**Deliverables:**
+
+- [ ] Work-order schema (`.claude/work-orders/<id>.md` format)
+- [ ] Result schema (`.claude/work-results/<id>.json` format)
+- [ ] Wrapper script (`scripts/codex-worker.sh`) that enforces contract
+- [ ] `/phase-start-codex` skill that delegates to Codex via wrapper
+- [ ] Optional: Codex MCP server for structured tool calls
+
+**Alternative approaches considered:**
+
+1. **Bash shell-out (simplest)** — Works today but one-way context, no streaming
+2. **Codex MCP server** — Native feel but requires building/maintaining server
+3. **Skill-level routing** — Add `executor: codex` metadata, build router (future evolution)
+4. **Manual alternating** — User switches between tools (zero code but disjointed UX)
+
+**Why Orchestrator/Worker is recommended:**
+- Plays to strengths (Claude for planning/review, Codex for implementation)
+- Git provides shared state naturally
+- Claude Code keeps session context, task tracking, verification
+- Incremental path to MCP integration later
+
+---
+
 ### Portable Workflow Kit (Adapters + Model Router)
 
-Create a single source of truth for skills/prompts/commands/rules while supporting multiple “hosts” (e.g. Claude Code today, other CLIs later) and swappable models/providers.
+Create a single source of truth for skills/prompts/commands/rules while supporting multiple "hosts" (e.g. Claude Code today, other CLIs later) and swappable models/providers.
 
 **Key requirement:** Preserve the current Claude Code experience for sharing (no mandatory build step; keep repo root layout as-is), with portability features as optional “sidecar” adapters.
 

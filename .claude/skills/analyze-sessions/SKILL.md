@@ -23,6 +23,18 @@ Each entry contains:
 
 ## Analysis Process
 
+Copy this checklist and track progress:
+
+```
+Analyze Sessions Progress:
+- [ ] Step 1: Read session logs
+- [ ] Step 2: Calculate statistics
+- [ ] Step 3: Identify command patterns
+- [ ] Step 4: Find automation opportunities
+- [ ] Step 5: Analyze tool usage
+- [ ] Step 6: Generate recommendations
+```
+
 ### 1. Read Session Logs
 
 Read `.claude/logs/sessions.jsonl` and parse all entries.

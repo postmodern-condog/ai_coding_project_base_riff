@@ -8,6 +8,21 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion, Task
 
 Implement TODO items that have been marked as `[ready]` in TODOS.md.
 
+## Workflow
+
+Copy this checklist and track progress:
+
+```
+Run TODOs Progress:
+- [ ] Step 1: Directory guard check
+- [ ] Step 2: Find [ready] items
+- [ ] Step 3: User selection
+- [ ] Step 4: Git workflow setup
+- [ ] Step 5: Implementation loop (per item)
+- [ ] Step 6: Update TODOS.md with completion
+- [ ] Step 7: Generate summary report
+```
+
 ## Directory Guard
 
 Before starting, confirm `TODOS.md` exists in the current working directory.

@@ -6,6 +6,19 @@ allowed-tools: Read, Grep, Glob
 
 Read EXECUTION_PLAN.md and any feature execution plans to show overall project status.
 
+## Workflow
+
+Copy this checklist and track progress:
+
+```
+Progress Report:
+- [ ] Step 1: Directory guard check
+- [ ] Step 2: Discover all execution plans
+- [ ] Step 3: Count checkbox categories
+- [ ] Step 4: Calculate completion percentages
+- [ ] Step 5: Generate progress report
+```
+
 ## Directory Guard (Wrong Directory Check)
 
 Before starting, confirm `EXECUTION_PLAN.md` exists in the current working directory.

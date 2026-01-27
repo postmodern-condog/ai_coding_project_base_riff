@@ -37,6 +37,19 @@ If the config is missing or required commands are empty:
 
 ## Verification Workflow
 
+Copy this checklist and track progress:
+
+```
+Verify Task Progress:
+- [ ] Step 1: Parse criteria from task
+- [ ] Step 2: Pre-flight check (testability)
+- [ ] Step 3: TDD compliance check
+- [ ] Step 4: Verify each criterion
+- [ ] Step 5: Handle exit conditions
+- [ ] Step 6: Generate report
+- [ ] Step 7: Log to verification-log.jsonl
+```
+
 Follow the code-verification workflow (inline, no sub-agents):
 
 ### Step 1: Parse Criteria

@@ -18,13 +18,16 @@ This skill catches these issues before they compound.
 
 ## Workflow Overview
 
+Copy this checklist and track progress:
+
 ```
-1. Detect project language/framework
-2. Run duplication analysis
-3. Run complexity analysis
-4. Run file size analysis
-5. Check for common AI code smells
-6. Generate report with actionable items
+Tech Debt Check Progress:
+- [ ] Step 1: Detect project type
+- [ ] Step 2: Run duplication analysis
+- [ ] Step 3: Run complexity analysis
+- [ ] Step 4: Run file size analysis
+- [ ] Step 5: Check for AI code smells
+- [ ] Step 6: Generate report
 ```
 
 ## Thresholds Reference

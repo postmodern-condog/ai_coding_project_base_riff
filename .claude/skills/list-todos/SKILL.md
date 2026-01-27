@@ -13,6 +13,20 @@ Before starting:
 
 ## Process
 
+Copy this checklist and track progress:
+
+```
+List TODOs Progress:
+- [ ] Step 1: Read TODOS.md
+- [ ] Step 2: Read project context (optional)
+- [ ] Step 3: Extract TODO items
+- [ ] Step 4: Analyze each item
+- [ ] Step 5: Sort by priority score
+- [ ] Step 6: Output prioritized list
+- [ ] Step 7: Interactive Q&A (if items need clarification)
+- [ ] Step 8: Update TODOS.md with clarifications
+```
+
 1. **Read TODOS.md** from the project root
 2. **Read project context (optional)** — Look for context files in this order of preference:
    - VISION.md (if exists, use for project alignment)

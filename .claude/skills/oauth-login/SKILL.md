@@ -45,6 +45,24 @@ consent page, waits for callback, and stores tokens in the project's `.env` file
 
 ## Workflow
 
+Copy this checklist and track progress:
+
+```
+OAuth Login Progress:
+- [ ] Step 1: Check provider argument
+- [ ] Step 2: Check for existing credentials
+- [ ] Step 3: Collect OAuth app credentials
+- [ ] Step 4: Generate state parameter
+- [ ] Step 5: Build authorization URL
+- [ ] Step 6: Start callback server
+- [ ] Step 7: Open browser to auth URL
+- [ ] Step 8: Wait for callback
+- [ ] Step 9: Exchange code for tokens
+- [ ] Step 10: Store tokens in .env
+- [ ] Step 11: Verify token validity
+- [ ] Step 12: Report success
+```
+
 ### Step 1: Check Provider Argument
 
 If `$1` is not provided or not recognized:

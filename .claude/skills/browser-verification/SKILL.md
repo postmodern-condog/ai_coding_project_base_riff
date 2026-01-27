@@ -19,16 +19,19 @@ For each criterion, use metadata from `Verify:`:
 
 ## Workflow Overview
 
+Copy this checklist and track progress:
+
 ```
-1. Load config (dev server + auth + browser + deployment)
-1.5. Resolve base URL (preview or localhost)
-1.6. HTTP-first evaluation (skip browser if possible)
-2. Select browser tool (with fallback chain)
-3. Authenticate (if required)
-4. Navigate and validate
-5. Capture evidence
-6. Handle errors and recover
-7. Report results
+Browser Verification Progress:
+- [ ] Step 1: Load configuration
+- [ ] Step 1.5: Resolve base URL (preview or localhost)
+- [ ] Step 1.6: HTTP-first evaluation (skip browser if possible)
+- [ ] Step 2: Select browser tool (with fallback chain)
+- [ ] Step 3: Authenticate (if required)
+- [ ] Step 4: Navigate and validate
+- [ ] Step 5: Capture evidence
+- [ ] Step 6: Handle errors and recover
+- [ ] Step 7: Report results
 ```
 
 ## Step 1: Load Configuration

@@ -39,12 +39,15 @@ From `.claude/verification-config.json`:
 
 ## Workflow Overview
 
+Copy this checklist and track progress:
+
 ```
-1. Get current git branch and commit SHA
-2. Check for Vercel project linking
-3. Query Vercel for deployments matching branch
-4. Optionally wait for deployment to be ready
-5. Return URL or error with actionable guidance
+Vercel Preview Progress:
+- [ ] Step 1: Get git context (branch, commit)
+- [ ] Step 2: Check Vercel project linking
+- [ ] Step 3: Query deployments for branch
+- [ ] Step 4: Wait for deployment (if configured)
+- [ ] Step 5: Return URL or error guidance
 ```
 
 ## Step 1: Get Git Context
