@@ -168,6 +168,7 @@ Cross-Model Review (Codex):
 ### Skip Conditions
 
 Skip this step (mark as SKIPPED) if:
+- Running inside Codex CLI (`$CODEX_SANDBOX` is set) — Codex reviewing Codex has no cross-model benefit
 - Codex CLI not installed
 - `multiModelVerify.enabled` is explicitly false
 - Phase has fewer than 3 tasks (trivial phase)

@@ -47,6 +47,33 @@ Multi-Model Verify Progress:
 
 ## Step 1: Validate Prerequisites
 
+### Check if Running Inside Codex
+
+```bash
+# Codex sets CODEX_SANDBOX when running
+if [ -n "$CODEX_SANDBOX" ]; then
+  echo "RUNNING_IN_CODEX"
+fi
+```
+
+**If running inside Codex CLI:**
+```
+MULTI-MODEL-VERIFY: SKIPPED
+===========================
+Reason: Already running inside Codex CLI.
+
+Cross-model verification requires a different model.
+When running in Codex, Claude would review instead (not implemented yet).
+
+Continuing without cross-model verification.
+```
+
+Return `status: skipped`, reason: "running_in_codex". Do NOT block the parent workflow.
+
+**Note:** The purpose of cross-model verification is to get a *different* model's perspective. Codex reviewing Codex provides no cross-model benefit.
+
+### Check Codex CLI Available
+
 ```bash
 # Check Codex CLI installed
 codex --version
