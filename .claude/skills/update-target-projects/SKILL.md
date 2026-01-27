@@ -25,7 +25,7 @@ Use this skill when:
 1. `$TOOLKIT_SEARCH_PATH` environment variable (colon-separated paths)
 2. `~/Projects` (default)
 
-**Search depth:** 3 levels (finds `~/Projects/*/` and `~/Projects/*/*/`)
+**Search depth:** 4 levels (finds `~/Projects/*/`, `~/Projects/*/*/`, and `~/Projects/*/*/*/`)
 
 ## Workflow
 

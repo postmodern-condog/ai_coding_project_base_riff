@@ -174,11 +174,11 @@ project's documentation or security policy.
 - Ask the user for the correct commands
 - Proceed with default secrets detection (always available)
 
-**If a security tool command fails:**
-- Report the specific error from the tool
-- Mark that check as FAILED (not SKIPPED)
-- Continue with other checks
-- Include the failure in the final report
+**If a security tool returns a non-zero exit code:**
+- If output indicates findings (common for `npm audit`, `pip-audit`, etc.), treat as SUCCESS_WITH_FINDINGS
+- Parse and report the findings; do NOT mark the check as FAILED
+- If output indicates an execution error (crash, invalid args, config error), treat as FAILED
+- Always continue with other checks and include the outcome in the final report
 
 **If tool is not installed:**
 - Report: "{tool} not found"

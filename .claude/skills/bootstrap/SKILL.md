@@ -55,7 +55,19 @@ Store as `USER_DESCRIPTION`.
 
 ### Step 3: Run /setup Automatically
 
-Ensure toolkit is installed (idempotent — safe to run multiple times).
+Ensure the toolkit is installed in the project:
+
+1. Determine toolkit location:
+   - If running from the toolkit repo (e.g., `GENERATOR_PROMPT.md` exists in CWD), use that path
+   - Otherwise resolve from `.claude/toolkit-version.json` if present
+   - If still unknown, try common paths (e.g., `~/Projects/ai_coding_project_base`)
+
+2. Run `/setup PROJECT_ROOT` (idempotent — safe to run multiple times)
+   - If toolkit already installed and current, setup will report "Already up to date"
+   - If toolkit needs updating, setup will perform incremental sync
+   - If toolkit not installed, setup will perform full installation
+
+3. Continue after setup completes (no user interaction needed for idempotent runs)
 
 ### Step 4: Codebase Scan
 
@@ -73,10 +85,36 @@ Compile findings as `CODEBASE_CONTEXT` with:
 find PROJECT_ROOT -name "EXECUTION_PLAN.md" -type f
 ```
 
-If unfinished plans exist, ask user:
-- "Continue anyway"
-- "Add TODO reminder"
-- "Cancel"
+For each found plan:
+
+1. If `.claude/phase-state.json` exists, use it for completion status
+2. If no state file, parse the plan for completion:
+   - Count `- [x]` (completed) vs `- [ ]` (incomplete) criteria
+   - A plan is incomplete if any criteria are unchecked
+
+If unfinished plans exist, report:
+```
+UNFINISHED EXECUTION PLANS DETECTED
+===================================
+- EXECUTION_PLAN.md: Phase 2 of 4 (5/12 tasks complete)
+- features/analytics/EXECUTION_PLAN.md: Phase 1 of 2 (3/8 tasks complete)
+```
+
+Ask with AskUserQuestion:
+```
+Question: "There are unfinished execution plans. How should I proceed?"
+Options:
+- "Continue anyway" — Create new feature plan alongside existing work
+- "Add TODO reminder" — Add reminder to TODOS.md and continue
+- "Cancel" — Stop bootstrap to focus on existing work
+```
+
+If "Add TODO reminder":
+```bash
+echo "- [ ] [backlog] Complete unfinished execution plans before starting new work" >> PROJECT_ROOT/TODOS.md
+```
+
+If "Cancel": Stop and report existing plans that need attention.
 
 ### Step 6: Ask Clarifying Questions
 
