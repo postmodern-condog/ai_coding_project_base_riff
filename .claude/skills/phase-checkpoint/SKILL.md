@@ -13,15 +13,14 @@ Copy this checklist and track progress:
 
 ```
 Phase Checkpoint Progress:
-- [ ] Step 1: Context and tool detection
-- [ ] Step 2: Read verification config
-- [ ] Step 3: Run automated local checks
-- [ ] Step 4: Run optional checks (browser, tech debt)
-- [ ] Step 5: Process manual verification items
-- [ ] Step 6: Human confirmation for manual items
-- [ ] Step 7: Production verification (if local passes)
-- [ ] Step 8: Update state and generate report
-- [ ] Step 9: Auto-advance check
+- [ ] Step 1: Context detection
+- [ ] Step 2: Tool availability & config
+- [ ] Step 3: Local verification (automated, optional, manual)
+- [ ] Step 4: Cross-model review (Codex)
+- [ ] Step 5: Production verification
+- [ ] Step 6: State update
+- [ ] Step 7: Generate report
+- [ ] Step 8: Auto-advance check
 ```
 
 ## Step 1: Context Detection
@@ -49,10 +48,23 @@ Check which optional tools are available:
 | Browser MCP | Check for `mcp__browsermcp__*` | Next in chain |
 | Chrome DevTools MCP | `mcp__chrome-devtools__list_pages` | Manual verification |
 | code-simplifier | Check if agent type available | Skip |
+| Codex CLI | `codex --version` | Skip cross-model review |
 
 **Browser fallback chain:** ExecuteAutomation → Browser MCP → Microsoft Playwright → Chrome DevTools → Manual
 
 Read `.claude/verification-config.json` from PROJECT_ROOT. If missing or incomplete, run `/configure-verification` first.
+
+Read `.claude/settings.local.json` for cross-model review config:
+```json
+{
+  "multiModelVerify": {
+    "enabled": true,
+    "triggerOn": ["phase-checkpoint"]
+  }
+}
+```
+
+If `multiModelVerify` is not configured, default to `enabled: true` when Codex CLI is available.
 
 ## Step 3: Local Verification (Must Pass First)
 
@@ -87,7 +99,81 @@ Run these using commands from verification-config:
 
 For external integrations, follow [DOCS_PROTOCOL.md](DOCS_PROTOCOL.md) to fetch latest documentation.
 
-## Step 4: Production Verification
+## Step 4: Cross-Model Review (Codex)
+
+**Purpose:** Get a second opinion from a different AI model to catch blind spots.
+
+### When This Step Runs
+
+This step runs if ALL of these conditions are true:
+- Codex CLI is available (`codex --version` succeeds)
+- `multiModelVerify.enabled` is true (or not configured, defaulting to true)
+- `"phase-checkpoint"` is in `multiModelVerify.triggerOn` (or not configured)
+
+### Execution
+
+1. **Gather phase context:**
+   ```bash
+   # Get branch diff
+   git diff main...HEAD --stat
+
+   # Get commit list
+   git log --oneline main..HEAD
+
+   # Identify technologies from changed files
+   ```
+
+2. **Identify research topics** from the phase:
+   - External services integrated (Supabase, Stripe, etc.)
+   - Frameworks/libraries used
+   - Security-sensitive areas
+
+3. **Invoke multi-model-verify** with:
+   ```
+   artifact_type: code
+   artifact_path: (phase branch diff)
+   research_topics: (extracted from phase context)
+   verification_focus: correctness, best practices, security
+   ```
+
+4. **Process results:**
+
+   | Codex Status | Checkpoint Action |
+   |--------------|-------------------|
+   | `pass` | Continue, note in report |
+   | `pass_with_notes` | Show recommendations, continue |
+   | `needs_attention` | Show critical issues, ask user how to proceed |
+   | `skipped` | Note unavailable, continue |
+   | `error` | Note error, continue |
+
+5. **For `needs_attention` status:**
+   - Display critical issues from Codex
+   - Ask user: "Address Codex findings before proceeding?"
+     - Yes → List issues to fix, pause checkpoint
+     - No → Continue, note as accepted risk
+   - Critical issues do NOT auto-block (user decides)
+
+### Output
+
+```
+Cross-Model Review (Codex):
+- Status: PASS | PASS WITH NOTES | NEEDS ATTENTION | SKIPPED
+- Critical Issues: {N}
+- Recommendations: {N}
+{If issues}
+- Top Issue: {description}
+{/If}
+```
+
+### Skip Conditions
+
+Skip this step (mark as SKIPPED) if:
+- Codex CLI not installed
+- `multiModelVerify.enabled` is explicitly false
+- Phase has fewer than 3 tasks (trivial phase)
+- `--skip-codex` flag passed to checkpoint
+
+## Step 5: Production Verification
 
 **BLOCKED** until all Local Verification passes.
 
@@ -96,7 +182,7 @@ When local passes, verify:
 - External integrations
 - Production-only manual checks
 
-## Step 5: State Update
+## Step 6: State Update
 
 After checkpoint passes, update `.claude/phase-state.json`:
 
@@ -112,7 +198,13 @@ After checkpoint passes, update `.claude/phase-state.json`:
       "lint_passed": true,
       "security_passed": true,
       "coverage_percent": 85,
-      "manual_verified": true
+      "manual_verified": true,
+      "codex_review": {
+        "status": "pass | pass_with_notes | needs_attention | skipped",
+        "critical_issues": 0,
+        "recommendations": 2,
+        "user_accepted_risks": []
+      }
     }
   }]
 }
@@ -120,7 +212,7 @@ After checkpoint passes, update `.claude/phase-state.json`:
 
 Write checkpoint report to `.claude/verification/phase-$1.md` and append to `.claude/verification-log.jsonl`.
 
-## Step 6: Report
+## Step 7: Report
 
 ```
 Phase $1 Checkpoint Results
@@ -131,6 +223,7 @@ Tool Availability:
 - Browser MCP: ✓ | ✗
 - Chrome DevTools MCP: ✓ | ✗
 - code-simplifier: ✓ | ✗
+- Codex CLI: ✓ | ✗
 
 ## Local Verification
 
@@ -154,6 +247,25 @@ Local Verification: ✓ PASSED | ✗ FAILED
 
 ---
 
+## Cross-Model Review (Codex)
+
+Status: PASS | PASS WITH NOTES | NEEDS ATTENTION | SKIPPED
+{If not skipped}
+- Critical Issues: {N}
+- Recommendations: {N}
+{If needs_attention}
+- User Action: Addressed | Accepted as risk
+{/If}
+{/If}
+
+{If has recommendations}
+Top Recommendations:
+1. {recommendation}
+2. {recommendation}
+{/If}
+
+---
+
 ## Production Verification
 {items or "Blocked: Complete local verification first"}
 
@@ -162,11 +274,13 @@ Local Verification: ✓ PASSED | ✗ FAILED
 Overall: Ready to proceed | Issues to address
 ```
 
-## Step 7: Auto-Advance
+## Step 8: Auto-Advance
 
 See [AUTO_ADVANCE.md](AUTO_ADVANCE.md) for auto-advance logic.
 
 **Summary:** If all checks pass and no manual items remain, automatically invoke `/phase-prep {N+1}`.
+
+**Codex review and auto-advance:** Codex findings do NOT block auto-advance unless user explicitly chooses to address them. The review is advisory.
 
 ---
 
@@ -198,6 +312,18 @@ See [AUTO_ADVANCE.md](AUTO_ADVANCE.md) for auto-advance logic.
 - Continue with remaining checks
 - Report tool failure in final summary
 - Suggest troubleshooting steps for the failing tool
+
+**If Codex review times out or errors:**
+- Mark as SKIPPED with reason
+- Do NOT block checkpoint progress
+- Note in report: "Cross-model review unavailable: {reason}"
+- Suggest: Re-run `/codex-review` manually after checkpoint if desired
+
+**If Codex finds critical issues:**
+- Present issues to user with context
+- Ask: "Address before proceeding or accept as noted risk?"
+- If user chooses to proceed: Log as "accepted risk" in state
+- Do NOT auto-block — cross-model review is advisory
 
 ---
 
