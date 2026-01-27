@@ -158,6 +158,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/list-todos` | Analyze and prioritize TODO items |
 | `/run-todos` | Implement [ready]-tagged TODO items with commits |
 | `/capture-learning` | Save project patterns to LEARNINGS.md |
+| `/update-docs` | Sync documentation with code changes (auto or manual) |
 
 See [Recovery Commands](docs/recovery-commands.md) for failure handling (`/phase-analyze`, `/phase-rollback`, `/task-retry`).
 

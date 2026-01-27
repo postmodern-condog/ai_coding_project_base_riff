@@ -11,6 +11,7 @@ Install git hooks to enhance the development workflow.
 |------|---------|--------------|
 | `pre-push-doc-check` | Warns if docs may need updating | Before `git push` |
 | `post-commit-sync-check` | Reminds to sync target projects | After `git commit` |
+| `post-commit-doc-update` | Triggers `/update-docs` automatically | After `git commit` |
 
 ## Steps
 
@@ -35,13 +36,21 @@ AVAILABLE HOOKS
    Checks: .claude/skills/, .claude/commands/, *PROMPT*.md
    Against: README.md, docs/*.md, AGENTS.md
 
-2. post-commit-sync-check
+2. post-commit-sync-check (toolkit only)
    Purpose: Reminds to sync target projects when skills are modified
    Checks: .claude/skills/*.md changes in commits
    Action: Displays reminder to run /update-target-projects
 
-Select hooks to install: [1] [2] [All] [None]
+3. post-commit-doc-update (recommended for all projects)
+   Purpose: Auto-updates documentation after commits
+   Checks: Skills, config, and structural changes
+   Action: Creates marker for /update-docs to process
+
+Select hooks to install: [1] [2] [3] [All] [None]
 ```
+
+**Note:** Hooks 2 and 3 both use the `post-commit` git hook. If installing both,
+they will be combined into a single dispatcher script.
 
 ### 3. Install Selected Hooks
 
@@ -52,8 +61,35 @@ For each selected hook, create a symlink from `.git/hooks/` to `.claude/hooks/`:
 ln -sf ../../.claude/hooks/pre-push-doc-check.sh .git/hooks/pre-push
 chmod +x .git/hooks/pre-push
 
-# For post-commit hook
+# For post-commit hook (single hook)
 ln -sf ../../.claude/hooks/post-commit-sync-check.sh .git/hooks/post-commit
+# OR
+ln -sf ../../.claude/hooks/post-commit-doc-update.sh .git/hooks/post-commit
+chmod +x .git/hooks/post-commit
+```
+
+**Combining multiple post-commit hooks:**
+
+If both `post-commit-sync-check` and `post-commit-doc-update` are selected,
+create a dispatcher script:
+
+```bash
+cat > .git/hooks/post-commit << 'EOF'
+#!/bin/bash
+# Combined post-commit hook dispatcher
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+# Run sync check (toolkit only)
+if [ -f "$REPO_ROOT/.claude/hooks/post-commit-sync-check.sh" ]; then
+    "$REPO_ROOT/.claude/hooks/post-commit-sync-check.sh"
+fi
+
+# Run doc update
+if [ -f "$REPO_ROOT/.claude/hooks/post-commit-doc-update.sh" ]; then
+    "$REPO_ROOT/.claude/hooks/post-commit-doc-update.sh"
+fi
+EOF
 chmod +x .git/hooks/post-commit
 ```
 
@@ -162,3 +198,54 @@ To bypass hooks temporarily:
 git commit --no-verify  # Skip post-commit hooks for this commit only
 git push --no-verify    # Skip pre-push hooks for this push only
 ```
+
+### post-commit-doc-update
+
+**What it does:**
+
+Creates a marker file (`.claude/doc-update-pending.json`) that signals Claude
+to run `/update-docs` automatically after each commit.
+
+**When it triggers:**
+- After any commit with non-documentation changes
+- Skipped for commits with `[skip-docs]` in the message
+- Skipped for `docs:` prefixed commits (prevents loops)
+
+**Example output:**
+```
+╭─────────────────────────────────────────────────────────────╮
+│            DOCUMENTATION SYNC PENDING                       │
+╰─────────────────────────────────────────────────────────────╯
+
+Commit abc123d may require documentation updates.
+
+  Skills changed: 2
+  Config changed: 1
+
+Claude will run /update-docs automatically.
+To skip: add [skip-docs] to commit message
+```
+
+**Marker file format:**
+```json
+{
+  "timestamp": "2026-01-27T10:30:00Z",
+  "commit": "abc123...",
+  "commit_short": "abc123d",
+  "message": "feat: add new feature",
+  "trigger": "post-commit",
+  "changes": {
+    "skills": 2,
+    "config": 1,
+    "structure": 0,
+    "total_files": 5
+  }
+}
+```
+
+**How Claude processes it:**
+1. Detects `.claude/doc-update-pending.json` exists
+2. Runs `/update-docs` to analyze the commit
+3. Updates README, CHANGELOG, docs/ as needed
+4. Creates a follow-up `docs:` commit
+5. Deletes the marker file

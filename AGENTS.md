@@ -106,3 +106,20 @@ modified and target projects may need syncing. You MUST:
 
 This replaces the previous background sync approach which couldn't access other
 project directories due to sandboxing.
+
+## Post-Commit Documentation Update
+
+When you see `DOCUMENTATION SYNC PENDING` or detect `.claude/doc-update-pending.json`:
+
+1. Run `/update-docs` to analyze the commit and update documentation
+2. The skill will:
+   - Analyze what changed in the commit
+   - Update README, AGENTS.md, CHANGELOG, and docs/ as appropriate
+   - Create a follow-up `docs:` commit if changes are made
+3. After completion, delete the marker file:
+   ```bash
+   rm -f .claude/doc-update-pending.json
+   ```
+
+**Note:** This applies to all projects with the doc-update hook installed, not
+just the toolkit.
