@@ -64,16 +64,26 @@ SKILL_CHANGES=$(echo "$CHANGED_FILES" | grep -E "^\.claude/skills/" || true)
 CONFIG_CHANGES=$(echo "$CHANGED_FILES" | grep -E "(package\.json|\.claude/.*\.json|pyproject\.toml|Cargo\.toml)" || true)
 STRUCTURE_CHANGES=$(echo "$CHANGED_FILES" | grep -E "^(src|lib|app|components|pages|api)/" || true)
 
-# Count significant changes
-SKILL_COUNT=$(echo "$SKILL_CHANGES" | grep -c . 2>/dev/null || echo "0")
-CONFIG_COUNT=$(echo "$CONFIG_CHANGES" | grep -c . 2>/dev/null || echo "0")
-STRUCTURE_COUNT=$(echo "$STRUCTURE_CHANGES" | grep -c . 2>/dev/null || echo "0")
+# Count significant changes (using wc -l, trimming whitespace)
+count_lines() {
+    echo "$1" | grep -c . 2>/dev/null | tr -d '[:space:]' || echo "0"
+}
+
+SKILL_COUNT=$(count_lines "$SKILL_CHANGES")
+CONFIG_COUNT=$(count_lines "$CONFIG_CHANGES")
+STRUCTURE_COUNT=$(count_lines "$STRUCTURE_CHANGES")
+
+# Ensure counts are valid integers (default to 0)
+SKILL_COUNT=${SKILL_COUNT:-0}
+CONFIG_COUNT=${CONFIG_COUNT:-0}
+STRUCTURE_COUNT=${STRUCTURE_COUNT:-0}
 
 # Only create marker if there are potentially doc-worthy changes
 TOTAL_SIGNIFICANT=$((SKILL_COUNT + CONFIG_COUNT + STRUCTURE_COUNT))
 if [ "$TOTAL_SIGNIFICANT" -eq 0 ]; then
     # Check for any meaningful changes (not just docs)
-    NON_DOC_CHANGES=$(echo "$CHANGED_FILES" | grep -vE "\.(md|txt)$" | grep -c . 2>/dev/null || echo "0")
+    NON_DOC_CHANGES=$(echo "$CHANGED_FILES" | grep -vE "\.(md|txt)$" | grep -c . 2>/dev/null | tr -d '[:space:]' || echo "0")
+    NON_DOC_CHANGES=${NON_DOC_CHANGES:-0}
     if [ "$NON_DOC_CHANGES" -eq 0 ]; then
         exit 0
     fi
@@ -109,7 +119,7 @@ cat > "$MARKER" << EOF
     "skills": $SKILL_COUNT,
     "config": $CONFIG_COUNT,
     "structure": $STRUCTURE_COUNT,
-    "total_files": $(echo "$CHANGED_FILES" | grep -c . 2>/dev/null || echo "0")
+    "total_files": $(count_lines "$CHANGED_FILES")
   }
 }
 EOF
@@ -122,13 +132,13 @@ printf '%b╰──────────────────────�
 printf '\n'
 printf '%bCommit %s%b may require documentation updates.\n' "$GREEN" "$COMMIT_SHORT" "$NC"
 printf '\n'
-if [ "$SKILL_COUNT" -gt 0 ]; then
+if [ "${SKILL_COUNT:-0}" -gt 0 ]; then
     printf '  %bSkills changed:%b %s\n' "$DIM" "$NC" "$SKILL_COUNT"
 fi
-if [ "$CONFIG_COUNT" -gt 0 ]; then
+if [ "${CONFIG_COUNT:-0}" -gt 0 ]; then
     printf '  %bConfig changed:%b %s\n' "$DIM" "$NC" "$CONFIG_COUNT"
 fi
-if [ "$STRUCTURE_COUNT" -gt 0 ]; then
+if [ "${STRUCTURE_COUNT:-0}" -gt 0 ]; then
     printf '  %bStructure changed:%b %s\n' "$DIM" "$NC" "$STRUCTURE_COUNT"
 fi
 printf '\n'
