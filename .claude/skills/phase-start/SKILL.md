@@ -1,11 +1,33 @@
 ---
 name: phase-start
 description: Execute all tasks in a phase autonomously. Use after /phase-prep confirms prerequisites are met.
-argument-hint: [phase-number]
+argument-hint: "<phase-number> [--codex] [--pause]"
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Task, WebFetch, WebSearch
 ---
 
 Execute all steps and tasks in Phase $1 from EXECUTION_PLAN.md.
+
+## Arguments
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `$1` | Yes | Phase number to execute |
+| `--codex` | No | Execute tasks via Codex CLI instead of directly |
+| `--pause` | No | Stop after phase completes (skip auto-advance to checkpoint) |
+
+## Execution Modes
+
+**Default mode:** Claude Code executes tasks directly using its tools.
+
+**Codex mode (`--codex`):** Claude Code orchestrates while Codex CLI executes each task:
+- Claude Code maintains context, verification, auto-advance logic
+- Codex executes individual tasks with documentation research
+- Results return to Claude Code for verification and next-task decisions
+
+Use `--codex` when:
+- Tasks involve external APIs where current documentation matters
+- You want cross-model execution for different perspectives
+- Codex's web search during implementation adds value
 
 ## External Tool Documentation Protocol
 
@@ -86,6 +108,60 @@ Before starting, confirm the required files exist:
 
 **Before starting:** If context is below 40% remaining, run `/compact` first. This ensures the full command instructions remain in context throughout execution. Compaction mid-command loses procedural instructions.
 
+## Codex Mode Prerequisites (if `--codex` flag provided)
+
+Skip this section if `--codex` was not provided.
+
+### Check Codex CLI
+
+```bash
+# Verify Codex is installed
+codex --version
+
+# Verify authentication
+codex login status
+```
+
+**If Codex CLI not available:**
+```
+ERROR: --codex flag requires Codex CLI
+=======================================
+Codex CLI is not installed or not authenticated.
+
+Install: npm install -g @openai/codex
+Auth:    codex login
+
+Falling back to default execution mode.
+```
+
+Fall back to default mode (Claude Code executes directly). Do NOT block the phase.
+
+### Read Codex Configuration
+
+Read `.claude/settings.local.json` for Codex settings:
+
+```json
+{
+  "multiModelVerify": {
+    "codexModel": "o3",
+    "taskTimeoutMinutes": 60
+  }
+}
+```
+
+Extract configuration values:
+
+```bash
+# Extract model (default: omit flag to use Codex default)
+CODEX_MODEL=$(jq -r '.multiModelVerify.codexModel // empty' .claude/settings.local.json 2>/dev/null)
+
+# Extract timeout in minutes (default: 60 = 1 hour)
+TIMEOUT_MINS=$(jq -r '.multiModelVerify.taskTimeoutMinutes // 60' .claude/settings.local.json 2>/dev/null || echo "60")
+TIMEOUT_SECS=$((TIMEOUT_MINS * 60))
+```
+
+Use defaults if not configured: model=Codex default, timeout=60 minutes.
+
 ## Execution Rules
 
 1. **Git Workflow (Auto-Commit)**
@@ -147,6 +223,153 @@ Before starting, confirm the required files exist:
    - Use conventional commit format: `task({id}): {imperative description}`
 
 2. **Task Execution** (for each task)
+
+   {If `--codex` flag provided}
+
+   **Codex Execution Mode:**
+
+   a. **Build task prompt** — Write to a temp file:
+
+      ```bash
+      # Create prompt file path
+      TASK_PROMPT="/tmp/codex-task-${task_id}.md"
+      TASK_OUTPUT="/tmp/codex-task-${task_id}-output.txt"
+      ```
+
+      Write the following content to `$TASK_PROMPT`:
+
+      ```markdown
+      # Task Execution Request
+
+      ## Project Context
+
+      Read these files first:
+      - AGENTS.md (workflow conventions)
+      - EXECUTION_PLAN.md (full plan context)
+      - {relevant source files for this task}
+
+      ## Task to Execute
+
+      **Task ID:** {task_id}
+      **Description:** {task description}
+
+      ## Acceptance Criteria
+
+      {list acceptance criteria from EXECUTION_PLAN.md}
+
+      ## Instructions
+
+      1. **Explore first:** Search for similar existing functionality, identify patterns
+      2. **Write tests first:** One test per acceptance criterion
+      3. **Implement:** Minimum code to pass tests, following codebase patterns
+      4. **Verify:** Run tests, ensure all pass
+      5. **Report results** in this exact format at the end of your response:
+
+      TASK EXECUTION RESULT
+      =====================
+      Task: {task_id}
+      Status: COMPLETE | FAILED | BLOCKED
+
+      Files Created:
+      - {path}
+
+      Files Modified:
+      - {path}
+
+      Tests:
+      - {test status summary}
+
+      {If FAILED or BLOCKED}
+      Issue: {description}
+      {/If}
+
+      ## Constraints
+
+      - Follow patterns in AGENTS.md
+      - Use project's existing conventions (naming, structure, error handling)
+      - Do NOT commit (orchestrator handles commits)
+      - Do NOT modify EXECUTION_PLAN.md (orchestrator handles checkboxes)
+      ```
+
+   b. **Execute via Codex:**
+
+      Build the command with optional model flag:
+
+      ```bash
+      # Build model flag if configured
+      MODEL_FLAG=""
+      if [ -n "$CODEX_MODEL" ]; then
+        MODEL_FLAG="--model $CODEX_MODEL"
+      fi
+
+      # Execute with timeout (default: 1 hour)
+      timeout ${TIMEOUT_SECS:-3600} bash -c "cat $TASK_PROMPT | codex exec \
+        --sandbox danger-full-access \
+        -c 'approval_policy=\"never\"' \
+        -c 'features.search=true' \
+        $MODEL_FLAG \
+        -o $TASK_OUTPUT \
+        -"
+      EXIT_CODE=$?
+      ```
+
+      **Flags explained:**
+      - `--sandbox danger-full-access`: Full file and network access for task execution
+      - `-c 'approval_policy="never"'`: Non-interactive, no approval prompts
+      - `-c 'features.search=true'`: Enable web search for documentation research
+      - `--model`: Optional, uses configured model or Codex default
+      - `-o $TASK_OUTPUT`: Write final response to file for parsing
+      - `-`: Read prompt from stdin
+      - `timeout`: Hard limit per task (default 1 hour)
+
+   c. **Process results:**
+
+      Handle exit codes and parse output:
+
+      ```bash
+      # Check exit status
+      if [ $EXIT_CODE -eq 124 ]; then
+        # Timeout
+        STATUS="FAILED"
+        ISSUE="Task timed out after ${TIMEOUT_MINS:-60} minutes"
+      elif [ $EXIT_CODE -ne 0 ]; then
+        # Codex error
+        STATUS="FAILED"
+        ISSUE="Codex exited with code $EXIT_CODE"
+      elif [ ! -f "$TASK_OUTPUT" ]; then
+        # No output file
+        STATUS="FAILED"
+        ISSUE="Codex produced no output"
+      else
+        # Parse the output file for TASK EXECUTION RESULT block
+        # Extract Status line (format: "Status: COMPLETE | FAILED | BLOCKED")
+        STATUS=$(grep "^Status:" "$TASK_OUTPUT" | head -1 | awk '{print $2}')
+        if [ -z "$STATUS" ]; then
+          # Fallback: try without anchor in case of indentation
+          STATUS=$(grep "Status:" "$TASK_OUTPUT" | head -1 | awk '{print $2}')
+        fi
+        if [ -z "$STATUS" ]; then
+          STATUS="FAILED"
+          ISSUE="Could not parse task result from Codex output"
+        fi
+      fi
+      ```
+
+      Based on status:
+      - If `COMPLETE`: proceed to verification
+      - If `FAILED` or `BLOCKED`: apply stuck detection logic (see section 3)
+      - Log the issue and increment failure counter
+
+   d. **Verify and commit:**
+      - Run `/verify-task {task_id}` (Claude Code verifies Codex's work)
+      - Update checkboxes in EXECUTION_PLAN.md
+      - Commit (see Git Workflow above)
+      - Clean up temp files: `rm -f $TASK_PROMPT $TASK_OUTPUT`
+
+   {Else}
+
+   **Default Execution Mode:**
+
    - Read the task definition and acceptance criteria
    - **Explore before implementing:**
      - Search for similar existing functionality (don't duplicate)
@@ -158,6 +381,8 @@ Before starting, confirm the required files exist:
    - Run verification using /verify-task
    - Update checkboxes in EXECUTION_PLAN.md: `- [ ]` → `- [x]`
    - **Commit immediately** (see Git Workflow above)
+
+   {/If}
 
 3. **Stuck Detection and Recovery**
 
@@ -214,7 +439,14 @@ Maintain `.claude/phase-state.json` throughout execution:
    mkdir -p .claude
    ```
 
-   Set phase status to `IN_PROGRESS` with `started_at` timestamp.
+   Set phase status to `IN_PROGRESS` with `started_at` timestamp and `execution_mode`:
+   ```json
+   {
+     "status": "IN_PROGRESS",
+     "started_at": "{ISO timestamp}",
+     "execution_mode": "default | codex"
+   }
+   ```
 
 2. **After each task completion**, update the task entry:
    ```json
@@ -274,6 +506,7 @@ If `.claude/phase-state.json` doesn't exist, run `/populate-state` first to init
 Do not check back until Phase $1 is complete, unless blocked or stuck.
 
 When done, provide:
+- Execution mode used (default or Codex)
 - Summary of what was built
 - Files created/modified
 - Git branch and commits created

@@ -232,19 +232,52 @@ Be specific. Reference line numbers or section names. Prioritize by impact.
 Build the command with configuration:
 
 ```bash
-cat {prompt_file} | codex exec \
-  --model "${CODEX_MODEL}" \
+# Create output file path
+OUTPUT_FILE="/tmp/codex-verify-output-$(date +%s).txt"
+
+# Build model flag if configured
+MODEL_FLAG=""
+if [ -n "$CODEX_MODEL" ]; then
+  MODEL_FLAG="--model $CODEX_MODEL"
+fi
+
+# Execute with timeout
+timeout $((TIMEOUT_MINS * 60)) bash -c "cat {prompt_file} | codex exec \
   --sandbox danger-full-access \
-  --search \
-  -o \
-  -
+  -c 'approval_policy=\"never\"' \
+  -c 'features.search=true' \
+  $MODEL_FLAG \
+  -o $OUTPUT_FILE \
+  -"
+EXIT_CODE=$?
+
+# Handle exit codes
+if [ $EXIT_CODE -eq 124 ]; then
+  # Timeout - return partial output if available
+  CODEX_STATUS="error"
+  CODEX_REASON="Timeout after ${TIMEOUT_MINS} minutes"
+elif [ $EXIT_CODE -ne 0 ]; then
+  # Error - log and return error status
+  CODEX_STATUS="error"
+  CODEX_REASON="Codex exited with code $EXIT_CODE"
+fi
+
+# Read output
+if [ -f "$OUTPUT_FILE" ]; then
+  CODEX_OUTPUT=$(cat "$OUTPUT_FILE")
+  rm -f "$OUTPUT_FILE"
+else
+  CODEX_STATUS="error"
+  CODEX_REASON="No output file produced"
+fi
 ```
 
 **Flags explained:**
-- `--model`: Use configured model (default: o3)
 - `--sandbox danger-full-access`: Enables network access for documentation research
-- `--search`: Enables web search tool for the "research-first" pattern
-- `-o` / `--output-last-message`: Returns only the final message (cleaner parsing)
+- `-c 'approval_policy="never"'`: Non-interactive execution
+- `-c 'features.search=true'`: Enable web search for documentation research
+- `--model`: Optional, use configured model or Codex default
+- `-o $OUTPUT_FILE`: Write final response to file for parsing
 - `-`: Read prompt from stdin
 
 **Important:** Do NOT use `2>&1` — Codex streams progress to stderr and final output to stdout. Merging them corrupts the parseable response.

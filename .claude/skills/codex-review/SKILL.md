@@ -103,12 +103,42 @@ Categorize findings by severity: critical, major, minor, suggestion.
 ## Step 4: Invoke Codex
 
 ```bash
-cat {prompt_file} | codex exec --sandbox danger-full-access -
+# Create output file
+OUTPUT_FILE="/tmp/codex-review-output-$(date +%s).txt"
+
+# Execute with timeout (10 minutes default)
+timeout 600 bash -c "cat {prompt_file} | codex exec \
+  --sandbox danger-full-access \
+  -c 'approval_policy=\"never\"' \
+  -c 'features.search=true' \
+  -o $OUTPUT_FILE \
+  -"
+EXIT_CODE=$?
+
+# Handle exit codes
+if [ $EXIT_CODE -eq 124 ]; then
+  echo "ERROR: Codex timed out after 10 minutes"
+  # Partial output may still be available
+elif [ $EXIT_CODE -ne 0 ]; then
+  echo "ERROR: Codex exited with code $EXIT_CODE"
+fi
+
+# Read and clean up
+if [ -f "$OUTPUT_FILE" ]; then
+  CODEX_OUTPUT=$(cat "$OUTPUT_FILE")
+  rm -f "$OUTPUT_FILE"
+else
+  echo "WARNING: No output file produced"
+fi
 ```
 
-**Timeout**: Set a long timeout (10 minutes) as Codex may need time to research and review.
-
-**Note**: `--sandbox danger-full-access` enables network access for documentation research.
+**Flags explained:**
+- `--sandbox danger-full-access`: Enables network access for documentation research
+- `-c 'approval_policy="never"'`: Non-interactive execution
+- `-c 'features.search=true'`: Enable web search for documentation research
+- `-o $OUTPUT_FILE`: Write final response to file for reliable parsing
+- `-`: Read prompt from stdin
+- `timeout 600`: 10 minute limit for review tasks
 
 ## Step 5: Present Results
 

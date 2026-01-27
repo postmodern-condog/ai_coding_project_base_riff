@@ -147,7 +147,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/configure-verification` | Set test/lint/build/auth commands for your stack |
 | `/oauth-login <provider>` | Complete OAuth flow (Google/GitHub) for browser verification |
 | `/phase-prep N` | Check prerequisites, preview future human items |
-| `/phase-start N` | Execute phase N (creates branch, commits per task) |
+| `/phase-start N [--codex]` | Execute phase N (creates branch, commits per task). Use `--codex` to have Codex CLI execute tasks while Claude orchestrates. |
 | `/phase-checkpoint N` | Local-first verification, then production checks |
 | `/verify-task X.Y.Z` | Verify specific task acceptance criteria |
 | `/criteria-audit` | Validate acceptance criteria metadata |
@@ -269,6 +269,35 @@ codex login
 ```
 
 Codex findings are advisory — they don't block auto-advance. You can also invoke `/codex-review` directly for on-demand review.
+
+### Codex Task Execution
+
+You can have Codex CLI execute tasks while Claude Code orchestrates:
+
+```bash
+/phase-start 1 --codex
+```
+
+**How it works:**
+- Claude Code reads tasks and builds prompts
+- Codex CLI executes each task (with web search for current docs)
+- Claude Code verifies results and commits
+- Auto-advance and state tracking work normally
+
+**When to use `--codex`:**
+- Tasks involve external APIs where current documentation matters
+- You want cross-model execution for different perspectives
+- Codex's web search during implementation adds value
+
+**Configuration** (`.claude/settings.local.json`):
+```json
+{
+  "multiModelVerify": {
+    "codexModel": "o3",
+    "taskTimeoutMinutes": 60
+  }
+}
+```
 
 ### Local-First Verification
 
