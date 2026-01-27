@@ -2,6 +2,14 @@
 
 ## In Progress
 
+- [ ] **[P2 / Medium]** Re-implement Vercel preview URL support in auto-verify —
+  The deployment/preview URL resolution was removed from `/auto-verify` because it
+  wasn't working reliably. Need to:
+  1. Investigate why `/vercel-preview` wasn't resolving URLs correctly
+  2. Design a reliable preview URL resolution mechanism
+  3. Add back deployment config with proper integration to `/vercel-preview`
+  4. Test the full flow: deploy → get preview URL → use in verification
+
 - [x] **[P0 / High]** Deep audit of automation verification — ensure all components needed for human-free verification are present (see below) — DONE (84292a8)
 - [ ] **[P0 / High x0.5]** Make workflow portable across CLIs/models without breaking Claude Code "clone-and-go" sharing — **DEFERRED** (requirements unclear, revisit when specific target CLIs are identified)
 - [ ] **[P1 / Medium]** Verification logging and manual intervention analysis (see below)
@@ -17,15 +25,27 @@
 - [x] **[P1 / Medium]** Enhance `/phase-prep` to show human prep for future phases (clarified, see below) — DONE
 - [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below) — REMOVED (no clean way to detect permission mode at runtime)
 - [x] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below) — DONE
-- [x] **[P1 / Medium x2]** [ready] Post-commit hook to run target project sync commands — Create a hook that runs after every commit to automatically execute `/update-target-projects` and any other commands that intermittently update target projects. This would eliminate the manual step of remembering to sync after skill changes. Implementation: Add to `.claude/settings.json` hooks with a post-commit trigger that detects skill file changes and runs sync automatically. — DONE (058868a)
+- [x] **[P1 / Medium x2]** [ready] Post-commit hook to run target project sync commands —
+  Create a hook that runs after every commit to automatically execute
+  `/update-target-projects` and any other commands that intermittently update target
+  projects. This would eliminate the manual step of remembering to sync after skill
+  changes. Implementation: add a post-commit hook in `.claude/settings.json` that
+  detects skill file changes and runs sync automatically. — DONE (058868a)
 
 **Clarifications (from Q&A 2026-01-23):**
 - **Execution**: Background (non-blocking) — sync runs after commit completes, user can continue
 - **Trigger condition**: Only when `.claude/skills/` files change — check git diff before running
 - **Commands to run**: Just `/update-target-projects` — Codex skills are symlinks (auto-update)
 - **Scope**: Toolkit repo only — hook lives in ai_coding_project_base, syncs to target projects
-- [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` — What do these commands enable? Are they redundant or do they serve distinct use cases? Clarify their purpose and whether both are needed
-- [x] **[P2 / Medium]** [ready] Add OAuth support to `/configure-verification` and examples — Currently auth configuration only supports email/password via env vars. Need to handle OAuth flows (particularly Google OAuth) which require browser redirects, token storage, and session persistence. Key challenges: automating the OAuth consent flow in headless browser, storing refresh tokens, handling token expiration during verification runs — DONE (7de0d20)
+- [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` —
+  What do these commands enable? Are they redundant or do they serve distinct use
+  cases? Clarify their purpose and whether both are needed.
+- [x] **[P2 / Medium]** [ready] Add OAuth support to `/configure-verification` and
+  examples — Currently auth configuration only supports email/password via env vars.
+  Need to handle OAuth flows (particularly Google OAuth) which require browser
+  redirects, token storage, and session persistence. Key challenges: automating the
+  OAuth consent flow in headless browser, storing refresh tokens, handling token
+  expiration during verification runs. — DONE (7de0d20)
 
 **Clarifications (from Q&A 2026-01-23):**
 - **Providers**: Google + GitHub initially — the two most common OAuth providers
@@ -38,7 +58,10 @@
   2. Update `/configure-verification` to support OAuth as auth method and trigger /oauth-login
   3. Before verification runs, check token expiry and refresh if needed
   4. Store `OAUTH_ACCESS_TOKEN`, `OAUTH_REFRESH_TOKEN`, `OAUTH_TOKEN_EXPIRY` in .env
-- [x] **[P1 / Medium]** [ready] Ensure Codex has access to the same MCPs as Claude Code — Need a way to sync or share MCP server configurations between Claude Code and OpenAI Codex CLI so both tools have equivalent capabilities (browser automation, etc.) — DONE (fbac8b5)
+- [x] **[P1 / Medium]** [ready] Ensure Codex has access to the same MCPs as Claude
+  Code — Need a way to sync or share MCP server configurations between Claude Code
+  and OpenAI Codex CLI so both tools have equivalent capabilities (browser
+  automation, etc.). — DONE (fbac8b5)
 
 **Clarifications (from Q&A 2026-01-23):**
 - **Protocol compatibility**: Both tools support the same MCP standard — servers work with both
@@ -51,7 +74,10 @@
   2. If detected, offer to configure essential MCPs for Codex
   3. Generate `~/.codex/config.toml` entries for Playwright MCP
   4. Use same pattern as existing Codex skill pack installation
-- [x] **[P1 / Medium x2]** [ready] Read external tool docs before setup instructions — Whenever an external tool is being used (Supabase, Stripe, Firebase, etc.), exhaustively read the latest official documentation before providing setup or testing instructions. Ensures accuracy and catches UI/API changes — DONE (c2861cc)
+- [x] **[P1 / Medium x2]** [ready] Read external tool docs before setup instructions —
+  Whenever an external tool is being used (Supabase, Stripe, Firebase, etc.),
+  exhaustively read the latest official documentation before providing setup or
+  testing instructions. Ensures accuracy and catches UI/API changes — DONE (c2861cc)
 
 **Clarifications (from Q&A 2026-01-23):**
 - **Caching**: Cache fetched docs per session to avoid redundant fetches
@@ -62,7 +88,10 @@
   - `/phase-start` — when implementing code that integrates with external services
   - Any time an external service (Supabase, Stripe, Firebase, etc.) is mentioned
 - **Implementation**: Add instructions directly to the command files themselves (phase-prep.md, phase-checkpoint.md, phase-start.md). This ensures behavior at execution point and works for existing projects without regeneration.
-- [x] **[P1 / Medium x2]** [ready] Atomic commits traceable to requirements — Commits are per-task, but no explicit link back to PRODUCT_SPEC requirements in commit messages. Add requirement IDs (e.g., `REQ-001`) to specs and propagate through EXECUTION_PLAN.md to commit messages (see below) — DONE (74fd827)
+- [x] **[P1 / Medium x2]** [ready] Atomic commits traceable to requirements —
+  Commits are per-task, but no explicit link back to PRODUCT_SPEC requirements in
+  commit messages. Add requirement IDs (e.g., `REQ-001`) to specs and propagate
+  through EXECUTION_PLAN.md to commit messages (see below) — DONE (74fd827)
 
 **Clarifications (from Q&A 2026-01-23):**
 - **REQ-ID generation**: Auto-generated during /product-spec (sequential: REQ-001, REQ-002, etc.)

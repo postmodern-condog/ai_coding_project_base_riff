@@ -37,7 +37,7 @@ Patterns are checked in priority order — first match wins.
 
 ### Pattern Matching
 
-See [PATTERNS.md](PATTERNS.md) for the full pattern matching table and detection algorithm.
+See [PATTERNS.md](PATTERNS.md) for the full pattern matching table and command templates.
 
 Key pattern categories:
 - HTTP patterns (curl): API endpoints, status codes, redirects, health checks
@@ -260,8 +260,6 @@ Suggested Fix: Start the dev server with `npm run dev` or check if port 3000 is 
 
 See [PATTERNS.md](PATTERNS.md) for URL and path extraction patterns.
 
-**Key rule:** All auto-verify HTTP checks must use BASE_URL (from deployment config), not hardcoded localhost.
-
 ## Configuration
 
 This skill respects settings from `.claude/verification-config.json`:
@@ -270,12 +268,6 @@ This skill respects settings from `.claude/verification-config.json`:
 {
   "devServer": {
     "url": "http://localhost:3000"
-  },
-  "deployment": {
-    "enabled": true,
-    "service": "vercel",
-    "useForBrowserVerification": true,
-    "fallbackToLocal": true
   },
   "autoVerify": {
     "enabled": true,
@@ -287,10 +279,6 @@ This skill respects settings from `.claude/verification-config.json`:
 }
 ```
 
-**URL resolution priority:**
-1. If `deployment.enabled` and preview URL available → use preview URL
-2. If `deployment.enabled` but no preview and `fallbackToLocal` → use devServer.url (warn)
-3. If `deployment.enabled` but no preview and NOT `fallbackToLocal` → BLOCKED
-4. If deployment not enabled → use devServer.url
+**URL resolution:** Use `devServer.url` for all HTTP checks. Ensure the dev server is running before verification.
 
 If `autoVerify.enabled` is false, skip automation attempts and return MANUAL for all criteria.

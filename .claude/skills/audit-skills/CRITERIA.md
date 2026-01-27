@@ -12,11 +12,11 @@ Check each skill against these criteria. Record violations with the criterion ID
 
 ### L2: Monolithic structure (no progressive disclosure)
 - **Severity**: Low
-- **Check**: Skill >400 lines with no references to other .md files
+- **Check**: Skill >500 lines with no references to other .md files
 - **Why**: Forces full context load; no selective reading
 - **Fix**: Extract detailed sections into separate files, link from main SKILL.md
 
-**Note**: Per Anthropic best practices, the 500-line limit is critical. Progressive disclosure becomes important when "approaching this limit" (~400+ lines). Skills under 400 lines with clear section structure are acceptable.
+**Note**: Per [Anthropic best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices), "Keep SKILL.md under 500 lines. If approaching this limit, split content into reference files." Skills under 500 lines with clear section structure are acceptable.
 
 ### L3: Nested references (>1 level deep)
 - **Severity**: Medium
@@ -32,7 +32,7 @@ Check each skill against these criteria. Record violations with the criterion ID
 - **Why**: Agent skips steps when working from memory on long workflows
 - **Fix**: Add checklist per Anthropic's recommended format:
 
-```markdown
+~~~markdown
 Copy this checklist and track progress:
 
 ```
@@ -40,9 +40,9 @@ Task Progress:
 - [ ] Step 1: First step
 - [ ] Step 2: Second step
 ```
-```
+~~~
 
-**Note**: Checklists belong INSIDE code blocks (not raw markdown). Claude copies the block into its response and checks items off as it works. This is the official Anthropic pattern from their [best practices docs](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices).
+**Note**: Checklists belong INSIDE code blocks (not raw markdown). Claude copies the block into its response and checks items off as it works. This is Anthropic's recommended pattern for copyable checklists — see their [best practices docs](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices).
 
 ### C2: No verification after critical actions
 - **Severity**: High

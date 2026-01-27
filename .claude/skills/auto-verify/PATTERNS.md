@@ -25,7 +25,8 @@ Detailed pattern matching and command generation templates.
 **Status Check:**
 ```bash
 # Check if endpoint returns success (2xx/3xx)
-curl -sf "{url}" -o /dev/null && echo "PASS:status_ok" || echo "FAIL:status_{http_code}"
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "{url}")
+[ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 400 ] && echo "PASS:status_$HTTP_CODE" || echo "FAIL:status_$HTTP_CODE"
 ```
 
 **Response Contains Text:**
@@ -101,10 +102,8 @@ These patterns indicate criteria that genuinely require human judgment:
 # Look for route patterns (prepend BASE_URL)
 /(?:at|to|from)\s+\/[a-zA-Z0-9\/_-]+/
 
-# Look for localhost patterns (replace with BASE_URL if deployment enabled)
+# Look for localhost patterns
 /localhost:\d+[^\s]*/
-
-# Default to BASE_URL from resolution above
 ```
 
 ### Path Extraction Patterns
