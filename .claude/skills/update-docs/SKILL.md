@@ -1,19 +1,32 @@
 ---
 name: update-docs
 description: Update documentation after commits. Syncs README, AGENTS.md, CHANGELOG, and docs/ with code changes. Use after commits or to analyze working tree changes.
-argument-hint: [commit-range|--working-tree]
+argument-hint: [commit-range|--working-tree|--audit]
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 ---
 
 # Update Documentation
 
-Automatically update documentation to reflect code changes. Works in any repository with convention-based discovery.
+Automatically update documentation to reflect code changes. Enforces the "README as landing page" pattern—README should be a concise entry point, with detailed documentation in `docs/`.
+
+## Core Philosophy
+
+> "Your README is not your documentation. It is an overview of your project... a gateway to other pieces of info."
+
+| README.md | docs/ |
+|-----------|-------|
+| What is this? Why should I care? | How does everything work? |
+| Quick start (copy-paste ready) | Step-by-step tutorials |
+| Minimal examples | Complete API/command reference |
+| Links to detailed docs | In-depth configuration |
+| < 300 lines ideal | As long as needed |
 
 ## Trigger Modes
 
 1. **Post-commit (automatic)**: Triggered by git hook after commits
 2. **Manual with commit range**: `/update-docs HEAD~3..HEAD` to analyze specific commits
 3. **Manual with working tree**: `/update-docs --working-tree` to analyze uncommitted changes
+4. **Audit mode**: `/update-docs --audit` to check README health and suggest migrations
 
 ## Arguments
 
@@ -21,6 +34,7 @@ Automatically update documentation to reflect code changes. Works in any reposit
 - `HEAD~N..HEAD`: Analyze the last N commits
 - `COMMIT1..COMMIT2`: Analyze a specific commit range
 - `--working-tree` or `-w`: Analyze uncommitted changes in working tree
+- `--audit` or `-a`: Audit README structure and suggest migrations to docs/
 
 ## Marker File Detection
 
@@ -28,220 +42,341 @@ When triggered by post-commit hook, check for `.claude/doc-update-pending.json`:
 
 ```bash
 if [ -f .claude/doc-update-pending.json ]; then
-  # Read marker to get commit info
   COMMIT=$(jq -r '.commit_short' .claude/doc-update-pending.json)
-  # Process that specific commit
 fi
 ```
 
-**After processing, always clean up the marker:**
+**After processing, always clean up:**
 
 ```bash
 rm -f .claude/doc-update-pending.json
 ```
 
-This prevents re-processing the same commit on subsequent runs.
+---
 
 ## Workflow
 
-Copy this checklist and track progress:
-
 ```
 Update Docs Progress:
-- [ ] Phase 1: Discover documentation files
+- [ ] Phase 1: Discover and audit documentation structure
 - [ ] Phase 2: Detect changes (git diff or working tree)
-- [ ] Phase 3: Analyze documentation implications
-- [ ] Phase 4: Update documentation files
-- [ ] Phase 5: Update CHANGELOG (if exists)
-- [ ] Phase 6: Create docs commit (if changes made)
+- [ ] Phase 3: Route updates to correct location
+- [ ] Phase 4: Migrate bloated README sections (if needed)
+- [ ] Phase 5: Apply updates
+- [ ] Phase 6: Update CHANGELOG (if exists)
+- [ ] Phase 7: Create docs commit (if changes made)
 ```
 
 ---
 
-## Phase 1: Discover Documentation Files
+## Phase 1: Discover and Audit Documentation Structure
 
-Scan the repository for documentation using conventions:
+### 1.1 Scan for Documentation Files
 
-### Primary Documentation
-- `README.md` (root) — Project overview, features, usage
-- `AGENTS.md` (root) — AI agent workflow guidelines
-- `CHANGELOG.md` (root) — Version history and changes
-- `CONTRIBUTING.md` (root) — Contribution guidelines
+```bash
+# Primary
+README.md, AGENTS.md, CHANGELOG.md, CONTRIBUTING.md
 
-### Secondary Documentation
-- `docs/*.md` — Detailed documentation files
-- `docs/**/*.md` — Nested documentation
+# Secondary (docs/)
+docs/*.md, docs/**/*.md
 
-### Config Documentation
-- `package.json` — `description`, `keywords`, `scripts` descriptions
-- `pyproject.toml` — Project description
-- `Cargo.toml` — Package description
+# Config
+package.json, pyproject.toml, Cargo.toml
+```
 
-**Output:** List discovered files with their modification times.
+### 1.2 Audit README Health
+
+Analyze README.md for signs it needs restructuring:
+
+**Red Flags (README is bloated):**
+
+| Signal | Threshold | Action |
+|--------|-----------|--------|
+| Total lines | > 500 lines | Recommend migration |
+| Commands table | > 20 entries | Move to `docs/commands.md` |
+| File structure tree | > 30 lines | Move to `docs/file-structure.md` |
+| Configuration section | > 50 lines | Move to `docs/configuration.md` |
+| Multiple H2 sections for same topic | Any | Consolidate in docs/ |
+| Code blocks | > 10 blocks | Move examples to docs/ |
+
+**Check for these README sections that belong in docs/:**
+
+```markdown
+## Commands Reference      → docs/commands.md
+## API Reference           → docs/api.md
+## Configuration           → docs/configuration.md
+## File Structure          → docs/file-structure.md
+## Detailed Examples       → docs/examples.md
+## Troubleshooting         → docs/troubleshooting.md
+## Architecture            → docs/architecture.md
+```
+
+### 1.3 Determine Ideal README Structure
+
+A healthy README should have only:
+
+```markdown
+# Project Name
+
+One-line description.
+
+## TL;DR / What is this?
+2-3 sentences max.
+
+## Quick Start
+5-10 lines of copy-paste commands.
+
+## Documentation
+- [Commands Reference](docs/commands.md)
+- [Configuration](docs/configuration.md)
+- [Contributing](CONTRIBUTING.md)
+
+## License
+One line.
+```
 
 ---
 
 ## Phase 2: Detect Changes
 
-### For Commit Analysis (default or commit range)
+### For Commit Analysis
 
 ```bash
-# Get changed files
 git diff --name-only <range>
-
-# Get detailed diff for understanding changes
 git diff --stat <range>
-git diff <range> -- <relevant-files>
 ```
 
-### For Working Tree Analysis (`--working-tree`)
+### For Working Tree Analysis
 
 ```bash
-# Get staged and unstaged changes
 git status --porcelain
-
-# Get detailed diff
-git diff          # unstaged
-git diff --cached # staged
+git diff
+git diff --cached
 ```
 
-**Categorize changes:**
-- **Structural**: New/deleted/renamed files or directories
-- **Skill/Command**: Changes to `.claude/skills/` or `.claude/commands/`
-- **Configuration**: Changes to config files (package.json, settings, etc.)
-- **Feature**: New functionality or modified behavior
-- **Fix**: Bug fixes or corrections
-- **Refactor**: Code restructuring without behavior change
+### Categorize Changes
+
+| Category | Examples |
+|----------|----------|
+| **Skill/Command** | `.claude/skills/`, `.claude/commands/` |
+| **Structure** | New directories, renamed files |
+| **Configuration** | `package.json`, settings files |
+| **Feature** | New functionality |
+| **Fix** | Bug fixes |
 
 ---
 
-## Phase 3: Analyze Documentation Implications
+## Phase 3: Route Updates to Correct Location
 
-For each category of change, determine documentation impact:
+### Routing Table
 
-### Structural Changes
-| Change | Documentation Impact |
-|--------|---------------------|
-| New directory | Update file structure in README |
-| New major file | Consider mentioning in README/docs |
-| Deleted component | Remove references in all docs |
-| Renamed paths | Update all path references |
+| Change Type | Target File | NOT README |
+|-------------|-------------|------------|
+| New skill/command | `docs/commands.md` | ~~README commands table~~ |
+| Skill description changed | `docs/commands.md` | |
+| New config option | `docs/configuration.md` | |
+| File structure changed | `docs/file-structure.md` | |
+| New API endpoint | `docs/api.md` | |
+| New workflow pattern | `AGENTS.md` | |
+| Quick start broken | `README.md` | (exception) |
+| Project description changed | `README.md` | (exception) |
+| New major feature | `README.md` (one line) + `docs/` (details) | |
 
-### Skill/Command Changes
-| Change | Documentation Impact |
-|--------|---------------------|
-| New skill | Add to commands table in README |
-| Modified skill | Update description if behavior changed |
-| Deleted skill | Remove from commands table |
-| New workflow pattern | Consider updating AGENTS.md |
+### README-Only Updates (Exceptions)
 
-### Configuration Changes
-| Change | Documentation Impact |
-|--------|---------------------|
-| New config option | Document in relevant section |
-| Changed defaults | Update examples |
-| New integration | Add setup instructions |
+Only update README.md directly for:
 
-### Feature Changes
-| Change | Documentation Impact |
-|--------|---------------------|
-| New feature | Add to features list, update README |
-| Modified behavior | Update usage examples |
-| New API | Update API documentation |
+1. **TL;DR / Description** — What the project is
+2. **Quick Start** — Minimal getting-started commands
+3. **Links section** — Adding links to new docs/ files
+4. **License** — License changes
+5. **Badges** — Build status, version badges
 
-**Decision Rule:** If unsure whether a change warrants doc updates, skip silently. Err on the side of not making unnecessary changes.
+### Create docs/ Files If Missing
+
+If routing requires a docs/ file that doesn't exist:
+
+1. Create the file with a standard template
+2. Add a link to it from README.md
+3. Migrate any existing content from README to the new file
+
+**Template for new docs/ file:**
+
+```markdown
+# {Title}
+
+{Brief description of what this document covers.}
+
+## Overview
+
+{Content migrated from README or new content}
 
 ---
 
-## Phase 4: Update Documentation Files
+*This documentation is auto-maintained. Last updated: {date}*
+```
 
-For each file that needs updates:
+---
 
-### README.md Updates
+## Phase 4: Migrate Bloated README Sections
 
-**Commands/Features Table:**
-If the repo has a commands table (like toolkit projects), keep it in sync:
-1. Scan for actual skills/commands in `.claude/skills/` and `.claude/commands/`
-2. Compare against documented commands
-3. Add missing entries, remove deleted ones
-4. Update descriptions if skill descriptions changed
+If Phase 1 audit found README sections that should be in docs/:
 
-**File Structure Section:**
-If README has a file structure tree:
-1. Compare against actual directory structure
-2. Update tree to reflect new/deleted directories
-3. Keep annotations accurate
+### 4.1 Identify Migration Candidates
 
-**Feature Lists:**
-1. Check if new features are documented
-2. Remove references to deleted features
+Look for these patterns in README:
 
-### AGENTS.md Updates
+```markdown
+## Commands Reference
+## Command Reference
+## Commands
+## CLI Reference
+→ Migrate to: docs/commands.md
 
-AGENTS.md requires careful handling—only update when:
-- New workflow patterns are introduced (new skill categories)
-- Integration points change (hooks, verification, cross-model)
-- Operating principles need clarification based on new tooling
+## File Structure
+## Project Structure
+## Directory Structure
+→ Migrate to: docs/file-structure.md
+
+## Configuration
+## Config
+## Settings
+## Options
+→ Migrate to: docs/configuration.md
+
+## API Reference
+## API
+## Endpoints
+→ Migrate to: docs/api.md
+```
+
+### 4.2 Migration Process
+
+For each section to migrate:
+
+1. **Extract** the section content from README
+2. **Create** the target docs/ file (if doesn't exist)
+3. **Move** the content to docs/ file
+4. **Replace** the README section with a link:
+
+**Before (README.md):**
+```markdown
+## Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| /foo | Does foo |
+| /bar | Does bar |
+... (50 more rows)
+```
+
+**After (README.md):**
+```markdown
+## Documentation
+
+See [Commands Reference](docs/commands.md) for the full list of available commands.
+```
+
+**Created (docs/commands.md):**
+```markdown
+# Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| /foo | Does foo |
+| /bar | Does bar |
+... (50 more rows)
+```
+
+### 4.3 Ask Before Large Migrations
+
+If migration would move > 100 lines:
+
+```
+README.md has a large "Commands Reference" section (156 lines).
+
+Best practice: Move detailed reference content to docs/commands.md
+and keep README as a concise landing page.
+
+Migrate now?
+[Y] Yes, migrate to docs/commands.md
+[n] No, keep in README
+[v] View content to migrate
+```
+
+---
+
+## Phase 5: Apply Updates
+
+### 5.1 Update docs/ Files
+
+For each routed update:
+
+1. Read the target docs/ file
+2. Find the relevant section
+3. Apply the update (add/modify/remove)
+4. Preserve formatting and structure
+
+### 5.2 Update README Links
+
+If new docs/ files were created, add links to README:
+
+```markdown
+## Documentation
+
+- [Commands Reference](docs/commands.md)
+- [Configuration Guide](docs/configuration.md)  ← NEW
+- [File Structure](docs/file-structure.md)
+```
+
+### 5.3 Update AGENTS.md (Conservative)
+
+Only update AGENTS.md when:
+- New workflow patterns are introduced
+- Integration points change (hooks, verification)
+- Operating principles need clarification
 
 **Do NOT auto-update:**
 - Nuanced guidance sections
 - Project-specific conventions
 - Editorial content
 
-### docs/*.md Updates
-
-For each documentation file:
-1. Check for broken internal links
-2. Update feature/command references
-3. Keep examples current with actual file paths
-
-### Config Documentation
-
-**package.json:**
-- Update `description` if project scope changed
-- Sync `scripts` descriptions with actual behavior
-
 ---
 
-## Phase 5: Update CHANGELOG
+## Phase 6: Update CHANGELOG
 
-If `CHANGELOG.md` exists, append an entry for the changes.
+If `CHANGELOG.md` exists, append entries.
 
-### CHANGELOG Format Detection
+### Format Detection
 
-Read existing CHANGELOG to detect format:
-- **Keep a Changelog** format (most common)
-- **Conventional Changelog** format
-- **Simple list** format
+Detect format from existing file:
+- **Keep a Changelog** (most common)
+- **Conventional Changelog**
+- **Simple list**
 
 ### Entry Generation
-
-Based on categorized changes from Phase 2:
 
 ```markdown
 ## [Unreleased]
 
 ### Added
-- New `/update-docs` skill for automatic documentation sync
+- New `docs/commands.md` for detailed command reference
 
 ### Changed
-- Updated README commands table
+- Migrated commands table from README to docs/
 
 ### Fixed
 - Fixed broken link in docs/setup.md
 ```
 
 **Rules:**
-- Only add entries for user-facing changes
-- Use past tense ("Added", "Fixed", "Changed")
-- Keep entries concise (one line each)
-- Group by type (Added, Changed, Deprecated, Removed, Fixed, Security)
+- Only user-facing changes
+- Past tense ("Added", "Fixed")
+- One line per entry
 
 ---
 
-## Phase 6: Create Documentation Commit
-
-If any documentation files were modified:
+## Phase 7: Create Documentation Commit
 
 ### Verify Changes
 
@@ -250,146 +385,145 @@ git status --porcelain
 git diff --stat
 ```
 
-### Review Before Commit
+### Summary Report
 
-Display a summary:
 ```
 Documentation Updates
 =====================
 
-Modified files:
-  - README.md (updated commands table)
-  - CHANGELOG.md (added entry)
-  - docs/setup.md (fixed broken link)
+Migrations:
+  - README.md → docs/commands.md (142 lines moved)
 
-Changes: +15 -3
+New files:
+  - docs/commands.md (created)
+
+Modified:
+  - README.md (replaced section with link)
+  - CHANGELOG.md (added entry)
+
+Changes: +156 -142
 ```
 
 ### Create Commit
 
 ```bash
-git add <modified-doc-files>
-git commit -m "docs: sync documentation with recent changes
+git add <files>
+git commit -m "docs: restructure documentation (README as landing page)
 
-- Updated commands table in README
+- Migrated commands table to docs/commands.md
+- README now links to detailed docs
 - Added CHANGELOG entry
-- Fixed broken link in docs/setup.md
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
-
-**Commit message format:**
-- Prefix with `docs:`
-- Summary line under 72 characters
-- Body lists specific updates
-- Include Co-Authored-By
 
 ---
 
 ## Edge Cases
 
-### No Documentation Files Found
-- Report: "No documentation files found in this repository"
-- Suggest: "Consider adding a README.md"
-- Exit without error
+### No docs/ Directory
+- Create `docs/` directory
+- Create initial files as needed
+- Add `.gitkeep` if empty
 
-### No Changes Detected
-- Report: "No changes require documentation updates"
-- Exit without creating commit
+### README Has No Clear Sections
+- Skip migration
+- Only add new content to docs/
+- Suggest manual restructuring
 
-### Working Tree Has Uncommitted Changes (non-working-tree mode)
-- Warn: "Working tree has uncommitted changes. Documentation commit will only include doc files."
-- Proceed with doc-only commit
+### docs/ File Already Exists with Different Content
+- Append new content to existing file
+- Don't overwrite existing sections
+- Warn if potential conflict
 
-### CHANGELOG Doesn't Exist
-- Skip CHANGELOG updates
-- Do not create CHANGELOG (too opinionated)
+### README Is Already Minimal
+- Great! Just route new updates to docs/
+- No migration needed
 
-### Conflict with Existing Changes
-- If doc files have uncommitted changes, warn user
-- Ask whether to include existing changes or skip file
-
-### Stale Marker File (Session Ended Before Processing)
-
-If `.claude/doc-update-pending.json` exists but references an old commit:
-
-1. **Check if marker is stale:**
-   ```bash
-   MARKER_COMMIT=$(jq -r '.commit_short' .claude/doc-update-pending.json 2>/dev/null)
-   CURRENT_HEAD=$(git rev-parse --short HEAD)
-   ```
-
-2. **If marker commit != HEAD:**
-   - The Claude session likely ended before processing
-   - Ask user: "Stale marker found for commit {marker_commit}. Current HEAD is {current_head}. Process anyway or delete marker?"
-   - Options:
-     - **Process original commit**: Analyze the commit referenced in marker
-     - **Process HEAD instead**: Analyze current HEAD
-     - **Delete and skip**: Remove marker without processing
-
-3. **If marker is very old (>24 hours):**
-   - Recommend deleting: "Marker is over 24 hours old. The commit may have been pushed/merged already."
-   - Still offer to process if user insists
-
-4. **After handling, always clean up:**
-   ```bash
-   rm -f .claude/doc-update-pending.json
-   ```
-
-### Marker File Has Invalid JSON
-- If `.claude/doc-update-pending.json` exists but can't be parsed:
-- Warn: "Marker file is corrupted. Deleting and skipping."
-- Delete the marker and exit without error
+### Stale Marker File
+- Check if marker references old commit
+- Ask user how to proceed
+- Always clean up marker
 
 ---
 
 ## Configuration (Optional)
 
-Projects can customize behavior via `.claude/doc-sync-config.json`:
+Projects can customize via `.claude/doc-sync-config.json`:
 
 ```json
 {
-  "enabled": true,
-  "files": {
-    "readme": "README.md",
-    "agents": "AGENTS.md",
-    "changelog": "CHANGELOG.md",
-    "docs": ["docs/**/*.md"]
+  "readme": {
+    "maxLines": 300,
+    "maxCommandsInTable": 10,
+    "sectionsToMigrate": ["Commands", "Configuration", "API"]
+  },
+  "routing": {
+    "commands": "docs/commands.md",
+    "configuration": "docs/configuration.md",
+    "api": "docs/api.md",
+    "fileStructure": "docs/file-structure.md"
   },
   "changelog": {
     "enabled": true,
     "format": "keepachangelog"
   },
-  "skipPatterns": [
-    "docs/api/**"
-  ],
-  "autoCommit": true
+  "autoMigrate": false
 }
 ```
 
-If no config exists, use conventions described above.
+If `autoMigrate: true`, migrations happen without asking.
+
+---
+
+## Audit Mode (`--audit`)
+
+When run with `--audit`, perform a full health check:
+
+```
+README Health Audit
+===================
+
+File: README.md
+Lines: 847 (⚠️  > 500 recommended)
+
+Sections that should be in docs/:
+  ⚠️  "Commands Reference" (156 lines) → docs/commands.md
+  ⚠️  "File Structure" (43 lines) → docs/file-structure.md
+  ⚠️  "Configuration" (89 lines) → docs/configuration.md
+  ✓  "Quick Start" (12 lines) — OK in README
+  ✓  "License" (2 lines) — OK in README
+
+Missing docs/ files:
+  ✗  docs/commands.md (would receive 156 lines)
+  ✗  docs/configuration.md (would receive 89 lines)
+
+Recommendations:
+  1. Run /update-docs --migrate to restructure
+  2. README would go from 847 → ~150 lines
+  3. Creates 3 new files in docs/
+
+Run migration? [Y/n]
+```
 
 ---
 
 ## Integration with Post-Commit Hook
 
-This skill can be triggered automatically via git hook. See `POST_COMMIT_HOOK.md` for installation instructions.
+See `POST_COMMIT_HOOK.md` for installation.
 
 When triggered by hook:
 - Analyze only the most recent commit
-- Run in non-interactive mode
-- Create follow-up commit automatically
-- Log activity to `.claude/doc-sync.log`
+- Route updates to correct docs/ files
+- Auto-migrate if `autoMigrate: true` in config
+- Create follow-up commit
 
 ---
 
 ## Final Cleanup
 
-**Always run at the end of the skill, regardless of outcome:**
+**Always run at the end:**
 
 ```bash
-# Remove marker file to prevent re-triggering
 rm -f .claude/doc-update-pending.json
 ```
-
-This ensures the hook doesn't re-trigger on the next commit.
