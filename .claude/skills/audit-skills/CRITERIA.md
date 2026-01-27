@@ -11,10 +11,12 @@ Check each skill against these criteria. Record violations with the criterion ID
 - **Fix**: Split into main overview + reference files (REFERENCE.md, WORKFLOW.md, etc.)
 
 ### L2: Monolithic structure (no progressive disclosure)
-- **Severity**: Medium
-- **Check**: Skill >200 lines with no references to other .md files
+- **Severity**: Low
+- **Check**: Skill >400 lines with no references to other .md files
 - **Why**: Forces full context load; no selective reading
 - **Fix**: Extract detailed sections into separate files, link from main SKILL.md
+
+**Note**: Per Anthropic best practices, the 500-line limit is critical. Progressive disclosure becomes important when "approaching this limit" (~400+ lines). Skills under 400 lines with clear section structure are acceptable.
 
 ### L3: Nested references (>1 level deep)
 - **Severity**: Medium
@@ -56,11 +58,13 @@ Task Progress:
 
 ## Step Clarity
 
-### S1: Missing explicit step headers
-- **Severity**: Medium
-- **Check**: Sequential workflow without `### Step N:` or `**Step N:**` markers
+### S1: Unclear workflow structure
+- **Severity**: Low
+- **Check**: Sequential workflow where steps are hard to distinguish
 - **Why**: Agent may not recognize discrete execution points
-- **Fix**: Add numbered step headers with bold or heading formatting
+- **Fix**: Use any clear format: `### Step N:`, `**Step N:**`, or numbered lists (`1. First...`)
+
+**Note**: Multiple formats are acceptable per Anthropic best practices. The key is clarity and consistency WITHIN a skill, not a specific format. Numbered lists, bold headers, and markdown headings all work.
 
 ### S2: Critical instructions not repeated
 - **Severity**: Low
