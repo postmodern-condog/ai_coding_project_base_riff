@@ -152,6 +152,8 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/verify-task X.Y.Z` | Verify specific task acceptance criteria |
 | `/criteria-audit` | Validate acceptance criteria metadata |
 | `/security-scan` | Run security checks (deps, secrets, code) |
+| `/multi-model-verify` | Cross-model verification using Codex CLI |
+| `/codex-review` | Have Codex review current branch with doc research |
 | `/progress` | Show progress through execution plan |
 | `/list-todos` | Analyze and prioritize TODO items |
 | `/run-todos` | Implement [ready]-tagged TODO items with commits |
@@ -242,6 +244,32 @@ Auto-advance executes immediately when conditions are met. No countdown or delay
 
 When auto-advance stops (manual items exist, check fails, or final phase complete), a session report shows all completed steps and any blocking issues.
 
+### Cross-Model Verification (Codex)
+
+When Codex CLI is installed, `/phase-checkpoint` automatically invokes Codex for a second-opinion review. Codex researches current documentation before reviewing, which helps catch issues where Claude's training data may be outdated.
+
+**Setup:**
+```bash
+# Install Codex CLI
+npm install -g @openai/codex
+
+# Authenticate
+codex login
+```
+
+**Configuration** (`.claude/settings.local.json`):
+```json
+{
+  "multiModelVerify": {
+    "enabled": true,
+    "codexModel": "o3",
+    "timeoutMinutes": 10
+  }
+}
+```
+
+Codex findings are advisory — they don't block auto-advance. You can also invoke `/codex-review` directly for on-demand review.
+
 ### Local-First Verification
 
 Phase checkpoints run local verification first (tests, lint, security scan). Production verification (deployment, integration) only runs after local passes. This prevents wasted cycles on production checks when basic issues exist.
@@ -257,6 +285,7 @@ The toolkit enforces quality through multiple mechanisms:
 - **Auto-Verify** — Before listing items as "manual," the toolkit attempts automation using available tools (curl, browser MCP, file inspection). Only truly subjective criteria (UX, brand tone) require human review.
 - **Manual Verification Guides** — When human verification is required, the toolkit generates comprehensive step-by-step guides with prerequisites, exact commands, expected results, and troubleshooting tips.
 - **Stuck Detection** — Agents escalate to humans after repeated failures instead of spinning forever.
+- **Cross-Model Verification** — Optional second-opinion review using OpenAI Codex CLI. Codex researches current documentation before reviewing, catching blind spots from different training data.
 - **Vercel Preview Integration** — Browser tests can run against Vercel preview deployments instead of localhost, providing real HTTPS and working OAuth callbacks.
 
 ### Vercel Preview URL Integration

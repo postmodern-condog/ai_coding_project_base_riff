@@ -54,6 +54,30 @@ Guidelines:
   - Update `README.md` (commands list / file structure section) accordingly.
   - Ensure the skill aligns with constraints in `.claude/settings.json`.
 
+## Cross-Model Verification
+
+The toolkit supports cross-model verification using OpenAI Codex CLI:
+
+- `/multi-model-verify` — Reusable building block for Codex verification
+- `/codex-review` — Review current branch with documentation research
+- `/phase-checkpoint` — Automatically invokes Codex review when available
+
+When Codex CLI is installed and authenticated, phase checkpoints include a second-opinion
+review. Codex researches current documentation before reviewing, catching issues where
+training data may differ between models.
+
+**Configuration** (`.claude/settings.local.json`):
+```json
+{
+  "multiModelVerify": {
+    "enabled": true,
+    "codexModel": "o3"
+  }
+}
+```
+
+Codex findings are advisory and don't block workflows.
+
 ## Validation
 
 - Run `npm run lint` before finishing changes that touch Markdown files.
