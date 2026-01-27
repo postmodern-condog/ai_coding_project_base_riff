@@ -127,7 +127,9 @@ OAUTH_{PROVIDER}_CLIENT_SECRET=<client_secret>
 
 ### Step 5: Start Local Callback Server
 
-Create a temporary callback server to receive the OAuth code:
+Create a temporary callback server to receive the OAuth code.
+
+**EXECUTE this entire block** via the Bash tool (the JavaScript is written to a file, then executed):
 
 ```bash
 # Create callback server script

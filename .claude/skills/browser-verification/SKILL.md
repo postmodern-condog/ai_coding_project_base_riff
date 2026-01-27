@@ -295,7 +295,7 @@ For each browser criterion:
 
 ## Step 5: Evidence Capture
 
-Capture evidence appropriate to the criterion type:
+Capture evidence appropriate to the criterion type using the selected browser MCP tool (not Bash commands):
 
 | Type | Evidence |
 |------|----------|

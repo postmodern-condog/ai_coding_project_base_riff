@@ -93,7 +93,8 @@ For instructions with `browser: true`:
 
    **If NO tools available (SOFT BLOCK):**
 
-   Before marking as BLOCKED, attempt HTTP fallback for any remaining criteria:
+   Before marking as BLOCKED, attempt HTTP fallback for any remaining criteria.
+   **EXECUTE these commands** via Bash tool (substitute actual URLs):
    - Page loading: `curl -sf {url}`
    - API responses: `curl -s {url} | jq .`
    - Redirects: `curl -sI {url}`
