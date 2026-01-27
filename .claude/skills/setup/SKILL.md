@@ -159,8 +159,20 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    shasum -a 256 "$file" | cut -d' ' -f1
    ```
 
-   Include entries for:
-   - All copied skills (`.claude/skills/*/SKILL.md`)
+   **Include entries for ALL files in skill directories:**
+   ```bash
+   # Hash every .md file in every skill directory
+   for skill_dir in .claude/skills/*/; do
+     for file in "$skill_dir"*.md; do
+       [[ -f "$file" ]] || continue
+       hash=$(shasum -a 256 "$file" | cut -d' ' -f1)
+       # Add entry for "$file" with hash and timestamp
+     done
+   done
+   ```
+
+   This ensures skills with supporting files (e.g., `audit-skills/CRITERIA.md`,
+   `audit-skills/SCORING.md`) are tracked for conflict detection.
 
    **Do NOT copy:**
    - Generation skills (setup, product-spec, etc.) — these run from the toolkit

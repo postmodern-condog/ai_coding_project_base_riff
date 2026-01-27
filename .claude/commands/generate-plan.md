@@ -102,7 +102,19 @@ Calculate file hashes for each copied file:
 shasum -a 256 "$file" | cut -d' ' -f1
 ```
 
-Include entries for all copied skills (`.claude/skills/*/SKILL.md`).
+**Include entries for ALL files in skill directories:**
+```bash
+# Hash every .md file in every skill directory
+for skill_dir in .claude/skills/*/; do
+  for file in "$skill_dir"*.md; do
+    [[ -f "$file" ]] || continue
+    hash=$(shasum -a 256 "$file" | cut -d' ' -f1)
+    # Add entry for "$file" with hash and timestamp
+  done
+done
+```
+
+This ensures skills with supporting files (e.g., `audit-skills/CRITERIA.md`) are tracked.
 
 If the file already exists, **update it** with current hashes and commit info (this handles re-running generate-plan on an existing project).
 

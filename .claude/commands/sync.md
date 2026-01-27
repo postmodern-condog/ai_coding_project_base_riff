@@ -45,22 +45,13 @@ fi
 These files are synced from toolkit to target:
 
 **Skills** (`.claude/skills/`):
-- `fresh-start/`
-- `phase-prep/`
-- `phase-start/`
-- `phase-checkpoint/`
-- `verify-task/`
-- `configure-verification/`
-- `progress/`
-- `populate-state/`
-- `list-todos/`
-- `security-scan/`
-- `criteria-audit/`
-- `code-verification/`
-- `spec-verification/`
-- `browser-verification/`
-- `tech-debt-check/`
-- `auto-verify/`
+All skill directories in the toolkit's `.claude/skills/` are synced automatically.
+Skills are discovered dynamically — no hardcoded list.
+
+```bash
+# Discover all skills
+ls -1 "$TOOLKIT_PATH/.claude/skills" | grep -v "^\."
+```
 
 **Config** (only if missing):
 - `.claude/verification-config.json`
@@ -197,11 +188,28 @@ After sync completes, write `TARGET_PATH/.claude/toolkit-version.json`:
   "toolkit_commit_date": "{commit date ISO}",
   "last_sync": "{current ISO timestamp}",
   "files": {
-    "skills/fresh-start/SKILL.md": "{sha256 of synced file}",
-    "skills/phase-start/SKILL.md": "{sha256 of synced file}",
-    // ... all synced skills
+    ".claude/skills/{skill-name}/SKILL.md": {
+      "hash": "{sha256 of synced file}",
+      "synced_at": "{ISO timestamp}"
+    }
   }
 }
+```
+
+**IMPORTANT:** The `files` object must include an entry for every file in every synced skill directory, not just `SKILL.md`. For skills with supporting files (e.g., `audit-skills` has `CRITERIA.md` and `SCORING.md`), include all files:
+
+```bash
+# For each skill directory, hash all .md files
+for skill_dir in "$TARGET_PATH/.claude/skills"/*/; do
+  for file in "$skill_dir"*.md; do
+    hash=$(shasum -a 256 "$file" | cut -d' ' -f1)
+    rel_path="${file#$TARGET_PATH/}"
+    # Add to files object: "$rel_path": {"hash": "$hash", "synced_at": "$NOW"}
+  done
+done
+```
+
+This ensures conflict detection works for all files, not just the main SKILL.md
 ```
 
 Get toolkit commit info:

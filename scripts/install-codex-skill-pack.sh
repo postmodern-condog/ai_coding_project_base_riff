@@ -14,23 +14,7 @@ Options:
   --dest <path>    Destination skills directory (default: $CODEX_HOME/skills or ~/.codex/skills).
   -h, --help       Show help.
 
-Skills installed:
-  - fresh-start
-  - phase-prep
-  - phase-start
-  - phase-checkpoint
-  - verify-task
-  - configure-verification
-  - progress
-  - populate-state
-  - list-todos
-  - security-scan
-  - criteria-audit
-  - code-verification
-  - browser-verification
-  - spec-verification
-  - tech-debt-check
-  - auto-verify
+Skills: All skills from .claude/skills/ are discovered and installed automatically.
 EOF
 }
 
@@ -78,25 +62,22 @@ if [[ ! -d "$SRC_DIR" ]]; then
   exit 1
 fi
 
-# Skills to install for Codex (execution workflow skills)
-SKILLS=(
-  "fresh-start"
-  "phase-prep"
-  "phase-start"
-  "phase-checkpoint"
-  "verify-task"
-  "configure-verification"
-  "progress"
-  "populate-state"
-  "list-todos"
-  "security-scan"
-  "criteria-audit"
-  "code-verification"
-  "browser-verification"
-  "spec-verification"
-  "tech-debt-check"
-  "auto-verify"
-)
+# Dynamically discover all skills from the toolkit
+# This ensures new skills are automatically included without manual updates
+SKILLS=()
+while IFS= read -r -d '' skill_dir; do
+  skill_name="$(basename "$skill_dir")"
+  # Skip hidden directories
+  [[ "$skill_name" == .* ]] && continue
+  SKILLS+=("$skill_name")
+done < <(find "$SRC_DIR" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+
+if [[ ${#SKILLS[@]} -eq 0 ]]; then
+  echo "No skills found in $SRC_DIR" >&2
+  exit 1
+fi
+
+echo "Discovered ${#SKILLS[@]} skills to install."
 
 mkdir -p "$DEST"
 
