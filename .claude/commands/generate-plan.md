@@ -51,38 +51,17 @@ Write both documents to the target directory:
 
 ## Setup Execution Environment
 
-After writing the documents, copy the execution commands and skills to the target project so `/fresh-start`, `/phase-start`, etc. work when the user switches to that directory.
+After writing the documents, copy the execution skills to the target project so `/fresh-start`, `/phase-start`, etc. work when the user switches to that directory.
 
-### 1. Copy Execution Commands
+### 1. Copy Skills
 
-Copy only the execution-phase commands to `$1/.claude/commands/`:
-
-```bash
-mkdir -p "$1/.claude/commands"
-cp .claude/commands/fresh-start.md "$1/.claude/commands/"
-cp .claude/commands/phase-prep.md "$1/.claude/commands/"
-cp .claude/commands/phase-start.md "$1/.claude/commands/"
-cp .claude/commands/phase-checkpoint.md "$1/.claude/commands/"
-cp .claude/commands/verify-task.md "$1/.claude/commands/"
-cp .claude/commands/criteria-audit.md "$1/.claude/commands/"
-cp .claude/commands/configure-verification.md "$1/.claude/commands/"
-cp .claude/commands/progress.md "$1/.claude/commands/"
-cp .claude/commands/security-scan.md "$1/.claude/commands/"
-cp .claude/commands/list-todos.md "$1/.claude/commands/"
-cp .claude/commands/populate-state.md "$1/.claude/commands/"
-```
-
-Optional extras (not installed by default): recovery commands are available under `extras/claude/commands/`.
-
-### 2. Copy Skills
-
-Copy the skills directory:
+Copy the skills directory (includes all execution skills like fresh-start, phase-start, etc.):
 
 ```bash
 cp -r .claude/skills "$1/.claude/"
 ```
 
-### 3. Add Verification Config
+### 2. Add Verification Config
 
 If `$1/.claude/verification-config.json` does not exist, copy the template:
 ```bash
@@ -91,7 +70,7 @@ cp .claude/verification-config.json "$1/.claude/verification-config.json"
 
 If it already exists, do not overwrite it.
 
-### 4. Create toolkit-version.json
+### 3. Create toolkit-version.json
 
 Create `$1/.claude/toolkit-version.json` to enable future syncs with `/sync`:
 
@@ -103,7 +82,7 @@ Create `$1/.claude/toolkit-version.json` to enable future syncs with `/sync`:
   "toolkit_commit_date": "{commit date in ISO format}",
   "last_sync": "{current ISO timestamp}",
   "files": {
-    ".claude/commands/fresh-start.md": {
+    ".claude/skills/fresh-start/SKILL.md": {
       "hash": "{sha256 hash of copied file}",
       "synced_at": "{ISO timestamp}"
     }
@@ -123,11 +102,11 @@ Calculate file hashes for each copied file:
 shasum -a 256 "$file" | cut -d' ' -f1
 ```
 
-Include entries for all copied commands and skills (`.claude/commands/*.md` and `.claude/skills/*/SKILL.md`).
+Include entries for all copied skills (`.claude/skills/*/SKILL.md`).
 
 If the file already exists, **update it** with current hashes and commit info (this handles re-running generate-plan on an existing project).
 
-### 5. Create CLAUDE.md
+### 4. Create CLAUDE.md
 
 If `$1/CLAUDE.md` does not exist, create it with:
 

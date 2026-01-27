@@ -45,7 +45,7 @@ cd ai_coding_project_base
 # 2. Generate specs and plan (from toolkit directory)
 /product-spec ~/Projects/my-new-app
 /technical-spec ~/Projects/my-new-app
-/generate-plan ~/Projects/my-new-app   # Also copies execution commands to your project
+/generate-plan ~/Projects/my-new-app   # Also copies execution skills to your project
 
 # 3. Execute (from your project directory)
 cd ~/Projects/my-new-app
@@ -134,7 +134,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | Command | Description |
 |---------|-------------|
 | `/setup [path]` | Initialize new project with toolkit structure |
-| `/sync [path]` | Sync target project with latest toolkit commands/skills |
+| `/sync [path]` | Sync target project with latest toolkit skills |
 | `/update-target-projects` | Discover and sync all toolkit-using projects at once |
 | `/gh-init [path]` | Initialize git repo with smart .gitignore and optional GitHub remote |
 | `/install-hooks [path]` | Install git hooks (pre-push doc sync check) |
@@ -170,8 +170,7 @@ your-project/
 ├── LEARNINGS.md             # Discovered patterns (created as you work)
 ├── DEFERRED.md              # Deferred requirements (captured during Q&A)
 ├── .claude/
-│   ├── commands/            # Execution commands (auto-copied)
-│   ├── skills/              # Verification skills (auto-copied)
+│   ├── skills/              # Execution skills (auto-copied)
 │   ├── verification-config.json
 │   └── toolkit-version.json # Tracks toolkit sync state
 └── [your code]
@@ -329,8 +328,8 @@ ai_coding_project_base/
 │   ├── FEATURE_TECHNICAL_SPEC_PROMPT.md
 │   └── FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md
 ├── .claude/
-│   ├── commands/                    # All slash commands
-│   ├── skills/                      # Verification skills
+│   ├── skills/                      # All skills (create /slash-commands)
+│   ├── commands/                    # Legacy command format (still works)
 │   │   ├── auto-verify/             # Automation-before-manual logic
 │   │   ├── browser-verification/    # Browser MCP verification
 │   │   ├── code-verification/       # Multi-agent code verification

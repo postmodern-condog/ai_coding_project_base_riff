@@ -31,8 +31,8 @@ AVAILABLE HOOKS
 ===============
 
 1. pre-push-doc-check
-   Purpose: Warns when commands/skills/prompts change without documentation updates
-   Checks: .claude/commands/, .claude/skills/, *PROMPT*.md
+   Purpose: Warns when skills/prompts change without documentation updates
+   Checks: .claude/skills/, .claude/commands/, *PROMPT*.md
    Against: README.md, docs/*.md, AGENTS.md
 
 2. post-commit-sync-check
@@ -84,8 +84,8 @@ To bypass temporarily: git commit --no-verify  OR  git push --no-verify
 
 | Files Changed | Documentation Expected |
 |---------------|----------------------|
-| `.claude/commands/*.md` | README.md should be updated |
-| `.claude/skills/*.md` | README.md or docs/*.md |
+| `.claude/skills/*.md` | README.md or docs/*.md should be updated |
+| `.claude/commands/*.md` | README.md or docs/*.md (legacy format) |
 | `*PROMPT*.md` | README.md or docs/*.md |
 
 **Behavior:**
@@ -102,9 +102,9 @@ To bypass temporarily: git commit --no-verify  OR  git push --no-verify
 
 The following changes may require documentation updates:
 
-  - Commands changed but README.md not updated:
-      .claude/commands/new-command.md
-      .claude/commands/phase-start.md
+  - Skills changed but README.md not updated:
+      .claude/skills/new-skill/SKILL.md
+      .claude/skills/phase-start/SKILL.md
 
 Consider updating:
   - README.md (command list, file structure)

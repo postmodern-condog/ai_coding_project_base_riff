@@ -12,7 +12,7 @@ Features are isolated in their own directories under `features/<name>/`, enablin
 # From toolkit directory:
 /feature-spec ~/Projects/existing-app/features/analytics
 /feature-technical-spec ~/Projects/existing-app/features/analytics
-/feature-plan ~/Projects/existing-app/features/analytics   # Also copies execution commands
+/feature-plan ~/Projects/existing-app/features/analytics   # Also copies execution skills
 
 # From your feature directory:
 cd ~/Projects/existing-app/features/analytics

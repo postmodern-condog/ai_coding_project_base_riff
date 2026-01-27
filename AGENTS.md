@@ -7,13 +7,16 @@ This repository is a **toolkit** (prompts, slash commands, skills). It is not a
 
 ## Repo Context
 
-- **Primary artifacts:** Markdown prompt templates and Claude Code slash commands.
+- **Primary artifacts:** Markdown prompt templates and Claude Code skills.
 - **Main directories:**
-  - `.claude/commands/` — Slash command definitions (frontmatter + instructions)
-  - `.claude/skills/` — Skills (`SKILL.md`)
+  - `.claude/skills/` — Skills (`SKILL.md`) — these create `/slash-commands`
+  - `.claude/commands/` — Legacy command format (still works, but prefer skills)
   - `FEATURE_PROMPTS/` — Feature workflow prompt templates
   - `deprecated/` — Legacy/reference-only prompt files (avoid editing unless required)
   - `docs/` — Static documentation site assets
+
+**Note:** Skills and commands are now merged in Claude Code. A file at `.claude/skills/review/SKILL.md`
+creates `/review`. The `.claude/commands/` format still works but skills are preferred for new work.
 
 ## Operating Principles
 
@@ -33,20 +36,23 @@ This repository is a **toolkit** (prompts, slash commands, skills). It is not a
 - Avoid introducing new long, duplicated sections—prefer referencing an existing
   command/skill or consolidating.
 
-## Slash Commands (`.claude/commands/*.md`)
+## Skills (`.claude/skills/*/SKILL.md` and `.claude/commands/*.md`)
 
-- Keep the YAML frontmatter valid (description, argument-hint, allowed-tools).
-- Keep “Directory Guard” sections accurate; commands should fail fast when run in the
+Skills and commands are merged in Claude Code. Both create `/slash-commands`:
+- `.claude/skills/foo/SKILL.md` → `/foo`
+- `.claude/commands/foo.md` → `/foo`
+
+**Prefer skills format** for new work (supports supporting files, better discovery).
+
+Guidelines:
+- Keep the YAML frontmatter valid (`name`, `description`, `argument-hint`, `allowed-tools`).
+- Keep "Directory Guard" sections accurate; skills should fail fast when run in the
   wrong directory.
-- If you add/rename a command:
-  - Update `README.md` (commands list / file structure section) accordingly.
-  - Ensure the command aligns with constraints in `.claude/settings.json`.
-
-## Skills (`.claude/skills/*/SKILL.md`)
-
 - Prefer general, reusable workflows (avoid product-specific rules).
-- If a skill references additional assets, link them explicitly (don’t require bulk
-  reading to understand the workflow).
+- If a skill references additional assets, link them explicitly.
+- If you add/rename a skill:
+  - Update `README.md` (commands list / file structure section) accordingly.
+  - Ensure the skill aligns with constraints in `.claude/settings.json`.
 
 ## Validation
 
