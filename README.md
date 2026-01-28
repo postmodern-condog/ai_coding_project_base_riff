@@ -252,7 +252,12 @@ When auto-advance stops (manual items exist, check fails, or final phase complet
 
 ### Cross-Model Verification (Codex)
 
-When Codex CLI is installed, `/phase-checkpoint` automatically invokes Codex for a second-opinion review. Codex researches current documentation before reviewing, which helps catch issues where Claude's training data may be outdated.
+When Codex CLI is installed, the toolkit automatically invokes Codex for second-opinion reviews at key points:
+
+- **Generation commands** — `/product-spec`, `/technical-spec`, `/generate-plan`, `/feature-spec`, `/feature-technical-spec`, `/feature-plan`, and `/bootstrap` all run Codex review after creating documents
+- **Phase checkpoints** — `/phase-checkpoint` reviews completed phase code
+
+Codex researches current documentation before reviewing, which helps catch issues where Claude's training data may be outdated.
 
 **Setup:**
 ```bash
