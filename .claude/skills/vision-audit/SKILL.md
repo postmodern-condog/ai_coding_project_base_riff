@@ -1,31 +1,41 @@
 ---
 name: vision-audit
-description: Compare VISION.md against current toolkit state and report alignment with traffic-light scoring.
-allowed-tools: Read, Glob, Grep, Bash
+description: Audit vision alignment, analyze SDLC gaps, research trends, and generate feature proposals.
+allowed-tools: Read, Glob, Grep, Bash, WebSearch
 ---
 
 # Vision Audit
 
-Evaluate toolkit alignment with VISION.md **and** compare against modern SDLC outcomes.
+A comprehensive audit that evaluates the toolkit against its vision, compares to SDLC outcomes, researches the landscape, and **generates feature proposals** with rationale.
 
-This audit is both backward-looking (are we following our stated vision?) and forward-looking (are we achieving the outcomes that modern SDLC requires, or intentionally avoiding them?).
+This is both an audit tool and a **roadmap generator**.
 
-**Key principle:** Focus on *outcomes*, not practices or tools. "Code is verified before commit" is an outcome—whether via local tests, preview deployments, or AI verification is a tactical choice that can evolve.
+**Key principle:** Focus on *outcomes*, not practices or tools. Proposals should achieve outcomes in ways that align with our principles and differentiate from competitors.
 
 ## Scope
 
-This skill is **toolkit-specific**. It audits the AI Coding Toolkit repository against its own VISION.md and SDLC_REFERENCE.md. It is not synced to target projects.
+This skill is **toolkit-specific**. It reads the toolkit's direction documents and generates proposals for improvement. Not synced to target projects.
 
 ## Trigger
 
-Manual only. Run `/vision-audit` when you want to check alignment.
+Manual only. Run `/vision-audit` when you want to:
+- Check alignment with vision and SDLC outcomes
+- Get researched feature proposals
+- Understand competitive positioning
+
+---
 
 ## Prerequisites
 
-- **VISION.md** must exist in the repository root
-- **SDLC_REFERENCE.md** must exist in the repository root
+The following documents should exist in the repository root:
 
-If either is missing, exit with error and suggest creating them.
+| Document | Purpose | Required? |
+|----------|---------|-----------|
+| **VISION.md** | Principles, scope, success criteria | Yes |
+| **SDLC_REFERENCE.md** | Outcomes to achieve | Yes |
+| **COMPETITORS.md** | Landscape analysis, differentiation | Recommended |
+
+If COMPETITORS.md is missing, proposals will lack competitive context but audit will still run.
 
 ---
 
@@ -33,134 +43,175 @@ If either is missing, exit with error and suggest creating them.
 
 ```
 Vision Audit Progress:
-- [ ] Phase 1: Parse VISION.md sections
+- [ ] Phase 1: Parse direction documents
 - [ ] Phase 2: Gather evidence from codebase
 - [ ] Phase 3: Evaluate vision alignment (R/Y/G scoring)
-- [ ] Phase 4: Compare against SDLC_REFERENCE.md
-- [ ] Phase 5: Classify gaps (ADDRESSED / AVOIDED / OPPORTUNITY)
-- [ ] Phase 6: Generate combined report
-- [ ] Phase 7: Provide actionable recommendations
+- [ ] Phase 4: Classify SDLC outcomes (ACHIEVED / AVOIDED / OPPORTUNITY)
+- [ ] Phase 5: Research opportunities (web search + competitor check)
+- [ ] Phase 6: Generate proposals with rationale
+- [ ] Phase 7: Output combined report
 ```
 
 ---
 
 ## Part A: Vision Alignment Audit
 
-### Phase 1: Parse VISION.md
+### Phase 1: Parse Direction Documents
 
-Read VISION.md and extract auditable items:
+Read and extract from each document:
 
-| Section | What to Extract |
-|---------|-----------------|
-| **Problem** | Context only (not scored) |
-| **Aspiration** | Core goal to measure against |
-| **Principles** | Each numbered principle (priority order) |
-| **AI Strengths** | Items under "Lean on these strengths" |
-| **AI Weaknesses** | Items under "Guard against these weaknesses" |
-| **Scope - In** | What should be present |
-| **Scope - Out** | What should NOT be present (used for SDLC gap classification) |
-| **Success** | Each success criterion |
+**VISION.md:**
+| Section | Extract |
+|---------|---------|
+| Problem | Context (not scored) |
+| Aspiration | Core goal |
+| Principles | Numbered principles (priority order) |
+| AI Strengths | What to leverage |
+| AI Weaknesses | What to guard against |
+| Scope In/Out | Boundaries for classification |
+| Success | Measurable criteria |
+
+**SDLC_REFERENCE.md:**
+- All outcomes by phase (1.1, 1.2, 2.1, etc.)
+- "Why it matters" for each
+
+**COMPETITORS.md:**
+- Competitor list and philosophies
+- Feature matrix (what they have vs us)
+- Strengths to learn from
+- Our unique differentiation
+- Gaps & opportunities already identified
 
 ### Phase 2: Gather Evidence
 
-Scan the codebase for evidence:
+Scan the codebase:
 
 | Source | What to Look For |
 |--------|------------------|
-| `.claude/skills/` | Skill complexity, count, patterns |
+| `.claude/skills/` | Skill count, complexity, patterns |
 | `.claude/commands/` | Legacy commands |
-| `README.md` | Feature claims, workflow descriptions |
-| `AGENTS.md` | Workflow rules, guardrails |
+| `README.md` | Feature claims, workflow |
+| `AGENTS.md` | Workflow rules |
 | `docs/` | Documentation coverage |
-| `*.md` prompts | Spec/plan generation patterns |
+| Prompt files | Spec/plan generation patterns |
 
 ### Phase 3: Evaluate Vision Alignment
 
-For each extracted vision item, assign a score:
+Score each vision item:
 
-| Score | Meaning | Criteria |
-|-------|---------|----------|
-| 🟢 Green | Aligned | Clear evidence, no contradictions |
-| 🟡 Yellow | Partial | Some evidence, incomplete or mixed |
-| 🔴 Red | Misaligned | Contradicting evidence or violation |
+| Score | Meaning |
+|-------|---------|
+| 🟢 Green | Aligned — clear evidence |
+| 🟡 Yellow | Partial — mixed signals |
+| 🔴 Red | Misaligned — contradiction |
 
 ---
 
 ## Part B: SDLC Gap Analysis
 
-### Phase 4: Compare Against SDLC Reference
+### Phase 4: Classify SDLC Outcomes
 
-Read SDLC_REFERENCE.md and check each practice:
-
-**For each SDLC practice (P1.1, C2.1, T4.1, etc.):**
-
-1. **Search for evidence** that the toolkit addresses this practice
-2. **Check VISION.md scope** to see if this practice falls in-scope or out-of-scope
-3. **Classify the gap** (see Phase 5)
-
-### Phase 5: Classify Gaps
-
-For each SDLC practice, determine its status:
-
-#### ACHIEVED
-The toolkit achieves this outcome (regardless of specific practice used).
+For each outcome in SDLC_REFERENCE.md:
 
 ```
-✅ Outcome 4.1: Code Correctness Is Verified Before Commit
-   ACHIEVED via: /verify-task, /code-verification, /phase-checkpoint
-   Evidence: Tests enforced before task completion
+ACHIEVED     → Toolkit achieves this outcome
+AVOIDED      → Out of scope per VISION.md (with citation)
+OPPORTUNITY  → In scope but not yet achieved
 ```
 
-#### INTENTIONALLY AVOIDED
-The practice is out of scope per VISION.md, with clear reasoning.
-
+**Decision Tree:**
 ```
-⊘ Outcome 6.1: Deployments Are Automated and Consistent
-   INTENTIONALLY AVOIDED
-   Reason: VISION.md states "Downstream of verification (deployment, monitoring,
-   iteration)" is out of scope. The toolkit stops at verified commits.
-
-   This is correct because: The toolkit's value is reducing supervision overhead
-   for AI coding, not replacing deployment infrastructure.
-```
-
-#### OPPORTUNITY
-The practice is in-scope (or adjacent to scope) but not yet addressed.
-
-```
-💡 Outcome 1.3: Security Risks Are Considered Early
-   OPPORTUNITY
-   Relevance: Falls within "Planning" phase which is in-scope
-   Gap: Limited security prompts during specification
-
-   Recommendation: Add security consideration questions to spec Q&A
-   (auth approach, data sensitivity, trust boundaries)
-
-   Priority: MEDIUM (improves security without adding complexity)
-   Effort: LOW (add prompts to existing skill)
-```
-
-### Classification Decision Tree
-
-```
-For each SDLC practice:
-│
-├─ Does toolkit address it?
-│  └─ YES → ADDRESSED
-│
-├─ Is it explicitly out of scope in VISION.md?
-│  └─ YES → INTENTIONALLY AVOIDED (explain why this is correct)
-│
-├─ Is it in-scope or adjacent to scope?
-│  └─ YES → OPPORTUNITY (recommend action)
-│
-└─ Ambiguous?
-   └─ Default to OPPORTUNITY with LOW priority
+Does toolkit achieve this outcome?
+├─ YES → ACHIEVED
+├─ NO → Is it out of scope per VISION.md?
+│       ├─ YES → AVOIDED (cite the scope exclusion)
+│       └─ NO → OPPORTUNITY (proceed to research)
 ```
 
 ---
 
-## Phase 6: Generate Combined Report
+## Part C: Research & Proposals (NEW)
+
+### Phase 5: Research Opportunities
+
+For each OPPORTUNITY identified, conduct research:
+
+#### 5a. Web Research (Live)
+
+Use WebSearch to find current information:
+
+```
+Search: "{outcome} best practices 2026"
+Search: "AI coding tools {outcome}"
+Search: "{specific capability} implementation patterns"
+```
+
+Extract:
+- Current industry trends
+- How leading tools approach this
+- Emerging patterns or technologies
+
+#### 5b. Competitor Analysis
+
+Check COMPETITORS.md for each opportunity:
+
+- Do any competitors address this? How?
+- What works well in their approach?
+- What can we do differently/better?
+- Does addressing this strengthen our differentiation?
+
+#### 5c. Principles Filter
+
+For each opportunity, check against VISION.md principles:
+
+```
+□ Simplicity: Does this add too much complexity?
+□ Flexibility: Does this force a workflow?
+□ 90% Rule: Do most solo developers want this?
+```
+
+If an opportunity fails the principles filter, mark it as **SKIP** with reasoning.
+
+### Phase 6: Generate Proposals
+
+For each researched opportunity that passes the principles filter, generate a proposal:
+
+```
+════════════════════════════════════════════════════════════════════
+
+PROPOSAL: {Short Title}
+─────────────────────────
+
+Outcome Addressed: {SDLC outcome ID and name}
+
+Gap: {What's missing today}
+
+Research Findings:
+  • Trend: {What current best practices say}
+  • Competitors: {How others handle this}
+  • Differentiation: {How we can do it uniquely}
+
+Proposal: {What to build/change}
+
+Rationale:
+  • Vision fit: {How this advances our aspiration}
+  • Principle alignment: {Which principles it respects}
+  • Competitive angle: {Why our approach is better}
+
+Implementation Sketch:
+  • Approach: {High-level how}
+  • Files affected: {Which skills/prompts to modify}
+  • Effort: LOW / MEDIUM / HIGH
+
+Priority: HIGH / MEDIUM / LOW
+  {Brief justification for priority}
+
+════════════════════════════════════════════════════════════════════
+```
+
+---
+
+## Phase 7: Combined Report Structure
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
@@ -169,187 +220,144 @@ For each SDLC practice:
 
 SUMMARY
 ───────
-Vision Alignment: X of Y items (🟢 N / 🟡 N / 🔴 N)
-SDLC Coverage:    X of Y outcomes achieved
+Vision Alignment:  X of Y items (🟢 N / 🟡 N / 🔴 N)
+SDLC Outcomes:     X achieved, Y avoided, Z opportunities
+Proposals:         N proposals generated (H high, M medium, L low)
 
 ════════════════════════════════════════════════════════════════════
 
 PART A: VISION ALIGNMENT
 ────────────────────────
-
-[Existing vision audit output - aspiration, principles, AI strengths/
-weaknesses, scope alignment, success criteria with R/Y/G scores]
-
-════════════════════════════════════════════════════════════════════
-
-PART B: SDLC GAP ANALYSIS
-─────────────────────────
-
-SDLC PHASE: PLAN
-────────────────
-✅ P1.1 Requirements documentation      ADDRESSED (specs, prompts)
-✅ P1.2 User story mapping              ADDRESSED (acceptance criteria)
-✅ P1.3 Technical design documents      ADDRESSED (/technical-spec)
-💡 P1.4 Threat modeling                 OPPORTUNITY (see recommendations)
-⊘ P1.5 Estimation & capacity planning  AVOIDED (out of scope: project mgmt)
-✅ P1.6 Dependency analysis             ADDRESSED (tech spec prompts)
-✅ P1.7 Definition of Done              ADDRESSED (acceptance criteria)
-⊘ P1.8 Backlog grooming                AVOIDED (out of scope: project mgmt)
-
-SDLC PHASE: CODE
-────────────────
-✅ C2.1 Version control (Git)           ADDRESSED (git workflow built-in)
-✅ C2.2 Branching strategy              ADDRESSED (phase branches)
-✅ C2.3 Code review / PR process        ADDRESSED (/codex-review)
-✅ C2.4 Coding standards                ADDRESSED (lint in verification)
-⊘ C2.5 Pair/mob programming            AVOIDED (out of scope: multi-dev)
-✅ C2.6 Documentation as code           ADDRESSED (/update-docs)
-✅ C2.7 Secrets management              ADDRESSED (/security-scan)
-✅ C2.8 AI coding assistants            ADDRESSED (this is the toolkit)
-✅ C2.9 Modular architecture            ADDRESSED (tech spec prompts)
-
-[... continue for each SDLC phase ...]
+[R/Y/G scoring for aspiration, principles, AI strengths/weaknesses,
+scope, success criteria]
 
 ════════════════════════════════════════════════════════════════════
 
-COVERAGE SUMMARY BY PHASE
-─────────────────────────
+PART B: SDLC OUTCOME COVERAGE
+─────────────────────────────
+[By-phase listing of ACHIEVED / AVOIDED / OPPORTUNITY]
 
-| Phase    | Addressed | Avoided | Opportunity | Total |
-|----------|-----------|---------|-------------|-------|
-| Plan     | 5         | 2       | 1           | 8     |
-| Code     | 8         | 1       | 0           | 9     |
-| Build    | 2         | 4       | 1           | 7     |
-| Test     | 8         | 2       | 2           | 12    |
-| Release  | 3         | 3       | 2           | 8     |
-| Deploy   | 0         | 9       | 0           | 9     |
-| Operate  | 0         | 8       | 0           | 8     |
-| Monitor  | 0         | 9       | 0           | 9     |
-| Security | 3         | 1       | 1           | 5     |
-| Quality  | 3         | 1       | 1           | 5     |
-| Collab   | 1         | 2       | 1           | 4     |
-|----------|-----------|---------|-------------|-------|
-| TOTAL    | 33        | 42      | 9           | 84    |
+[Coverage summary table]
 
-Note: High "Avoided" count in Deploy/Operate/Monitor is expected per
-VISION.md scope ("Downstream of verification is out of scope").
+════════════════════════════════════════════════════════════════════
+
+PART C: PROPOSALS
+─────────────────
+
+[For each proposal, full detail as shown in Phase 6]
+
+════════════════════════════════════════════════════════════════════
+
+SKIPPED OPPORTUNITIES
+─────────────────────
+[Opportunities that failed principles filter, with reasoning]
+
+════════════════════════════════════════════════════════════════════
+
+COMPETITIVE POSITIONING
+───────────────────────
+Summary of how proposals strengthen differentiation:
+• {Proposal 1} reinforces {unique angle}
+• {Proposal 2} addresses gap vs {competitor}
+• etc.
+
+════════════════════════════════════════════════════════════════════
+
+RECOMMENDED ROADMAP
+───────────────────
+Based on this audit, suggested implementation order:
+
+1. {HIGH priority proposal} - {one-line rationale}
+2. {HIGH priority proposal} - {one-line rationale}
+3. {MEDIUM priority proposal} - {one-line rationale}
+...
 ```
 
 ---
 
-## Phase 7: Actionable Recommendations
+## Research Guidelines
 
-For each OPPORTUNITY, provide:
+### What to Search For
 
-```
-════════════════════════════════════════════════════════════════════
+| Opportunity Type | Search Queries |
+|-----------------|----------------|
+| Security | "shift-left security AI coding 2026", "SAST tools modern development" |
+| Testing | "AI-assisted testing best practices", "test generation tools 2026" |
+| Context management | "LLM context management techniques", "AI coding context rot solutions" |
+| Workflow | "AI coding workflow automation", "spec-driven development tools" |
 
-OPPORTUNITIES (Prioritized)
-───────────────────────────
+### Competitive Questions to Answer
 
-HIGH PRIORITY
-─────────────
+For each opportunity, answer:
+1. Which competitors address this? (check COMPETITORS.md feature matrix)
+2. What's their approach? (philosophy, not just features)
+3. What works well? What doesn't?
+4. Can we achieve the outcome with less complexity?
+5. Can we leverage our unique angles (verification-first, cross-model, simplicity)?
 
-💡 T4.5 SAST (Static Application Security Testing)
-   Gap: /security-scan exists but doesn't run SAST tools
-   Recommendation: Integrate Semgrep or similar into /security-scan
-   Effort: MEDIUM
-   Impact: HIGH (catches vulnerabilities earlier)
+### Principles Filter Details
 
-   Implementation hint: Add `semgrep --config auto` to security-scan
-   workflow, similar to existing dependency scanning.
+**Simplicity over capability:**
+- Would this add a new skill? (caution)
+- Would this add significant lines to existing skills? (caution)
+- Could this be documentation instead of tooling? (prefer docs)
 
-MEDIUM PRIORITY
-───────────────
+**Flexibility over guardrails:**
+- Does this force users into a specific workflow?
+- Can users opt-out or skip this?
+- Is this additive rather than mandatory?
 
-💡 P1.4 Threat modeling
-   Gap: No security considerations in spec phase
-   Recommendation: Add security prompts to /technical-spec
-   Effort: LOW
-   Impact: MEDIUM (shift-left security)
-
-   Implementation hint: Add "Security Considerations" section to
-   TECHNICAL_SPEC_PROMPT.md asking about auth, data sensitivity, etc.
-
-💡 R5.5 Feature flags
-   Gap: No guidance on gradual rollout
-   Recommendation: Document feature flag patterns in docs/
-   Effort: LOW
-   Impact: LOW-MEDIUM (optional best practice)
-
-   Implementation hint: Add docs/feature-flags.md with patterns,
-   don't build tooling (violates simplicity principle).
-
-LOW PRIORITY
-────────────
-
-💡 Q10.1 DORA metrics
-   Gap: No metrics tracking for toolkit effectiveness
-   Recommendation: SKIP - would violate simplicity principle
-   Note: User can track externally if desired
-
-════════════════════════════════════════════════════════════════════
-
-INTENTIONALLY AVOIDED (Validation)
-──────────────────────────────────
-
-The following practices are correctly avoided per VISION.md scope:
-
-Deploy Phase (D6.1-D6.9): All avoided
-  ✓ Correct: "Downstream of verification" is out of scope
-
-Operate Phase (O7.1-O7.8): All avoided
-  ✓ Correct: "monitoring, iteration" explicitly out of scope
-
-Monitor Phase (M8.1-M8.9): All avoided
-  ✓ Correct: Same as above
-
-Multi-developer (C2.5, L11.1-L11.3): Avoided
-  ✓ Correct: "Multi-developer coordination" explicitly out of scope
-
-No misaligned "avoided" items found.
-```
-
----
-
-## Report Principles
-
-1. **Be specific** — Reference actual files, skills, and code
-2. **Justify avoidance** — Every AVOIDED item needs a VISION.md citation
-3. **Prioritize opportunities** — Don't overwhelm with low-value suggestions
-4. **Respect principles** — Don't recommend features that violate simplicity
-5. **Forward-looking** — This audit should drive roadmap, not just compliance
+**90% rule:**
+- Is this a common need for solo developers?
+- Is this enterprise/team-specific? (skip)
+- Is this niche technology-specific? (skip)
 
 ---
 
 ## Edge Cases
 
-### SDLC_REFERENCE.md Missing
+### COMPETITORS.md Missing
 
 ```
-WARNING: SDLC_REFERENCE.md not found.
+NOTE: COMPETITORS.md not found.
 
-Running vision alignment audit only (Part A).
-Create SDLC_REFERENCE.md to enable gap analysis (Part B).
+Proposals will be generated without competitive analysis.
+Consider creating COMPETITORS.md for richer proposals.
 ```
 
-### Practice Partially Addressed
-
-When a practice is partially addressed:
-- List as ADDRESSED with a note about limitations
-- OR list as OPPORTUNITY if the gap is significant
+### No Opportunities Found
 
 ```
-🔶 T4.11 Test coverage metrics
-   PARTIALLY ADDRESSED
-   Current: /verify-task checks tests exist
-   Gap: No coverage threshold enforcement
+All SDLC outcomes are either ACHIEVED or correctly AVOIDED.
 
-   Recommendation: LOW priority - coverage metrics can add noise
+No proposals generated. The toolkit is well-aligned with its vision
+and SDLC best practices.
+
+Consider:
+- Reviewing COMPETITORS.md for differentiation opportunities
+- Checking if new SDLC trends have emerged (run with fresh research)
 ```
 
-### New SDLC Practices
+### Too Many Opportunities
 
-If SDLC_REFERENCE.md has practices not covered in this skill's examples:
-- Apply the same classification logic
-- Use the decision tree to determine ADDRESSED/AVOIDED/OPPORTUNITY
+If more than 10 opportunities are identified:
+- Prioritize ruthlessly using principles filter
+- Generate full proposals only for HIGH priority items
+- Summarize MEDIUM/LOW in a list without full research
+
+### Research Rate Limits
+
+If web search is rate-limited:
+- Fall back to COMPETITORS.md analysis only
+- Note that proposals lack current trend research
+- Suggest re-running later for full analysis
+
+---
+
+## Output Principles
+
+1. **Actionable** — Each proposal should be implementable
+2. **Justified** — Every recommendation tied to vision/outcomes/competition
+3. **Honest** — If something doesn't fit our principles, say so and skip it
+4. **Prioritized** — Don't overwhelm; rank by impact and effort
+5. **Differentiated** — Proposals should strengthen our unique positioning

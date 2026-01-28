@@ -35,12 +35,13 @@ Copy this checklist and track progress:
 Update Target Projects Progress:
 - [ ] Phase 1: Discover projects with toolkit-version.json
 - [ ] Phase 1b: Check Codex CLI skill pack status
+- [ ] Phase 1c: Detect orphaned skills (removed from toolkit)
 - [ ] Phase 2: Detect activity status for each project
 - [ ] Phase 3: Check sync status (OUTDATED vs CURRENT)
-- [ ] Phase 4: Display status report
+- [ ] Phase 4: Display status report (including orphans)
 - [ ] Phase 5: User selection (what to sync)
-- [ ] Phase 6a: Sync Codex skill pack (if selected)
-- [ ] Phase 6b: Sync target projects (if selected)
+- [ ] Phase 6a: Sync Codex skill pack (if selected) — includes deletions
+- [ ] Phase 6b: Sync target projects (if selected) — includes deletions
 - [ ] Phase 7: Generate summary report
 ```
 
@@ -59,6 +60,16 @@ See [CODEX_SYNC.md](CODEX_SYNC.md) for detailed Codex sync logic.
 1. Discover skills dynamically from toolkit
 2. Classify each skill: MISSING, SYMLINK_CURRENT, COPY_OUTDATED, etc.
 3. Determine overall Codex status
+
+### Phase 1c: Detect Orphaned Skills
+
+Identify skills that exist in targets but have been removed from toolkit:
+
+1. Compare installed skills against current toolkit skills
+2. Mark as ORPHANED if skill directory no longer exists in toolkit
+3. Check if orphaned skills have local modifications
+
+See [CODEX_SYNC.md](CODEX_SYNC.md) and [PROJECT_SYNC.md](PROJECT_SYNC.md) for orphan detection logic.
 
 ### Phase 2-3: Activity and Sync Status
 
@@ -109,13 +120,18 @@ SYNC COMPLETE
 
 Codex CLI Skill Pack:
   Skills updated:  3
-  Already current: 13
+  Skills deleted:  1 (orphaned)
+  Already current: 12
 
 Target Projects:
   Projects processed: 4
     Synced:  2
     Skipped: 1 (active)
     Current: 1
+  Skills deleted: 1 (orphaned)
+
+Deleted Skills (removed from toolkit):
+  - multi-model-verify
 
 All synced items are now at toolkit commit abc1234
 ```

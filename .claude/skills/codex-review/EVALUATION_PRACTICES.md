@@ -1,10 +1,10 @@
 # Evaluation Best Practices
 
-For reliable multi-model verification, follow these patterns.
+For reliable cross-model verification, follow these patterns.
 
 ## Rubric-First Approach
 
-Define clear evaluation criteria in the prompt before asking for verification. The prompt template uses structured categories (Completeness, Correctness, Clarity, Best Practices) as a rubric.
+Define clear evaluation criteria in the prompt before asking for review. The prompt template uses structured categories (Correctness, Best Practices, Consistency, Documentation, Potential Issues) as a rubric.
 
 ## Severity Classification
 
@@ -41,12 +41,16 @@ When Claude and Codex disagree, follow these guidelines:
 
 **When in doubt:** Present disagreements to the user with context from both models. The goal is catching blind spots, not achieving false consensus.
 
-## Portability Note
+## Status Mapping
 
-This skill uses the `.claude/skills/` directory structure with `allowed-tools` in YAML frontmatter, which is a convention in this toolkit.
+| Codex Status | Meaning | Checkpoint Action |
+|--------------|---------|-------------------|
+| `pass` | No issues found | Continue, note in report |
+| `pass_with_notes` | Minor recommendations only | Show recommendations, continue |
+| `needs_attention` | Critical issues found | Show issues, ask user how to proceed |
+| `skipped` | Codex unavailable | Note unavailable, continue |
+| `error` | Codex failed | Note error, continue |
 
-For reference, official Claude Code documentation describes:
-- Custom slash commands in `.claude/commands/`
-- Subagents in `.claude/agents/` with `tools` field
+## Advisory Nature
 
-See [Anthropic's slash commands documentation](https://docs.anthropic.com/en/docs/claude-code/slash-commands) for the official format.
+Codex findings are **advisory** — they do not auto-block workflows. The user decides whether to address findings or accept them as noted risks. This prevents false positives from blocking legitimate work.

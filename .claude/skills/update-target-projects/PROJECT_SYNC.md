@@ -73,21 +73,82 @@ For each selected project:
 [1/3] ~/Projects/my-app
       Checking files...
       Copying skills...
+      Removing orphaned skills...
       Updating toolkit-version.json...
-      Done (5 files updated)
+      Done (5 files updated, 1 deleted)
 ```
 
 **Sync Logic (for each project):**
 
 1. Change working context to target project
-2. For each skill in the sync list, compare hashes:
+2. **Detect orphaned skills** — skills in target that no longer exist in toolkit
+3. For each skill in the sync list, compare hashes:
    - If toolkit hash = target hash: skip (current)
    - If target missing: copy from toolkit (new)
    - If target = last-synced hash: copy from toolkit (clean update)
    - If target differs from last-synced: report conflict (ask user)
-3. Update `toolkit-version.json` with new commit and hashes
+4. **Delete orphaned skills** (with user confirmation if locally modified)
+5. Update `toolkit-version.json` with new commit, hashes, and removed skills
 
 **Skills to sync:** All skills from `.claude/skills/` are synced dynamically.
+
+## Orphan Detection
+
+Detect skills in target project that no longer exist in toolkit:
+
+```bash
+find_orphaned_project_skills() {
+  local project_path="$1"
+  local target_skills_dir="$project_path/.claude/skills"
+  local orphans=()
+
+  # List skills in target project
+  for skill in $(ls -1 "$target_skills_dir" 2>/dev/null | grep -v "^\\."); do
+    # Check if skill exists in toolkit
+    if [[ ! -d "$TOOLKIT_SKILLS_DIR/$skill" ]]; then
+      orphans+=("$skill")
+    fi
+  done
+  echo "${orphans[@]}"
+}
+```
+
+**Orphan handling:**
+
+| Scenario | Action |
+|----------|--------|
+| Orphaned, no local changes | Delete automatically |
+| Orphaned, has local changes | Prompt: delete / keep / backup |
+| Not from this toolkit | Skip (may be project-specific) |
+
+```bash
+delete_orphaned_project_skill() {
+  local project_path="$1"
+  local skill_name="$2"
+  local skill_path="$project_path/.claude/skills/$skill_name"
+
+  # Check for local modifications (compare against last-synced hash)
+  local last_synced_hash=$(jq -r ".skills[\"$skill_name\"].hash // empty" \
+    "$project_path/.claude/toolkit-version.json" 2>/dev/null)
+
+  if [[ -z "$last_synced_hash" ]]; then
+    # Not tracked — might be project-specific, skip
+    echo "SKIPPED"
+    return
+  fi
+
+  local current_hash=$(find "$skill_path" -type f -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1)
+
+  if [[ "$current_hash" == "$last_synced_hash" ]]; then
+    # No local changes, safe to delete
+    rm -rf "$skill_path"
+    echo "DELETED"
+  else
+    # Has local changes — prompt user
+    echo "MODIFIED"
+  fi
+}
+```
 
 ## Active Project Handling
 

@@ -143,7 +143,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 
 | Command | Description |
 |---------|-------------|
-| `/vision-audit` | Audit vision alignment AND compare against SDLC best practices |
+| `/vision-audit` | Audit vision alignment, research trends, generate feature proposals |
 
 ### Execution Commands (run from your project directory)
 
@@ -158,8 +158,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/verify-task X.Y.Z` | Verify specific task acceptance criteria |
 | `/criteria-audit` | Validate acceptance criteria metadata |
 | `/security-scan` | Run security checks (deps, secrets, code) |
-| `/multi-model-verify` | Cross-model verification using Codex CLI |
-| `/codex-review` | Have Codex review current branch with doc research |
+| `/codex-review` | Cross-model review using Codex CLI with doc research |
 | `/progress` | Show progress through execution plan |
 | `/list-todos` | Analyze and prioritize TODO items |
 | `/run-todos` | Implement [ready]-tagged TODO items with commits |

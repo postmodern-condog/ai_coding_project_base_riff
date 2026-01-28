@@ -58,9 +58,9 @@ Guidelines:
 
 The toolkit supports cross-model verification using OpenAI Codex CLI:
 
-- `/multi-model-verify` — Reusable building block for Codex verification
-- `/codex-review` — Review current branch with documentation research
-- `/phase-checkpoint` — Automatically invokes Codex review when available
+- `/codex-review` — Review current branch with documentation research. Supports
+  `--upstream`, `--research`, `--base`, and `--model` flags.
+- `/phase-checkpoint` — Automatically invokes `/codex-review` when Codex is available
 
 When Codex CLI is installed and authenticated, phase checkpoints include a second-opinion
 review. Codex researches current documentation before reviewing, catching issues where

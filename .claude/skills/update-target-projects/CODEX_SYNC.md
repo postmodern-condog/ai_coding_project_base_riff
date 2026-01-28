@@ -7,14 +7,17 @@ CODEX_SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills"
 TOOLKIT_SKILLS_DIR="$(pwd)/.claude/skills"
 
 # Dynamically discover all skills from toolkit directory
-CODEX_SKILLS=($(ls -1 "$TOOLKIT_SKILLS_DIR" | grep -v "^\\."))
+TOOLKIT_SKILLS=($(ls -1 "$TOOLKIT_SKILLS_DIR" | grep -v "^\\."))
+
+# Discover all skills currently installed in Codex directory
+CODEX_INSTALLED=($(ls -1 "$CODEX_SKILLS_DIR" 2>/dev/null | grep -v "^\\."))
 ```
 
-**Note:** Skills are discovered dynamically from the toolkit's `.claude/skills/` directory.
+**Note:** Skills are discovered dynamically from both toolkit and Codex directories.
 
 ## Status Classification
 
-For each skill, determine its status:
+For each skill in toolkit, determine its status:
 
 ```bash
 check_codex_skill() {
@@ -49,6 +52,37 @@ check_codex_skill() {
 | `COPY_CURRENT` | Copy, content matches | No action needed |
 | `COPY_OUTDATED` | Copy, content differs | Offer to update |
 
+## Orphan Detection
+
+Detect skills in Codex that no longer exist in toolkit:
+
+```bash
+find_orphaned_skills() {
+  local orphans=()
+  for skill in "${CODEX_INSTALLED[@]}"; do
+    if [[ ! -d "$TOOLKIT_SKILLS_DIR/$skill" ]]; then
+      # Check if it's a symlink to this toolkit (now broken/orphaned)
+      if [[ -L "$CODEX_SKILLS_DIR/$skill" ]]; then
+        local target=$(readlink "$CODEX_SKILLS_DIR/$skill")
+        if [[ "$target" == *"/.claude/skills/$skill" ]]; then
+          orphans+=("$skill")
+        fi
+      # Or if it was copied from this toolkit (check for toolkit marker)
+      elif [[ -f "$CODEX_SKILLS_DIR/$skill/.toolkit-source" ]]; then
+        orphans+=("$skill")
+      fi
+    fi
+  done
+  echo "${orphans[@]}"
+}
+```
+
+| Orphan Type | Description | Default Action |
+|-------------|-------------|----------------|
+| Broken symlink | Points to deleted toolkit skill | Delete |
+| Copied with marker | Has `.toolkit-source` file | Prompt user |
+| Unknown origin | No toolkit marker | Skip (not ours) |
+
 ## Sync Logic
 
 ```bash
@@ -62,6 +96,8 @@ sync_codex_skill() {
     MISSING|COPY_OUTDATED)
       rm -rf "$codex_path" 2>/dev/null || true
       cp -R "$toolkit_path" "$codex_path"
+      # Mark as toolkit-managed for orphan detection
+      echo "$TOOLKIT_PATH" > "$codex_path/.toolkit-source"
       echo "UPDATED"
       ;;
     SYMLINK_CURRENT|COPY_CURRENT)
@@ -72,6 +108,14 @@ sync_codex_skill() {
       ;;
   esac
 }
+
+delete_orphaned_skill() {
+  local skill_name="$1"
+  local codex_path="$CODEX_SKILLS_DIR/$skill_name"
+
+  rm -rf "$codex_path"
+  echo "DELETED"
+}
 ```
 
 ## Status Display
@@ -80,19 +124,30 @@ sync_codex_skill() {
 CODEX CLI SKILL PACK
 ────────────────────
 Location: ~/.codex/skills
-Status:   OUTDATED (3 skills need updating)
+Status:   OUTDATED (3 skills need updating, 1 orphaned)
 
   Skill                  Status
   ──────────────────────────────────────
   fresh-start            SYMLINK_CURRENT
   phase-start            COPY_OUTDATED    ← needs update
   verify-task            MISSING          ← needs install
+  multi-model-verify     ORPHANED         ← removed from toolkit
 ```
 
 **If all symlinks:**
 ```
 Status: CURRENT (all symlinks - auto-updating)
 All {N} skills are symlinked to this toolkit. No sync needed.
+```
+
+**If orphaned skills found:**
+```
+ORPHANED SKILLS (removed from toolkit)
+──────────────────────────────────────
+The following skills no longer exist in the toolkit:
+  - multi-model-verify
+
+These will be deleted during sync.
 ```
 
 **If not installed:**

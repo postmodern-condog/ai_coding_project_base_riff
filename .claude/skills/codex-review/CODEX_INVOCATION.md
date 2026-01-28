@@ -1,12 +1,16 @@
 # Codex CLI Invocation
 
-Detailed instructions for invoking Codex CLI for verification.
+Detailed instructions for invoking Codex CLI for review.
 
 ## Build Command
 
 ```bash
 # Create output file path
-OUTPUT_FILE="/tmp/codex-verify-output-$(date +%s).txt"
+OUTPUT_FILE="/tmp/codex-review-output-$(date +%s).txt"
+
+# Read config
+CODEX_MODEL=$(jq -r '.multiModelVerify.codexModel // empty' .claude/settings.local.json 2>/dev/null)
+TIMEOUT_MINS=$(jq -r '.multiModelVerify.timeoutMinutes // 10' .claude/settings.local.json 2>/dev/null || echo "10")
 
 # Build model flag if configured
 MODEL_FLAG=""
