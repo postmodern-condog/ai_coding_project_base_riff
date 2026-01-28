@@ -6,11 +6,15 @@ allowed-tools: Read, Glob, Grep, Bash
 
 # Vision Audit
 
-Evaluate how well the current toolkit aligns with VISION.md principles, scope, and success criteria.
+Evaluate toolkit alignment with VISION.md **and** compare against modern SDLC outcomes.
+
+This audit is both backward-looking (are we following our stated vision?) and forward-looking (are we achieving the outcomes that modern SDLC requires, or intentionally avoiding them?).
+
+**Key principle:** Focus on *outcomes*, not practices or tools. "Code is verified before commit" is an outcome—whether via local tests, preview deployments, or AI verification is a tactical choice that can evolve.
 
 ## Scope
 
-This skill is **toolkit-specific**. It audits the AI Coding Toolkit repository against its own VISION.md. It is not synced to target projects.
+This skill is **toolkit-specific**. It audits the AI Coding Toolkit repository against its own VISION.md and SDLC_REFERENCE.md. It is not synced to target projects.
 
 ## Trigger
 
@@ -18,13 +22,10 @@ Manual only. Run `/vision-audit` when you want to check alignment.
 
 ## Prerequisites
 
-VISION.md must exist in the repository root. If missing, exit with error:
+- **VISION.md** must exist in the repository root
+- **SDLC_REFERENCE.md** must exist in the repository root
 
-```
-ERROR: VISION.md not found.
-
-This skill requires a VISION.md document to audit against.
-```
+If either is missing, exit with error and suggest creating them.
 
 ---
 
@@ -34,144 +35,132 @@ This skill requires a VISION.md document to audit against.
 Vision Audit Progress:
 - [ ] Phase 1: Parse VISION.md sections
 - [ ] Phase 2: Gather evidence from codebase
-- [ ] Phase 3: Evaluate alignment for each item
-- [ ] Phase 4: Generate report with summary
-- [ ] Phase 5: Provide actionable suggestions
+- [ ] Phase 3: Evaluate vision alignment (R/Y/G scoring)
+- [ ] Phase 4: Compare against SDLC_REFERENCE.md
+- [ ] Phase 5: Classify gaps (ADDRESSED / AVOIDED / OPPORTUNITY)
+- [ ] Phase 6: Generate combined report
+- [ ] Phase 7: Provide actionable recommendations
 ```
 
 ---
 
-## Phase 1: Parse VISION.md
+## Part A: Vision Alignment Audit
 
-Read VISION.md and extract auditable items from each section:
+### Phase 1: Parse VISION.md
 
-### Sections to Extract
+Read VISION.md and extract auditable items:
 
 | Section | What to Extract |
 |---------|-----------------|
 | **Problem** | Context only (not scored) |
 | **Aspiration** | Core goal to measure against |
 | **Principles** | Each numbered principle (priority order) |
-| **AI Strengths** | Each bullet under "Lean on these strengths" |
-| **AI Weaknesses** | Each bullet under "Guard against these weaknesses" |
+| **AI Strengths** | Items under "Lean on these strengths" |
+| **AI Weaknesses** | Items under "Guard against these weaknesses" |
 | **Scope - In** | What should be present |
-| **Scope - Out** | What should NOT be present |
+| **Scope - Out** | What should NOT be present (used for SDLC gap classification) |
 | **Success** | Each success criterion |
 
-### Expected Structure
+### Phase 2: Gather Evidence
 
-```markdown
-## Problem
-[context]
-
-## Aspiration
-[main goal]
-
-## Principles
-1. **Name** — Description
-2. **Name** — Description
-...
-
-## AI Strengths and Weaknesses
-**Lean on these strengths:**
-- Item
-- Item
-
-**Guard against these weaknesses:**
-- Item
-- Item
-
-## Scope
-**In scope:** ...
-**Out of scope:**
-- Item
-- Item
-
-## Success
-- Criterion
-- Criterion
-```
-
----
-
-## Phase 2: Gather Evidence
-
-Scan the codebase to gather evidence for evaluation:
-
-### Evidence Sources
+Scan the codebase for evidence:
 
 | Source | What to Look For |
 |--------|------------------|
 | `.claude/skills/` | Skill complexity, count, patterns |
-| `.claude/commands/` | Legacy commands, complexity |
+| `.claude/commands/` | Legacy commands |
 | `README.md` | Feature claims, workflow descriptions |
 | `AGENTS.md` | Workflow rules, guardrails |
-| `docs/` | Documentation depth and coverage |
+| `docs/` | Documentation coverage |
 | `*.md` prompts | Spec/plan generation patterns |
-| Git history | Recent changes, commit patterns |
 
-### Evidence Gathering Commands
+### Phase 3: Evaluate Vision Alignment
 
-```bash
-# Count skills and their sizes
-find .claude/skills -name "SKILL.md" | wc -l
-wc -l .claude/skills/*/SKILL.md
+For each extracted vision item, assign a score:
 
-# Check for complexity indicators
-grep -r "MUST\|REQUIRED\|mandatory" .claude/skills/
+| Score | Meaning | Criteria |
+|-------|---------|----------|
+| 🟢 Green | Aligned | Clear evidence, no contradictions |
+| 🟡 Yellow | Partial | Some evidence, incomplete or mixed |
+| 🔴 Red | Misaligned | Contradicting evidence or violation |
 
-# Review README size and structure
-wc -l README.md
+---
 
-# Check for scope creep indicators
-grep -ri "deploy\|monitor\|CI/CD\|multi-user" .claude/
+## Part B: SDLC Gap Analysis
+
+### Phase 4: Compare Against SDLC Reference
+
+Read SDLC_REFERENCE.md and check each practice:
+
+**For each SDLC practice (P1.1, C2.1, T4.1, etc.):**
+
+1. **Search for evidence** that the toolkit addresses this practice
+2. **Check VISION.md scope** to see if this practice falls in-scope or out-of-scope
+3. **Classify the gap** (see Phase 5)
+
+### Phase 5: Classify Gaps
+
+For each SDLC practice, determine its status:
+
+#### ACHIEVED
+The toolkit achieves this outcome (regardless of specific practice used).
+
+```
+✅ Outcome 4.1: Code Correctness Is Verified Before Commit
+   ACHIEVED via: /verify-task, /code-verification, /phase-checkpoint
+   Evidence: Tests enforced before task completion
+```
+
+#### INTENTIONALLY AVOIDED
+The practice is out of scope per VISION.md, with clear reasoning.
+
+```
+⊘ Outcome 6.1: Deployments Are Automated and Consistent
+   INTENTIONALLY AVOIDED
+   Reason: VISION.md states "Downstream of verification (deployment, monitoring,
+   iteration)" is out of scope. The toolkit stops at verified commits.
+
+   This is correct because: The toolkit's value is reducing supervision overhead
+   for AI coding, not replacing deployment infrastructure.
+```
+
+#### OPPORTUNITY
+The practice is in-scope (or adjacent to scope) but not yet addressed.
+
+```
+💡 Outcome 1.3: Security Risks Are Considered Early
+   OPPORTUNITY
+   Relevance: Falls within "Planning" phase which is in-scope
+   Gap: Limited security prompts during specification
+
+   Recommendation: Add security consideration questions to spec Q&A
+   (auth approach, data sensitivity, trust boundaries)
+
+   Priority: MEDIUM (improves security without adding complexity)
+   Effort: LOW (add prompts to existing skill)
+```
+
+### Classification Decision Tree
+
+```
+For each SDLC practice:
+│
+├─ Does toolkit address it?
+│  └─ YES → ADDRESSED
+│
+├─ Is it explicitly out of scope in VISION.md?
+│  └─ YES → INTENTIONALLY AVOIDED (explain why this is correct)
+│
+├─ Is it in-scope or adjacent to scope?
+│  └─ YES → OPPORTUNITY (recommend action)
+│
+└─ Ambiguous?
+   └─ Default to OPPORTUNITY with LOW priority
 ```
 
 ---
 
-## Phase 3: Evaluate Alignment
-
-For each extracted item, assign a traffic-light score based on evidence:
-
-### Scoring Criteria
-
-| Score | Meaning | Criteria |
-|-------|---------|----------|
-| 🟢 Green | Aligned | Clear evidence of alignment, no contradictions |
-| 🟡 Yellow | Partial | Some evidence, but incomplete or mixed signals |
-| 🔴 Red | Misaligned | Contradicting evidence, or clear violation |
-
-### Evaluation Guidelines
-
-**Principles:**
-- **Simplicity over capability**: Are skills concise? Is README under 500 lines? Few mandatory steps?
-- **Flexibility over guardrails**: Are workflows optional? Can users skip steps? No forced patterns?
-- **90% rule**: Are features broadly useful? No niche enterprise features?
-
-**AI Strengths (are we leveraging?):**
-- Explicit instructions → AGENTS.md exists, skills have clear steps
-- Rigorous testing → Verification skills exist, TDD enforced
-- Clear specifications → Spec prompts produce structured output
-- Bounded tasks → Tasks have acceptance criteria, phases are scoped
-
-**AI Weakness Guards (are we protecting?):**
-- Context loss → State files exist, `/fresh-start` loads context
-- Scope creep → Phases enforce boundaries, specs capture scope
-- Inconsistent quality → Verification at checkpoints
-- Stuck loops → Escalation paths documented, stuck detection exists
-
-**Scope:**
-- In-scope: Spec → Plan → Execute → Verify chain exists
-- Out-of-scope: No deployment tools, no monitoring, no multi-dev coordination
-
-**Success Criteria:**
-- Evaluate whether each criterion is achievable with current toolkit
-
----
-
-## Phase 4: Generate Report
-
-Output a terminal report with this structure:
+## Phase 6: Generate Combined Report
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
@@ -180,151 +169,187 @@ Output a terminal report with this structure:
 
 SUMMARY
 ───────
-Overall: X of Y items aligned
-
-  🟢 Green:  N items
-  🟡 Yellow: N items
-  🔴 Red:    N items
+Vision Alignment: X of Y items (🟢 N / 🟡 N / 🔴 N)
+SDLC Coverage:    X of Y outcomes achieved
 
 ════════════════════════════════════════════════════════════════════
 
-ASPIRATION
-──────────
-"Reduce the overhead of supervising AI coding to near-zero."
+PART A: VISION ALIGNMENT
+────────────────────────
 
-🟢 ALIGNED
-   Evidence: Verification is automated, state persists across sessions,
-   phase workflow minimizes manual intervention.
+[Existing vision audit output - aspiration, principles, AI strengths/
+weaknesses, scope alignment, success criteria with R/Y/G scores]
 
 ════════════════════════════════════════════════════════════════════
 
-PRINCIPLES
-──────────
-
-1. Simplicity over capability
-   🟡 PARTIAL
-   Evidence: Most skills are focused, but README is 425 lines (above
-   300 ideal). Some skills have complex multi-phase workflows.
-
-2. Flexibility over guardrails
-   🟢 ALIGNED
-   Evidence: All phase commands are optional. Users can skip verification.
-   No mandatory workflows.
-
-3. 90% rule
-   🟢 ALIGNED
-   Evidence: Features target solo developers. No enterprise-specific
-   tooling (RBAC, audit logs, etc.).
-
-════════════════════════════════════════════════════════════════════
-
-AI STRENGTHS (Leveraging)
+PART B: SDLC GAP ANALYSIS
 ─────────────────────────
 
-✓ Following explicit instructions
-  🟢 AGENTS.md provides clear workflow rules. Skills have step-by-step phases.
-
-✓ Rigorous testing when enforced
-  🟢 /phase-checkpoint runs verification. TDD enforcement exists.
-
-[... continue for each strength ...]
-
-════════════════════════════════════════════════════════════════════
-
-AI WEAKNESS GUARDS (Protecting)
-───────────────────────────────
-
-✓ Context and progress loss
-  🟢 /fresh-start loads context. Phase state persists in files.
-
-✓ Scope creep
-  🟡 Phases enforce boundaries, but no automatic scope-creep detection.
-
-[... continue for each weakness ...]
-
-════════════════════════════════════════════════════════════════════
-
-SCOPE ALIGNMENT
-───────────────
-
-In-scope items:
-  🟢 Specification → /product-spec, /technical-spec exist
-  🟢 Planning → /generate-plan exists
-  🟢 Execution → /phase-start exists
-  🟢 Verification → /phase-checkpoint, /verify-task exist
-
-Out-of-scope (should NOT exist):
-  🟢 No deployment tools found
-  🟢 No monitoring tools found
-  🟢 No multi-developer coordination
-
-════════════════════════════════════════════════════════════════════
-
-SUCCESS CRITERIA
+SDLC PHASE: PLAN
 ────────────────
+✅ P1.1 Requirements documentation      ADDRESSED (specs, prompts)
+✅ P1.2 User story mapping              ADDRESSED (acceptance criteria)
+✅ P1.3 Technical design documents      ADDRESSED (/technical-spec)
+💡 P1.4 Threat modeling                 OPPORTUNITY (see recommendations)
+⊘ P1.5 Estimation & capacity planning  AVOIDED (out of scope: project mgmt)
+✅ P1.6 Dependency analysis             ADDRESSED (tech spec prompts)
+✅ P1.7 Definition of Done              ADDRESSED (acceptance criteria)
+⊘ P1.8 Backlog grooming                AVOIDED (out of scope: project mgmt)
 
-1. "Developer can run full workflow and end up with verified code..."
-   🟢 ACHIEVABLE — Full command chain exists and is documented.
+SDLC PHASE: CODE
+────────────────
+✅ C2.1 Version control (Git)           ADDRESSED (git workflow built-in)
+✅ C2.2 Branching strategy              ADDRESSED (phase branches)
+✅ C2.3 Code review / PR process        ADDRESSED (/codex-review)
+✅ C2.4 Coding standards                ADDRESSED (lint in verification)
+⊘ C2.5 Pair/mob programming            AVOIDED (out of scope: multi-dev)
+✅ C2.6 Documentation as code           ADDRESSED (/update-docs)
+✅ C2.7 Secrets management              ADDRESSED (/security-scan)
+✅ C2.8 AI coding assistants            ADDRESSED (this is the toolkit)
+✅ C2.9 Modular architecture            ADDRESSED (tech spec prompts)
 
-2. "Time-to-completion drops because supervision overhead is minimal"
-   🟡 PARTIAL — Automation exists but some manual steps remain.
+[... continue for each SDLC phase ...]
 
-[... continue for each criterion ...]
+════════════════════════════════════════════════════════════════════
+
+COVERAGE SUMMARY BY PHASE
+─────────────────────────
+
+| Phase    | Addressed | Avoided | Opportunity | Total |
+|----------|-----------|---------|-------------|-------|
+| Plan     | 5         | 2       | 1           | 8     |
+| Code     | 8         | 1       | 0           | 9     |
+| Build    | 2         | 4       | 1           | 7     |
+| Test     | 8         | 2       | 2           | 12    |
+| Release  | 3         | 3       | 2           | 8     |
+| Deploy   | 0         | 9       | 0           | 9     |
+| Operate  | 0         | 8       | 0           | 8     |
+| Monitor  | 0         | 9       | 0           | 9     |
+| Security | 3         | 1       | 1           | 5     |
+| Quality  | 3         | 1       | 1           | 5     |
+| Collab   | 1         | 2       | 1           | 4     |
+|----------|-----------|---------|-------------|-------|
+| TOTAL    | 33        | 42      | 9           | 84    |
+
+Note: High "Avoided" count in Deploy/Operate/Monitor is expected per
+VISION.md scope ("Downstream of verification is out of scope").
 ```
 
 ---
 
-## Phase 5: Actionable Suggestions
+## Phase 7: Actionable Recommendations
 
-For each Yellow or Red item, provide specific suggestions:
+For each OPPORTUNITY, provide:
 
 ```
 ════════════════════════════════════════════════════════════════════
 
-SUGGESTIONS FOR IMPROVEMENT
+OPPORTUNITIES (Prioritized)
 ───────────────────────────
 
-🟡 Simplicity over capability
-   → Consider migrating README sections to docs/ (currently 425 lines)
-   → Review /update-docs skill for potential simplification
+HIGH PRIORITY
+─────────────
 
-🟡 Scope creep protection
-   → Add scope-drift detection to /phase-checkpoint
-   → Consider warning when tasks exceed original spec boundaries
+💡 T4.5 SAST (Static Application Security Testing)
+   Gap: /security-scan exists but doesn't run SAST tools
+   Recommendation: Integrate Semgrep or similar into /security-scan
+   Effort: MEDIUM
+   Impact: HIGH (catches vulnerabilities earlier)
 
-🟡 Time-to-completion
-   → Document expected time savings vs manual coding
-   → Add metrics collection for supervision time (optional)
+   Implementation hint: Add `semgrep --config auto` to security-scan
+   workflow, similar to existing dependency scanning.
+
+MEDIUM PRIORITY
+───────────────
+
+💡 P1.4 Threat modeling
+   Gap: No security considerations in spec phase
+   Recommendation: Add security prompts to /technical-spec
+   Effort: LOW
+   Impact: MEDIUM (shift-left security)
+
+   Implementation hint: Add "Security Considerations" section to
+   TECHNICAL_SPEC_PROMPT.md asking about auth, data sensitivity, etc.
+
+💡 R5.5 Feature flags
+   Gap: No guidance on gradual rollout
+   Recommendation: Document feature flag patterns in docs/
+   Effort: LOW
+   Impact: LOW-MEDIUM (optional best practice)
+
+   Implementation hint: Add docs/feature-flags.md with patterns,
+   don't build tooling (violates simplicity principle).
+
+LOW PRIORITY
+────────────
+
+💡 Q10.1 DORA metrics
+   Gap: No metrics tracking for toolkit effectiveness
+   Recommendation: SKIP - would violate simplicity principle
+   Note: User can track externally if desired
+
+════════════════════════════════════════════════════════════════════
+
+INTENTIONALLY AVOIDED (Validation)
+──────────────────────────────────
+
+The following practices are correctly avoided per VISION.md scope:
+
+Deploy Phase (D6.1-D6.9): All avoided
+  ✓ Correct: "Downstream of verification" is out of scope
+
+Operate Phase (O7.1-O7.8): All avoided
+  ✓ Correct: "monitoring, iteration" explicitly out of scope
+
+Monitor Phase (M8.1-M8.9): All avoided
+  ✓ Correct: Same as above
+
+Multi-developer (C2.5, L11.1-L11.3): Avoided
+  ✓ Correct: "Multi-developer coordination" explicitly out of scope
+
+No misaligned "avoided" items found.
 ```
 
-### Suggestion Guidelines
+---
 
-- Be specific and actionable
-- Reference specific files or skills when relevant
-- Prioritize high-impact, low-effort improvements
-- Don't suggest changes that violate other principles (e.g., don't add complexity to fix scope creep)
+## Report Principles
+
+1. **Be specific** — Reference actual files, skills, and code
+2. **Justify avoidance** — Every AVOIDED item needs a VISION.md citation
+3. **Prioritize opportunities** — Don't overwhelm with low-value suggestions
+4. **Respect principles** — Don't recommend features that violate simplicity
+5. **Forward-looking** — This audit should drive roadmap, not just compliance
 
 ---
 
 ## Edge Cases
 
-### VISION.md Has Non-Standard Structure
+### SDLC_REFERENCE.md Missing
 
-If VISION.md doesn't match expected structure:
-- Extract what sections exist
-- Note which sections are missing
-- Audit only the sections present
-- Suggest adding missing sections if they would be valuable
+```
+WARNING: SDLC_REFERENCE.md not found.
 
-### Ambiguous Evidence
+Running vision alignment audit only (Part A).
+Create SDLC_REFERENCE.md to enable gap analysis (Part B).
+```
 
-When evidence is unclear:
-- Default to Yellow (partial alignment)
-- Note the ambiguity in the evidence section
-- Suggest clarifying the vision statement or adding explicit indicators
+### Practice Partially Addressed
 
-### New Principles Added
+When a practice is partially addressed:
+- List as ADDRESSED with a note about limitations
+- OR list as OPPORTUNITY if the gap is significant
 
-If VISION.md has additional sections not covered above:
-- Attempt to evaluate them using the same R/Y/G criteria
-- Note them as "Additional Principles" in the report
+```
+🔶 T4.11 Test coverage metrics
+   PARTIALLY ADDRESSED
+   Current: /verify-task checks tests exist
+   Gap: No coverage threshold enforcement
+
+   Recommendation: LOW priority - coverage metrics can add noise
+```
+
+### New SDLC Practices
+
+If SDLC_REFERENCE.md has practices not covered in this skill's examples:
+- Apply the same classification logic
+- Use the decision tree to determine ADDRESSED/AVOIDED/OPPORTUNITY

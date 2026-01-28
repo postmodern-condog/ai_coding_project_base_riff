@@ -143,7 +143,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 
 | Command | Description |
 |---------|-------------|
-| `/vision-audit` | Compare VISION.md against current toolkit state with R/Y/G scoring |
+| `/vision-audit` | Audit vision alignment AND compare against SDLC best practices |
 
 ### Execution Commands (run from your project directory)
 
