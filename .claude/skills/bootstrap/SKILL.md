@@ -150,6 +150,27 @@ If CLAUDE.md doesn't reference AGENTS.md, add:
 @AGENTS.md
 ```
 
+### Step 9b: Cross-Model Review (Automatic)
+
+After creating documents, run cross-model review if Codex CLI is available:
+
+1. Check if Codex CLI is installed: `codex --version`
+2. If available, run `/codex-review` on the generated documents
+3. Present any findings to the user before proceeding
+
+**Review invocation:**
+```
+/codex-review --research "{detected technologies from codebase scan}" PROJECT_ROOT/features/FEATURE_NAME/EXECUTION_PLAN.md
+```
+
+**If Codex finds issues:**
+- Show critical issues and recommendations
+- Ask user: "Address findings before proceeding?" (Yes/No)
+- If Yes: Apply suggested fixes
+- If No: Continue with noted issues
+
+**If Codex unavailable:** Skip silently and proceed to Step 10.
+
 ### Step 10: Clean Up and Report
 
 If bootstrap-context.md was used, offer to delete it.
@@ -163,6 +184,8 @@ Location: PROJECT_ROOT/features/FEATURE_NAME/
 Files created:
 - FEATURE_SPEC.md
 - EXECUTION_PLAN.md — {N} phases, {M} tasks
+
+Cross-Model Review: PASSED | PASSED WITH NOTES | SKIPPED
 
 Next steps:
 1. Review: cat PROJECT_ROOT/features/FEATURE_NAME/FEATURE_SPEC.md

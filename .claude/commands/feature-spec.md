@@ -135,12 +135,34 @@ After collecting answers, append to `PROJECT_ROOT/DEFERRED.md` right away.
 
 After capturing (or skipping), continue the spec Q&A where you left off.
 
+## Cross-Model Review (Automatic)
+
+After writing FEATURE_SPEC.md, run cross-model review if Codex CLI is available:
+
+1. Check if Codex CLI is installed: `codex --version`
+2. If available, run `/codex-review` on the generated document
+3. Present any findings to the user before proceeding
+
+**Review invocation:**
+```
+/codex-review --research "feature requirements, user stories" $1/FEATURE_SPEC.md
+```
+
+**If Codex finds issues:**
+- Show critical issues and recommendations
+- Ask user: "Address findings before proceeding?" (Yes/No)
+- If Yes: Apply suggested fixes
+- If No: Continue with noted issues
+
+**If Codex unavailable:** Skip silently and proceed to Next Step.
+
 ## Next Step
 
 When complete, inform the user:
 ```
 FEATURE_SPEC.md created at $1/FEATURE_SPEC.md
 Deferred Requirements: {count} items captured to PROJECT_ROOT/DEFERRED.md
+Cross-Model Review: PASSED | PASSED WITH NOTES | SKIPPED
 
 Next: Run /feature-technical-spec $1
 ```

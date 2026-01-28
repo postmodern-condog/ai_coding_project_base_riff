@@ -168,6 +168,27 @@ Run `/criteria-audit $1` to validate verification metadata in EXECUTION_PLAN.md.
 - If FAIL: stop and ask the user to resolve missing metadata before proceeding.
 - If WARN: report and continue.
 
+## Cross-Model Review (Automatic)
+
+After verification passes, run cross-model review if Codex CLI is available:
+
+1. Check if Codex CLI is installed: `codex --version`
+2. If available, run `/codex-review` with upstream context
+3. Present any findings to the user before proceeding
+
+**Review invocation:**
+```
+/codex-review --upstream $1/TECHNICAL_SPEC.md --research "execution planning, task breakdown" $1/EXECUTION_PLAN.md
+```
+
+**If Codex finds issues:**
+- Show critical issues and recommendations
+- Ask user: "Address findings before proceeding?" (Yes/No)
+- If Yes: Apply suggested fixes
+- If No: Continue with noted issues
+
+**If Codex unavailable:** Skip silently and proceed to Next Step.
+
 ## Next Step
 
 When verification is complete, inform the user:
@@ -175,6 +196,7 @@ When verification is complete, inform the user:
 EXECUTION_PLAN.md and AGENTS.md created and verified at $1
 
 Verification: PASSED | PASSED WITH NOTES | NEEDS REVIEW
+Cross-Model Review: PASSED | PASSED WITH NOTES | SKIPPED
 
 Your project is ready for execution:
 1. cd $1
