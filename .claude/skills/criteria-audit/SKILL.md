@@ -10,11 +10,14 @@ use the verification metadata format.
 
 ## Workflow Overview
 
+Copy this checklist and track progress:
+
 ```
-1. Read EXECUTION_PLAN.md
-2. Parse phases, tasks, and acceptance criteria
-3. Validate verification metadata
-4. Report issues and summarize
+Criteria Audit Progress:
+- [ ] Step 1: Read EXECUTION_PLAN.md
+- [ ] Step 2: Parse phases, tasks, and acceptance criteria
+- [ ] Step 3: Validate verification metadata
+- [ ] Step 4: Report issues and summarize
 ```
 
 ## Step 1: Parse Acceptance Criteria

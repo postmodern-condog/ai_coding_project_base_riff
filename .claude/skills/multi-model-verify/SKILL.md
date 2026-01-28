@@ -229,97 +229,17 @@ Be specific. Reference line numbers or section names. Prioritize by impact.
 
 ## Step 4: Invoke Codex
 
-Build the command with configuration:
+See [CODEX_INVOCATION.md](CODEX_INVOCATION.md) for detailed command building and result parsing.
 
-```bash
-# Create output file path
-OUTPUT_FILE="/tmp/codex-verify-output-$(date +%s).txt"
-
-# Build model flag if configured
-MODEL_FLAG=""
-if [ -n "$CODEX_MODEL" ]; then
-  MODEL_FLAG="--model $CODEX_MODEL"
-fi
-
-# Execute with timeout
-timeout $((TIMEOUT_MINS * 60)) bash -c "cat {prompt_file} | codex exec \
-  --sandbox danger-full-access \
-  -c 'approval_policy=\"never\"' \
-  -c 'features.search=true' \
-  $MODEL_FLAG \
-  -o $OUTPUT_FILE \
-  -"
-EXIT_CODE=$?
-
-# Handle exit codes
-if [ $EXIT_CODE -eq 124 ]; then
-  # Timeout - return partial output if available
-  CODEX_STATUS="error"
-  CODEX_REASON="Timeout after ${TIMEOUT_MINS} minutes"
-elif [ $EXIT_CODE -ne 0 ]; then
-  # Error - log and return error status
-  CODEX_STATUS="error"
-  CODEX_REASON="Codex exited with code $EXIT_CODE"
-fi
-
-# Read output
-if [ -f "$OUTPUT_FILE" ]; then
-  CODEX_OUTPUT=$(cat "$OUTPUT_FILE")
-  rm -f "$OUTPUT_FILE"
-else
-  CODEX_STATUS="error"
-  CODEX_REASON="No output file produced"
-fi
-```
-
-**Flags explained:**
-- `--sandbox danger-full-access`: Enables network access for documentation research
-- `-c 'approval_policy="never"'`: Non-interactive execution
-- `-c 'features.search=true'`: Enable web search for documentation research
-- `--model`: Optional, use configured model or Codex default
-- `-o $OUTPUT_FILE`: Write final response to file for parsing
-- `-`: Read prompt from stdin
-
-**Important:** Do NOT use `2>&1` — Codex streams progress to stderr and final output to stdout. Merging them corrupts the parseable response.
-
-**Timeout:** Use configured timeout (default: 10 minutes). Codex may need time to research.
-
-**Handle failures:**
-- If Codex times out: Return partial output if available
-- If Codex errors: Log error, return `status: error`
-- If output is malformed: Attempt best-effort parsing
+Key points:
+- Use `codex exec` with `--sandbox danger-full-access` for network access
+- Enable search with `-c 'features.search=true'`
+- Do NOT merge stderr/stdout (`2>&1` corrupts output)
+- Default timeout: 10 minutes
 
 ## Step 5: Parse Results
 
-Extract structured findings from Codex output:
-
-```json
-{
-  "status": "pass | pass_with_notes | needs_attention | error | skipped",
-  "critical_issues": [
-    {
-      "description": "string",
-      "location": "string (file:line or section name)",
-      "suggestion": "string"
-    }
-  ],
-  "recommendations": [
-    {
-      "description": "string",
-      "location": "string",
-      "suggestion": "string"
-    }
-  ],
-  "positive_findings": ["string"],
-  "context_preservation": {
-    "checked": true | false,
-    "items_checked": 0,
-    "all_preserved": true | false,
-    "missing_items": ["string"]
-  },
-  "raw_output": "string (full Codex response for debugging)"
-}
-```
+Parse output into structured findings with status, critical issues, recommendations, and context preservation check. See [CODEX_INVOCATION.md](CODEX_INVOCATION.md) for JSON schema.
 
 ## Step 6: Return to Caller
 
@@ -446,54 +366,11 @@ Return structured JSON for programmatic handling.
 
 ## Evaluation Best Practices
 
-For reliable multi-model verification, follow these patterns:
-
-### Rubric-First Approach
-
-Define clear evaluation criteria in the prompt before asking for verification. The prompt template in Step 3 uses structured categories (Completeness, Correctness, Clarity, Best Practices) as a rubric.
-
-### Severity Classification
-
-Use consistent severity levels:
-- **CRITICAL**: Blocks progress, must be addressed
-- **RECOMMENDATION**: Should be considered, doesn't block
-- **POSITIVE**: Reinforces good patterns
-
-This aligns with [OpenAI's evaluation best practices](https://platform.openai.com/docs/guides/evaluation-best-practices) for LLM-as-judge patterns.
-
-### Handling Model Disagreement
-
-When Claude and Codex disagree, follow these guidelines:
-
-| Scenario | Action |
-|----------|--------|
-| **Both agree: PASS** | High confidence, proceed |
-| **Both agree: NEEDS_ATTENTION** | High confidence, address issues |
-| **Claude: PASS, Codex: NEEDS_ATTENTION** | Review Codex's specific findings — it may have researched current docs |
-| **Claude: NEEDS_ATTENTION, Codex: PASS** | Trust Claude's context awareness, but note the disagreement |
-| **Conflicting critical issues** | Present both perspectives to user for decision |
-
-**Disagreement signals:**
-- If models disagree on >50% of findings, flag for human review
-- If one model finds critical issues the other missed, always surface them
-- Never silently discard findings from either model
-
-**Resolution strategies:**
-1. **Union approach** (default): Surface all unique findings from both models
-2. **Intersection approach**: Only flag issues both models identified (higher precision, lower recall)
-3. **Weighted approach**: Weight findings by model strength (e.g., Codex for current docs, Claude for context)
-
-**When in doubt:** Present disagreements to the user with context from both models. The goal is catching blind spots, not achieving false consensus.
-
-## Portability Note
-
-This skill uses the `.claude/skills/` directory structure with `allowed-tools` in YAML frontmatter, which is a convention in this toolkit.
-
-For reference, official Claude Code documentation describes:
-- Custom slash commands in `.claude/commands/`
-- Subagents in `.claude/agents/` with `tools` field
-
-See [Anthropic's slash commands documentation](https://docs.anthropic.com/en/docs/claude-code/slash-commands) for the official format.
+See [EVALUATION_PRACTICES.md](EVALUATION_PRACTICES.md) for:
+- Rubric-first approach for reliable evaluation
+- Severity classification (CRITICAL, RECOMMENDATION, POSITIVE)
+- Handling model disagreement (union vs intersection approach)
+- Resolution strategies when Claude and Codex conflict
 
 ## Example Invocations
 

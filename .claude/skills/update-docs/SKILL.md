@@ -220,89 +220,13 @@ If routing requires a docs/ file that doesn't exist:
 
 ## Phase 4: Migrate Bloated README Sections
 
-If Phase 1 audit found README sections that should be in docs/:
+If Phase 1 audit found README sections that should be in docs/, migrate them.
 
-### 4.1 Identify Migration Candidates
-
-Look for these patterns in README:
-
-```markdown
-## Commands Reference
-## Command Reference
-## Commands
-## CLI Reference
-→ Migrate to: docs/commands.md
-
-## File Structure
-## Project Structure
-## Directory Structure
-→ Migrate to: docs/file-structure.md
-
-## Configuration
-## Config
-## Settings
-## Options
-→ Migrate to: docs/configuration.md
-
-## API Reference
-## API
-## Endpoints
-→ Migrate to: docs/api.md
-```
-
-### 4.2 Migration Process
-
-For each section to migrate:
-
-1. **Extract** the section content from README
-2. **Create** the target docs/ file (if doesn't exist)
-3. **Move** the content to docs/ file
-4. **Replace** the README section with a link:
-
-**Before (README.md):**
-```markdown
-## Commands Reference
-
-| Command | Description |
-|---------|-------------|
-| /foo | Does foo |
-| /bar | Does bar |
-... (50 more rows)
-```
-
-**After (README.md):**
-```markdown
-## Documentation
-
-See [Commands Reference](docs/commands.md) for the full list of available commands.
-```
-
-**Created (docs/commands.md):**
-```markdown
-# Commands Reference
-
-| Command | Description |
-|---------|-------------|
-| /foo | Does foo |
-| /bar | Does bar |
-... (50 more rows)
-```
-
-### 4.3 Ask Before Large Migrations
-
-If migration would move > 100 lines:
-
-```
-README.md has a large "Commands Reference" section (156 lines).
-
-Best practice: Move detailed reference content to docs/commands.md
-and keep README as a concise landing page.
-
-Migrate now?
-[Y] Yes, migrate to docs/commands.md
-[n] No, keep in README
-[v] View content to migrate
-```
+See [MIGRATION.md](MIGRATION.md) for:
+- Section patterns to look for (Commands, Configuration, API, etc.)
+- Step-by-step migration process
+- Before/after examples
+- Confirmation prompts for large migrations
 
 ---
 
@@ -449,30 +373,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 ## Configuration (Optional)
 
-Projects can customize via `.claude/doc-sync-config.json`:
+Projects can customize via `.claude/doc-sync-config.json`. See [CONFIGURATION.md](CONFIGURATION.md) for full schema.
 
-```json
-{
-  "readme": {
-    "maxLines": 300,
-    "maxCommandsInTable": 10,
-    "sectionsToMigrate": ["Commands", "Configuration", "API"]
-  },
-  "routing": {
-    "commands": "docs/commands.md",
-    "configuration": "docs/configuration.md",
-    "api": "docs/api.md",
-    "fileStructure": "docs/file-structure.md"
-  },
-  "changelog": {
-    "enabled": true,
-    "format": "keepachangelog"
-  },
-  "autoMigrate": false
-}
-```
-
-If `autoMigrate: true`, migrations happen without asking.
+Key options:
+- `readme.maxLines`: Warn threshold (default: 300)
+- `routing.*`: Customize target docs/ files
+- `autoMigrate`: If true, migrations happen without asking
 
 ---
 

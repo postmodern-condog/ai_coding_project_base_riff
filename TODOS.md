@@ -103,6 +103,7 @@
 - **`/bootstrap`**: Quick planning bypass — skip `/product-spec` + `/technical-spec` when you have clear requirements already. Creates EXECUTION_PLAN.md directly from description/context.
 - **Overlap resolution**: Merge `/bootstrap` functionality into `/quick-feat`. Single command handles both simple features (inline plan) and larger features (multi-phase plan without full specs). Deprecate `/bootstrap` after merge.
 - **New TODO needed**: Create `/adopt` command for importing existing projects into toolkit workflow
+- [ ] **[P2 / Low]** Improve vercel-preview skill description — Change from vague "Resolve Vercel preview deployment URL" to clearer "Resolve Vercel preview URL with wait/fallback logic. Invoked by browser-verification for E2E testing." (audit finding D3)
 - [ ] Compare web vs CLI interface for generation workflow (see below)
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues) — **DEFERRED** (nice-to-have, not core workflow)
 - [ ] Intro commands for each Step — **DEFERRED** (unclear requirements, needs more thought)

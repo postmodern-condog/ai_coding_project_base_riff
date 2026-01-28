@@ -139,6 +139,12 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/gh-init [path]` | Initialize git repo with smart .gitignore and optional GitHub remote |
 | `/install-hooks [path]` | Install git hooks (pre-push doc sync check) |
 
+### Toolkit Maintenance (run from toolkit directory, not synced to projects)
+
+| Command | Description |
+|---------|-------------|
+| `/vision-audit` | Compare VISION.md against current toolkit state with R/Y/G scoring |
+
 ### Execution Commands (run from your project directory)
 
 | Command | Description |
