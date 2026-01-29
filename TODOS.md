@@ -2,6 +2,12 @@
 
 ## In Progress
 
+- [ ] **[P1 / Medium]** Clarify Supabase migration workflow — always apply locally first, test locally, avoid resetting the local DB
+  - Root cause: `supabase db push` targets the linked remote by default when `supabase/.temp/project-ref` exists; it is not a local-only command.
+  - Fix workflow: local testing uses `supabase start` + `supabase migration up` (not `db push`).
+  - Safety guard: add a wrapper/script that blocks `db push` unless `ALLOW_SUPABASE_REMOTE=1` or a `--db-url` is provided.
+  - Docs change: update agent instructions to explicitly say "local = `supabase migration up`; remote = `supabase db push --linked` only when intended," and call out the link file behavior.
+
 - [ ] **[P2 / Medium]** Re-implement Vercel preview URL support in auto-verify —
   The deployment/preview URL resolution was removed from `/auto-verify` because it
   wasn't working reliably. Need to:
