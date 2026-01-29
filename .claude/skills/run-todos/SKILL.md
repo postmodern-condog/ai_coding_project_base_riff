@@ -128,6 +128,10 @@ git add -A && git diff --cached --quiet || git commit -m "wip: uncommitted chang
 git checkout -b todo-impl-$(date +%Y-%m-%d)
 ```
 
+**Verify branch creation:** Run `git branch --show-current` and confirm it matches
+`todo-impl-{date}`. If the checkout failed (e.g., branch already exists), append
+a suffix: `todo-impl-{date}-2`.
+
 ## Implementation Loop
 
 For each selected item:
@@ -190,6 +194,10 @@ Use the Edit tool to make this update.
 git add -A
 git commit -m "todo: {item title (shortened if needed)}"
 ```
+
+**Verify commit succeeded:** Check exit code of `git commit`. If it fails (e.g.,
+pre-commit hook rejection), fix the issue and create a new commit — do NOT use
+`--amend`.
 
 Get the commit hash for the TODOS.md update:
 ```bash

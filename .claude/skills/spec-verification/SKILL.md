@@ -257,7 +257,8 @@ For each collected resolution:
 1. **Read the target document**
 2. **Locate the problematic text** (use exact match from issue)
 3. **Apply the fix** using Edit tool
-4. **For upstream document changes**: Require explicit confirmation before editing
+4. **Verify the edit** — Re-read the edited section to confirm the change was applied correctly. If the Edit tool reported no match or the content is unchanged, retry with corrected `old_string`.
+5. **For upstream document changes**: Require explicit confirmation before editing
 
 ### Fix Application Rules
 

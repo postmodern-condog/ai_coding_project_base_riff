@@ -57,6 +57,13 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    Copy verification config (if missing):
    - `.claude/verification-config.json` → target's `.claude/verification-config.json`
 
+   **Verify copies:** After copying, confirm the target has the expected files:
+   ```bash
+   # Count skill directories in target to verify copy succeeded
+   ls -d "$1/.claude/skills/"*/ 2>/dev/null | wc -l
+   ```
+   If the count is 0 or the directory doesn't exist, STOP and report the copy failure.
+
 3a. **Incremental Sync (When SETUP_MODE=incremental)**
 
    Skip Step 3 entirely and use this incremental approach instead:
