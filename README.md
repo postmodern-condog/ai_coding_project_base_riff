@@ -271,10 +271,12 @@ codex login
 **Configuration** (`.claude/settings.local.json`):
 ```json
 {
-  "multiModelVerify": {
+  "codexReview": {
     "enabled": true,
-    "codexModel": "o3",
-    "timeoutMinutes": 10
+    "codeModel": "gpt-5.2-codex",
+    "researchModel": "gpt-5.2",
+    "reviewTimeoutMinutes": 10,
+    "taskTimeoutMinutes": 60
   }
 }
 ```
@@ -303,8 +305,9 @@ You can have Codex CLI execute tasks while Claude Code orchestrates:
 **Configuration** (`.claude/settings.local.json`):
 ```json
 {
-  "multiModelVerify": {
-    "codexModel": "o3",
+  "codexReview": {
+    "codeModel": "gpt-5.2-codex",
+    "researchModel": "gpt-5.2",
     "taskTimeoutMinutes": 60
   }
 }

@@ -208,7 +208,7 @@ After verification passes, run cross-model review if Codex CLI is available:
 
 **Review invocation:**
 ```
-/codex-review --upstream $1/FEATURE_SPEC.md --research "{detected technologies from codebase}" $1/FEATURE_TECHNICAL_SPEC.md
+/codex-review --mode research --upstream $1/FEATURE_SPEC.md --research "{detected technologies from codebase}" $1/FEATURE_TECHNICAL_SPEC.md
 ```
 
 **If Codex finds issues:**

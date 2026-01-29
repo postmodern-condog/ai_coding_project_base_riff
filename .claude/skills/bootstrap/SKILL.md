@@ -160,7 +160,7 @@ After creating documents, run cross-model review if Codex CLI is available:
 
 **Review invocation:**
 ```
-/codex-review --research "{detected technologies from codebase scan}" PROJECT_ROOT/features/FEATURE_NAME/EXECUTION_PLAN.md
+/codex-review --mode research --research "{detected technologies from codebase scan}" PROJECT_ROOT/features/FEATURE_NAME/EXECUTION_PLAN.md
 ```
 
 **If Codex finds issues:**

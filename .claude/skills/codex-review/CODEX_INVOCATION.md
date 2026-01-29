@@ -8,9 +8,10 @@ Detailed instructions for invoking Codex CLI for review.
 # Create output file path
 OUTPUT_FILE="/tmp/codex-review-output-$(date +%s).txt"
 
-# Read config
-CODEX_MODEL=$(jq -r '.multiModelVerify.codexModel // empty' .claude/settings.local.json 2>/dev/null)
-TIMEOUT_MINS=$(jq -r '.multiModelVerify.timeoutMinutes // 10' .claude/settings.local.json 2>/dev/null || echo "10")
+# Read config (model selection handled by SKILL.md Step 1)
+CODEX_MODEL=$(jq -r '.codexReview.codeModel // empty' .claude/settings.local.json 2>/dev/null)
+RESEARCH_MODEL=$(jq -r '.codexReview.researchModel // empty' .claude/settings.local.json 2>/dev/null)
+TIMEOUT_MINS=$(jq -r '.codexReview.reviewTimeoutMinutes // 10' .claude/settings.local.json 2>/dev/null || echo "10")
 
 # Build model flag if configured
 MODEL_FLAG=""

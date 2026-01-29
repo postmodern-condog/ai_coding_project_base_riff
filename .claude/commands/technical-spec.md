@@ -135,7 +135,7 @@ After verification passes, run cross-model review if Codex CLI is available:
 
 **Review invocation:**
 ```
-/codex-review --upstream $1/PRODUCT_SPEC.md --research "{detected technologies}" $1/TECHNICAL_SPEC.md
+/codex-review --mode research --upstream $1/PRODUCT_SPEC.md --research "{detected technologies}" $1/TECHNICAL_SPEC.md
 ```
 
 **If Codex finds issues:**

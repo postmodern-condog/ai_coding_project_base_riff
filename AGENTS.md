@@ -69,9 +69,10 @@ training data may differ between models.
 **Configuration** (`.claude/settings.local.json`):
 ```json
 {
-  "multiModelVerify": {
+  "codexReview": {
     "enabled": true,
-    "codexModel": "o3"
+    "codeModel": "gpt-5.2-codex",
+    "researchModel": "gpt-5.2"
   }
 }
 ```

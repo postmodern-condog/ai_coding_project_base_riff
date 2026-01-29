@@ -145,7 +145,7 @@ After writing FEATURE_SPEC.md, run cross-model review if Codex CLI is available:
 
 **Review invocation:**
 ```
-/codex-review --research "feature requirements, user stories" $1/FEATURE_SPEC.md
+/codex-review --mode research --research "feature requirements, user stories" $1/FEATURE_SPEC.md
 ```
 
 **If Codex finds issues:**

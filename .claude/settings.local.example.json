@@ -13,5 +13,12 @@
       "Bash(lsof:*)",
       "Bash(timeout 15 npm run dev:*)"
     ]
+  },
+  "codexReview": {
+    "enabled": true,
+    "codeModel": "gpt-5.2-codex",
+    "researchModel": "gpt-5.2",
+    "reviewTimeoutMinutes": 10,
+    "taskTimeoutMinutes": 60
   }
 }

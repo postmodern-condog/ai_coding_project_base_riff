@@ -57,14 +57,14 @@ Read `.claude/verification-config.json` from PROJECT_ROOT. If missing or incompl
 Read `.claude/settings.local.json` for cross-model review config:
 ```json
 {
-  "multiModelVerify": {
+  "codexReview": {
     "enabled": true,
     "triggerOn": ["phase-checkpoint"]
   }
 }
 ```
 
-If `multiModelVerify` is not configured, default to `enabled: true` when Codex CLI is available.
+If `codexReview` is not configured, default to `enabled: true` when Codex CLI is available.
 
 ## Step 3: Local Verification (Must Pass First)
 
@@ -107,8 +107,8 @@ For external integrations, follow [DOCS_PROTOCOL.md](DOCS_PROTOCOL.md) to fetch 
 
 This step runs if ALL of these conditions are true:
 - Codex CLI is available (`codex --version` succeeds)
-- `multiModelVerify.enabled` is true (or not configured, defaulting to true)
-- `"phase-checkpoint"` is in `multiModelVerify.triggerOn` (or not configured)
+- `codexReview.enabled` is true (or not configured, defaulting to true)
+- `"phase-checkpoint"` is in `codexReview.triggerOn` (or not configured)
 
 ### Execution
 
@@ -163,7 +163,7 @@ Cross-Model Review (Codex):
 Skip this step (mark as SKIPPED) if:
 - Running inside Codex CLI (`$CODEX_SANDBOX` is set) — `/codex-review` detects this automatically
 - Codex CLI not installed
-- `multiModelVerify.enabled` is explicitly false
+- `codexReview.enabled` is explicitly false
 - Phase has fewer than 3 tasks (trivial phase)
 - `--skip-codex` flag passed to checkpoint
 

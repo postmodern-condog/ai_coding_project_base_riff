@@ -194,7 +194,7 @@ After verification passes, run cross-model review if Codex CLI is available:
 
 **Review invocation:**
 ```
-/codex-review --upstream $1/FEATURE_TECHNICAL_SPEC.md --research "execution planning, task breakdown" $1/EXECUTION_PLAN.md
+/codex-review --mode research --upstream $1/FEATURE_TECHNICAL_SPEC.md --research "execution planning, task breakdown" $1/EXECUTION_PLAN.md
 ```
 
 **If Codex finds issues:**

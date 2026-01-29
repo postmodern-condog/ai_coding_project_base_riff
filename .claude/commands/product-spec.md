@@ -125,7 +125,7 @@ After writing PRODUCT_SPEC.md, run cross-model review if Codex CLI is available:
 
 **Review invocation:**
 ```
-/codex-review --research "product requirements, user stories" $1/PRODUCT_SPEC.md
+/codex-review --mode research --research "product requirements, user stories" $1/PRODUCT_SPEC.md
 ```
 
 **If Codex finds issues:**
