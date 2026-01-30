@@ -1,7 +1,7 @@
 ---
 name: list-todos
 description: Analyze and prioritize TODO items from TODOS.md. Use when planning work or deciding what to implement next.
-allowed-tools: Read, Glob, Grep, AskUserQuestion, Edit, WebSearch, WebFetch
+allowed-tools: Read, Glob, Grep, AskUserQuestion, Edit
 ---
 
 Analyze the TODO items in TODOS.md and produce a prioritized list with implementation guidance.
@@ -22,10 +22,9 @@ List TODOs Progress:
 - [ ] Step 3: Extract TODO items
 - [ ] Step 4: Analyze each item
 - [ ] Step 5: Sort by priority score
-- [ ] Step 6: Research & Suggest (MEDIUM+ clarity items)
-- [ ] Step 7: Output prioritized list
-- [ ] Step 8: Interactive Q&A (if items need clarification)
-- [ ] Step 9: Update TODOS.md with clarifications
+- [ ] Step 6: Output prioritized list
+- [ ] Step 7: Interactive Q&A (if items need clarification)
+- [ ] Step 8: Update TODOS.md with clarifications
 ```
 
 1. **Read TODOS.md** from the project root
@@ -37,8 +36,7 @@ List TODOs Progress:
 3. **Extract TODO items** — Parse all actionable items from TODOS.md
 4. **Analyze each item** using the framework below
 5. **Sort by priority score** (highest first), break ties by value to project
-6. **Research & Suggest** — For the top 5 eligible items (MEDIUM+ clarity, not completed/deferred/removed), perform web research and generate actionable suggestions. See [SUGGESTIONS_WORKFLOW.md](SUGGESTIONS_WORKFLOW.md) for the full protocol.
-7. **Output the prioritized list**
+6. **Output the prioritized list**
 
 ## Analysis Framework
 
@@ -109,15 +107,6 @@ Adjust score based on:
 **Implementation Notes:**
 {2-4 sentences on how to implement: key files to modify, approach, dependencies, estimated scope}
 
-**Suggestions:**
-{Only for researched items with MEDIUM+ clarity. Omit this section entirely for LOW clarity or non-researched items.}
-- **Approach:** {implementation approach from research}
-- **Tools:** {specific tools/libraries with versions}
-- **Pattern:** {architecture/design pattern recommendation}
-- **Watch out:** {risks, gotchas, common pitfalls}
-- **Reference:** {URL to relevant documentation}
-{Include only categories with actual findings. If researched but nothing found: "No actionable suggestions found from research."}
-
 **Open Questions:**
 - {Question that would improve requirements clarity}
 - {Another question, if applicable}
@@ -168,16 +157,15 @@ Adjust score based on:
 
 ## Summary
 
-| Priority | Item | Score | Multiplier | Suggestions | Next Action |
-|----------|------|-------|------------|-------------|-------------|
-| 1 | {title} | {N}/10 | {×N or —} | {count or —} | {action} |
-| 2 | {title} | {N}/10 | {×N or —} | {count or —} | {action} |
-| ... | ... | ... | ... | ... | ... |
+| Priority | Item | Score | Multiplier | Next Action |
+|----------|------|-------|------------|-------------|
+| 1 | {title} | {N}/10 | {×N or —} | {action} |
+| 2 | {title} | {N}/10 | {×N or —} | {action} |
+| ... | ... | ... | ... | ... |
 
 **Ready to implement:** {count}
 **Needs clarification:** {count}
 **Consider deferring:** {count}
-**Items researched:** {N} of {M} eligible
 ```
 
 ## Error Handling
@@ -223,15 +211,14 @@ Adjust score based on:
 
 ## Interactive Q&A Phase
 
-After displaying the prioritized list and summary, offer the user an interactive session to clarify requirements.
+After displaying the prioritized list and summary, use `AskUserQuestion` to offer the user an interactive session to clarify requirements. **All user interactions in this phase MUST use the `AskUserQuestion` tool** — never ask questions via plain text output.
 
 See [QA_WORKFLOW.md](QA_WORKFLOW.md) for the detailed Q&A workflow:
-1. Choose action (Clarify / Review suggestions / Done)
+1. Choose action (Clarify an item / Done)
 2. Select item to clarify
 3. Summarize current state
 4. Ask open questions one at a time
 5. Update TODOS.md with clarifications
 6. Summarize understanding
 7. Check implementation readiness
-8. Review suggestions (accept/reject research findings)
-9. Continue or exit
+8. Continue or exit

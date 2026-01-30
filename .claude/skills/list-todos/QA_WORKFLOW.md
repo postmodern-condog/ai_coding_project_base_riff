@@ -1,6 +1,8 @@
 # Interactive Q&A Workflow
 
-After displaying the prioritized list and summary, offer the user an interactive session to clarify requirements or review research suggestions.
+After displaying the prioritized list and summary, offer the user an interactive session to clarify requirements.
+
+**IMPORTANT:** Every question to the user in this workflow MUST use the `AskUserQuestion` tool. Never ask questions via plain text output.
 
 ## Step 1: Choose Action
 
@@ -12,17 +14,14 @@ Header: "Q&A Mode"
 Options:
   - Label: "Clarify an item"
     Description: "Ask questions about a specific item to improve its requirements"
-  - Label: "Review suggestions"
-    Description: "Discuss and accept/reject research suggestions for items"
   - Label: "I'm done"
     Description: "Exit without further changes"
 ```
 
 - **"Clarify an item"** → proceed to Step 2 (Select Item to Clarify)
-- **"Review suggestions"** → proceed to Step 8 (Review Suggestions)
 - **"I'm done"** → go to Exit Summary
 
-After completing either a clarification round or a suggestions review round, return to this Step 1 prompt.
+After completing a clarification round, return to this Step 1 prompt.
 
 ## Step 2: Select Item to Clarify
 
@@ -167,62 +166,6 @@ Options:
 **If "No, I'm done for now":**
 - Go to Exit Summary
 
-## Step 8: Review Suggestions
-
-When the user selects "Review suggestions" from Step 1:
-
-### 8a: Select Item with Suggestions
-
-Show items that have research suggestions (up to 4 per prompt):
-
-```
-Question: "Which item's suggestions would you like to review?"
-Header: "Suggestions"
-Options:
-  - Label: "1. {item title}"
-    Description: "{N} suggestions"
-  - Label: "2. {item title}"
-    Description: "{N} suggestions"
-  - Label: "3. {item title}"
-    Description: "{N} suggestions"
-  - Label: "4. {item title}"
-    Description: "{N} suggestions"
-```
-
-If no items have suggestions, inform the user and return to Step 1.
-
-### 8b: Review Each Suggestion
-
-For the selected item, present each suggestion one at a time:
-
-```
-Question: "Add this suggestion to TODOS.md?"
-Header: "{Item title}"
-Options:
-  - Label: "Yes, add"
-    Description: "{first 80 chars of the suggestion text}"
-  - Label: "Skip this one"
-    Description: "Don't add to TODOS.md"
-```
-
-Output the full suggestion text before asking, so the user can read it in context.
-
-### 8c: Write Accepted Suggestions
-
-After reviewing all suggestions for the item, append accepted suggestions to the item in TODOS.md:
-
-```markdown
-**Suggestions (from research {date}):**
-- {Accepted suggestion 1}
-- {Accepted suggestion 2}
-```
-
-Use the Edit tool to add this section. If no suggestions were accepted, skip the write.
-
-### 8d: Return to Main Prompt
-
-After completing the suggestion review for one item, return to Step 1 (unified action prompt).
-
 ## Exit Summary
 
 When exiting Q&A mode, output:
@@ -231,8 +174,7 @@ When exiting Q&A mode, output:
 ## Q&A Session Complete
 
 **Items clarified:** {count}
-**Suggestions accepted:** {count}
-{List of items that were clarified or had suggestions accepted, with brief summary of decisions made}
+{List of items that were clarified, with brief summary of decisions made}
 
 TODOS.md has been updated with the changes above.
 ```

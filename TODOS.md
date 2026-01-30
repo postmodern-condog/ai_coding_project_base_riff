@@ -2,23 +2,44 @@
 
 ## In Progress
 
-- [ ] **[P1 / Medium]** Clarify Supabase migration workflow — always apply locally first, test locally, avoid resetting the local DB
+- [ ] **[P1 / Medium]** Clarify Supabase migration workflow — always apply locally first, test locally, avoid resetting the local DB — **DEFERRED** (revisit when actively working on a Supabase project)
   - Root cause: `supabase db push` targets the linked remote by default when `supabase/.temp/project-ref` exists; it is not a local-only command.
   - Fix workflow: local testing uses `supabase start` + `supabase migration up` (not `db push`).
   - Safety guard: add a wrapper/script that blocks `db push` unless `ALLOW_SUPABASE_REMOTE=1` or a `--db-url` is provided.
   - Docs change: update agent instructions to explicitly say "local = `supabase migration up`; remote = `supabase db push --linked` only when intended," and call out the link file behavior.
 
-- [ ] **[P2 / Medium]** Re-implement Vercel preview URL support in auto-verify —
+- [ ] **[P2 / Medium]** Re-implement deployment preview URL support in auto-verify (Vercel + Netlify) —
   The deployment/preview URL resolution was removed from `/auto-verify` because it
   wasn't working reliably. Need to:
   1. Investigate why `/vercel-preview` wasn't resolving URLs correctly
-  2. Design a reliable preview URL resolution mechanism
-  3. Add back deployment config with proper integration to `/vercel-preview`
-  4. Test the full flow: deploy → get preview URL → use in verification
+  2. Design a reliable preview URL resolution mechanism that supports both Vercel and Netlify
+  3. Rename `/vercel-preview` → `/deployment-preview` (single generic skill, clean break — no alias)
+  4. Add back deployment config with proper integration to `/deployment-preview`
+  5. Test the full flow: deploy → get preview URL → use in verification
+
+**Clarifications (from Q&A 2026-01-29):**
+- **Skill design**: Single generic `/deployment-preview` skill replaces `/vercel-preview`. Remove old skill entirely, update all references in browser-verification and other skills that invoke it.
+- **Providers**: Vercel + Netlify only (two providers sufficient for now).
+- **Netlify resolution**: Use Netlify CLI (`netlify api listSiteDeploys` or `netlify deploy --json`) to get preview URLs. Requires Netlify CLI installed.
+- **Provider detection**: Auto-detect from project files (`vercel.json` / `.vercel/` → Vercel, `netlify.toml` / `.netlify/` → Netlify). Falls back to `verification-config.json` if no markers found.
+- **Config structure** in `verification-config.json`:
+  ```json
+  {
+    "deployment": {
+      "enabled": true,
+      "provider": "auto",
+      "useForBrowserVerification": true,
+      "fallbackToLocal": true,
+      "waitForDeployment": true,
+      "deploymentTimeout": 300
+    }
+  }
+  ```
+- **Implementation scope**: Rename skill + directory, add Netlify provider logic alongside existing Vercel logic, update browser-verification references, update README/docs references.
 
 - [x] **[P0 / High]** Deep audit of automation verification — ensure all components needed for human-free verification are present (see below) — DONE (84292a8)
 - [ ] **[P0 / High x0.5]** Make workflow portable across CLIs/models without breaking Claude Code "clone-and-go" sharing — **DEFERRED** (requirements unclear, revisit when specific target CLIs are identified)
-- [ ] **[P1 / Medium]** Verification logging and manual intervention analysis (see below)
+- [x] **[P1 / Medium]** Verification logging and manual intervention analysis (see below) — REMOVED (covered by /analyze-sessions)
 - [ ] **[P1 / Medium]** Add optional path arguments to execution commands to reduce wrong-directory friction
 - [ ] **[P1 / Medium]** Fix nested `.claude/` directories shadowing parent commands — When a
   subdirectory has `.claude/` for local settings (e.g.,
@@ -27,7 +48,7 @@
   document the workaround (`ln -s ../../.claude/commands .claude/commands`)
 - [x] Persistent learnings/patterns file for cross-task context (see below) — DONE
 - [x] **[P1 / Medium]** Add `/capture-learning` command for simple learnings capture (see below) — DONE
-- [ ] **[P2 / Low]** Add `/quick-feat` command for very simple features (see below)
+
 - [x] **[P1 / Medium]** Enhance `/phase-prep` to show human prep for future phases (clarified, see below) — DONE
 - [ ] **[P1 / Medium x2]** Prompt user to enable `--dangerously-skip-permissions` before `/phase-start` (see below) — REMOVED (no clean way to detect permission mode at runtime)
 - [x] **[P1 / Medium x2]** Auto-advance steps without human intervention (see below) — DONE
@@ -43,9 +64,7 @@
 - **Trigger condition**: Only when `.claude/skills/` files change — check git diff before running
 - **Commands to run**: Just `/update-target-projects` — Codex skills are symlinks (auto-update)
 - **Scope**: Toolkit repo only — hook lives in ai_coding_project_base, syncs to target projects
-- [ ] **[P2 / Low x1.5]** Investigate the need for `/bootstrap` and `/adopt` —
-  What do these commands enable? Are they redundant or do they serve distinct use
-  cases? Clarify their purpose and whether both are needed.
+
 - [x] **[P2 / Medium]** [ready] Add OAuth support to `/configure-verification` and
   examples — Currently auth configuration only supports email/password via env vars.
   Need to handle OAuth flows (particularly Google OAuth) which require browser
@@ -104,12 +123,25 @@
 - **Existing projects**: Skip gracefully — if no REQ-ID exists for a task, omit [REQ-XXX] from commit message
 - [x] **[P0 / High x2]** Attempt automation before manual fallback — Add logic to attempt verification with available tools (curl, browser MCP, file inspection) before falling back to manual (see audit below) — DONE
 
-**Clarifications (from Q&A 2026-01-22):**
-- **`/adopt`**: Does not exist yet. Intended for importing existing non-toolkit projects into the workflow. Add as separate TODO.
-- **`/bootstrap`**: Quick planning bypass — skip `/product-spec` + `/technical-spec` when you have clear requirements already. Creates EXECUTION_PLAN.md directly from description/context.
-- **Overlap resolution**: Merge `/bootstrap` functionality into `/quick-feat`. Single command handles both simple features (inline plan) and larger features (multi-phase plan without full specs). Deprecate `/bootstrap` after merge.
-- **New TODO needed**: Create `/adopt` command for importing existing projects into toolkit workflow
-- [ ] **[P1 / Medium]** Create `/create-pr` skill with automatic Codex review — Runs `/codex-review` automatically before PR creation, includes any findings in PR description, and wraps `gh pr create`. Provides a controlled integration point for cross-model review in the PR workflow.
+
+- [ ] **[P1 / Medium]** [ready] Create `/create-pr` skill with automatic Codex review — Runs `/codex-review` automatically before PR creation, includes any findings in PR description, and wraps `gh pr create`. Provides a controlled integration point for cross-model review in the PR workflow.
+
+**Clarifications (from Q&A 2026-01-29):**
+- **PR body content**: Include all Codex findings — critical issues, recommendations, and positive findings. Full transparency.
+- **Blocking behavior**: Block PR creation if Codex reports critical issues. User must address them or use `--skip-review` to bypass.
+- **`--skip-review` flag**: Bypasses Codex review entirely. PR body notes "Codex Review: SKIPPED (--skip-review)". Use when Codex is unavailable or for trivial PRs.
+- **Arguments**: Optional focus area (e.g., `security`) + standard `gh pr create` flags (`--base`, `--title`, `--draft`). Flags pass through to `gh`.
+- **Title/body generation**: Auto-generate title from branch name and body from commit log. Show preview and let user confirm/edit before creating.
+- **Codex unavailable**: If Codex CLI is not installed, skip review silently and note "Codex Review: SKIPPED (Codex CLI not available)" in PR body. Do not block.
+- **Implementation approach**:
+  1. Create `.claude/skills/create-pr/SKILL.md`
+  2. Gather branch context (commits, changed files, base branch)
+  3. Auto-generate PR title and body from commits
+  4. Run `/codex-review` with optional focus area
+  5. If critical issues found: show issues, block, ask user to fix or `--skip-review`
+  6. Append Codex findings section to PR body
+  7. Show PR preview (title + body) for user confirmation
+  8. Run `gh pr create` with confirmed title/body and any passthrough flags
 - [ ] **[P2 / Low]** Improve vercel-preview skill description — Change from vague "Resolve Vercel preview deployment URL" to clearer "Resolve Vercel preview URL with wait/fallback logic. Invoked by browser-verification for E2E testing." (audit finding D3)
 - [ ] Compare web vs CLI interface for generation workflow (see below)
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues) — **DEFERRED** (nice-to-have, not core workflow)
@@ -125,7 +157,7 @@
 - **Analysis frequency**: Auto-analyze after every 5 sessions
 - **Transcript format**: JSONL (one JSON object per session, append-friendly)
 - **Analysis output**: Markdown report (ANALYSIS_REPORT.md) with patterns found and suggested automations
-- [ ] **[P1 / High]** Claude Code + Codex CLI Orchestration Integration (see below)
+- [x] **[P1 / High]** Claude Code + Codex CLI Orchestration Integration (see below) — DONE (implemented as `--codex` flag on `/phase-start`)
 - [ ] **[P1 / High x0.5]** Parallel Agent Orchestration (see below)
 - [ ] **[P2 / Medium]** Spec Diffing and Plan Regeneration (see below)
 - [ ] **[P2 / Medium x0.6]** Human Review Queue (see below)
@@ -651,67 +683,6 @@ A lightweight alternative to a full "compound documentation" system — a simple
 
 ---
 
-### `/quick-feat` Command for Simple Features
-
-A streamlined version of `/feature-spec` for very simple features that don't warrant full specification ceremony.
-
-**Problem:**
-- `/feature-spec` is designed for substantial features requiring detailed specification
-- For simple features ("add a logout button", "show user avatar in header"), full spec is overkill
-- But skipping specs entirely loses the benefits of planning
-
-**Proposed Implementation:**
-
-**Command:** `/quick-feat <description>`
-
-**Example:**
-```bash
-/quick-feat "Add logout button to navbar"
-```
-
-**Behavior:**
-1. Ask 2-3 clarifying questions max (not the full spec Q&A)
-2. Generate a minimal plan inline (not a separate EXECUTION_PLAN.md)
-3. Execute immediately with verification
-4. Commit with conventional commit message
-
-**Output:**
-```
-QUICK FEATURE: Add logout button to navbar
-
-Clarifications:
-- Location: Right side of navbar, after user name
-- Behavior: Call /api/auth/logout, redirect to /login
-- Style: Match existing navbar buttons
-
-Plan:
-1. Add LogoutButton component
-2. Wire to auth API
-3. Add to Navbar component
-
-Executing...
-✓ Created src/components/LogoutButton.tsx
-✓ Added to Navbar.tsx
-✓ Verified: Button renders, logout API called on click
-
-Committed: feat(auth): add logout button to navbar
-```
-
-**Guardrails:**
-- If feature touches >3 files, suggest `/feature-spec` instead
-- If clarification reveals complexity, escalate to full spec
-- Still runs verification (just inline, not phase-checkpoint)
-
-**Use cases:**
-- UI tweaks
-- Single-endpoint additions
-- Configuration changes
-- Bug fixes that are really small features
-
-**Files to create:**
-- `.claude/commands/quick-feat.md`
-
----
 
 ### Enhanced `/phase-prep` with Future Phase Preview
 
