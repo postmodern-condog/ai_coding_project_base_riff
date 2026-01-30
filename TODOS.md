@@ -170,6 +170,22 @@
 - [x] **[P1 / Medium]** Pre-push hook to check if README/docs need updating — Before every push, analyze recent commits and prompt if documentation appears outdated relative to code/command changes — DONE
 - [ ] **[P1 / High]** Research integrating with the native Task functionality that Claude Code recently added
 
+**Clarifications (from Q&A 2026-01-29):**
+- **Motivation**: Both UI visibility (users see task progress in Claude Code's native spinner/status line) AND simpler state management (potentially replace custom phase-state.json)
+- **Approach**: Needs research first — understand native Task capabilities and limitations (persistence across sessions, dependency support, max tasks, etc.) before deciding whether to replace or augment phase-state.json
+- **Initial scope**: `/phase-start` only — create native Tasks for each EXECUTION_PLAN task during phase execution. Other skills (checkpoint, list-todos) can integrate later if the pattern works.
+- **Research questions**:
+  1. Do native Tasks persist across sessions, or are they session-scoped?
+  2. Can native Tasks express dependencies (blockedBy/blocks)?
+  3. Is there a limit on number of concurrent tasks?
+  4. Can task status be read back reliably (for state recovery)?
+  5. How do native Tasks interact with context summarization?
+- **Implementation approach (pending research)**:
+  1. Research native Task API behavior (create, update, list, get)
+  2. Prototype in `/phase-start`: create a Task per EXECUTION_PLAN task, update status as tasks complete
+  3. Evaluate whether phase-state.json can be replaced or should remain as persistent backup
+  4. If successful, expand to `/phase-checkpoint` and `/list-todos`
+
 ## Future Concepts
 
 ### Auto-Advance Steps Without Human Intervention
