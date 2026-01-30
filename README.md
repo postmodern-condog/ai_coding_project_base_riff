@@ -137,12 +137,13 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/sync [path]` | Sync target project with latest toolkit skills |
 | `/update-target-projects` | Discover and sync all toolkit-using projects at once |
 | `/gh-init [path]` | Initialize git repo with smart .gitignore and optional GitHub remote |
-| `/install-hooks [path]` | Install git hooks (pre-push doc sync check) |
+| `/install-hooks [path]` | Install git hooks and session logging for workflow automation |
 
 ### Toolkit Maintenance (run from toolkit directory, not synced to projects)
 
 | Command | Description |
 |---------|-------------|
+| `/analyze-sessions` | Analyze cross-project session logs for automation opportunities |
 | `/vision-audit` | Audit vision alignment, research trends, generate feature proposals |
 
 ### Execution Commands (run from your project directory)
@@ -408,7 +409,7 @@ ai_coding_project_base/
 │   │   ├── oauth-login/             # OAuth flow for browser verification
 │   │   ├── vercel-preview/          # Vercel preview URL resolution
 │   │   └── ...                      # Security, tech-debt, etc.
-│   └── hooks/                       # Git hooks (doc check, sync, doc-update)
+│   └── hooks/                       # Git hooks + session logger template
 ├── docs/                            # Detailed documentation
 ├── extras/                          # Landing page, optional tools
 └── AGENTS.md                        # Toolkit contributor guidelines
