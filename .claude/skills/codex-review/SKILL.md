@@ -1,7 +1,7 @@
 ---
 name: codex-review
 description: Have OpenAI Codex review the current branch with documentation research. Use for second-opinion code reviews or when you want cross-AI verification.
-argument-hint: "[focus] [--upstream FILE] [--research TOPICS] [--base BRANCH] [--model MODEL] [--mode code|research]"
+argument-hint: "[focus] [--upstream FILE] [--research TOPICS] [--base BRANCH] [--model MODEL]"
 allowed-tools: Bash, Read, Glob, Grep
 ---
 
@@ -31,8 +31,7 @@ Invoke OpenAI's Codex CLI to review the current branch, with instructions to res
 | `--upstream FILE` | `--upstream PRODUCT_SPEC.md` | Check that code preserves requirements from upstream doc |
 | `--research TOPICS` | `--research "Supabase, NextAuth"` | Explicit technologies for Codex to research |
 | `--base BRANCH` | `--base develop` | Compare against different base branch |
-| `--model MODEL` | `--model gpt-5.2-codex` | Use specific Codex model (overrides --mode) |
-| `--mode MODE` | `--mode research` | Select model by task type: `code` (default) or `research`. When omitted, auto-detected from changed files. |
+| `--model MODEL` | `--model gpt-5.2-codex` | Use specific Codex model |
 
 ## Workflow
 
@@ -104,9 +103,8 @@ Do NOT attempt alternative commands or workarounds. Return status: `skipped`.
 Read `.claude/settings.local.json` for settings:
 
 ```bash
-# Read models from config
+# Read config
 CODE_MODEL=$(jq -r '.codexReview.codeModel // "gpt-5.2-codex"' .claude/settings.local.json 2>/dev/null || echo "gpt-5.2-codex")
-RESEARCH_MODEL=$(jq -r '.codexReview.researchModel // "gpt-5.2"' .claude/settings.local.json 2>/dev/null || echo "gpt-5.2")
 TIMEOUT_MINS=$(jq -r '.codexReview.reviewTimeoutMinutes // 10' .claude/settings.local.json 2>/dev/null || echo "10")
 ```
 
@@ -114,45 +112,19 @@ If `codexReview.enabled` is explicitly `false`, skip with message.
 
 ### Select Model
 
-Priority order: `--model` flag > `--mode` flag > auto-detection > default (`code`)
+Priority order: `--model` flag > config > default (`gpt-5.2-codex`)
 
 ```bash
 # 1. Explicit --model flag always wins
 if [ -n "$EXPLICIT_MODEL" ]; then
   CODEX_MODEL="$EXPLICIT_MODEL"
-
-# 2. Explicit --mode flag
-elif [ "$MODE" = "research" ]; then
-  CODEX_MODEL="$RESEARCH_MODEL"
-elif [ "$MODE" = "code" ]; then
-  CODEX_MODEL="$CODE_MODEL"
-
-# 3. Auto-detect from changed files when --mode not provided
+# 2. Use configured code model
 else
-  # Get changed file extensions
-  CODE_EXTENSIONS="ts|tsx|js|jsx|py|go|rs|java|rb|php|swift|kt|c|cpp|h|css|scss|vue|svelte"
-  CHANGED_FILES=$(git diff $BASE_BRANCH...HEAD --name-only 2>/dev/null)
-
-  if [ -z "$CHANGED_FILES" ]; then
-    # No git diff available — default to code
-    CODEX_MODEL="$CODE_MODEL"
-  elif echo "$CHANGED_FILES" | grep -qE "\.($CODE_EXTENSIONS)$"; then
-    # Has code files — use code model
-    CODEX_MODEL="$CODE_MODEL"
-  else
-    # Only non-code files (md, txt, json, etc.) — use research model
-    CODEX_MODEL="$RESEARCH_MODEL"
-  fi
+  CODEX_MODEL="$CODE_MODEL"
 fi
 ```
 
-**Auto-Detection Summary:**
-
-| Changed Files | Inferred Mode | Model |
-|---------------|---------------|-------|
-| Any `.ts`, `.js`, `.py`, etc. | `code` | `gpt-5.2-codex` |
-| Only `.md`, `.txt`, `.json` | `research` | `gpt-5.2` |
-| No diff available | `code` (safe default) | `gpt-5.2-codex` |
+**Note:** For reviewing non-code documents (specs, plans), use `/codex-consult` instead.
 
 ## Step 2: Gather Branch Context
 
@@ -296,9 +268,7 @@ Read from `.claude/settings.local.json`:
   "codexReview": {
     "enabled": true,
     "codeModel": "gpt-5.2-codex",
-    "researchModel": "gpt-5.2",
-    "reviewTimeoutMinutes": 10,
-    "taskTimeoutMinutes": 60
+    "reviewTimeoutMinutes": 10
   }
 }
 ```
@@ -307,9 +277,10 @@ Read from `.claude/settings.local.json`:
 |---------|---------|-------------|
 | `enabled` | `true` | Set to `false` to disable Codex review |
 | `codeModel` | `"gpt-5.2-codex"` | Model for code review tasks |
-| `researchModel` | `"gpt-5.2"` | Model for research/planning tasks |
 | `reviewTimeoutMinutes` | `10` | Max time for review invocations |
-| `taskTimeoutMinutes` | `60` | Max time for task execution via Codex |
+
+For document consultation (specs, plans), see `/codex-consult` which uses `codexConsult` config.
+For task execution via Codex, see `/phase-start --codex` which uses `codexReview.taskTimeoutMinutes`.
 
 **For CI/headless environments:** Set `CODEX_API_KEY` environment variable for authentication without interactive login.
 

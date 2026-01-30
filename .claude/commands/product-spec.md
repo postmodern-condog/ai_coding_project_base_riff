@@ -120,12 +120,12 @@ After capturing (or skipping), continue the spec Q&A where you left off. Don't b
 After writing PRODUCT_SPEC.md, run cross-model review if Codex CLI is available:
 
 1. Check if Codex CLI is installed: `codex --version`
-2. If available, run `/codex-review` on the generated document
+2. If available, run `/codex-consult` on the generated document
 3. Present any findings to the user before proceeding
 
-**Review invocation:**
+**Consultation invocation:**
 ```
-/codex-review --mode research --research "product requirements, user stories" $1/PRODUCT_SPEC.md
+/codex-consult --research "product requirements, user stories" $1/PRODUCT_SPEC.md
 ```
 
 **If Codex finds issues:**

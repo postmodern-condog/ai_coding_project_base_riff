@@ -17,8 +17,12 @@
   "codexReview": {
     "enabled": true,
     "codeModel": "gpt-5.2-codex",
-    "researchModel": "gpt-5.2",
     "reviewTimeoutMinutes": 10,
     "taskTimeoutMinutes": 60
+  },
+  "codexConsult": {
+    "enabled": true,
+    "researchModel": "gpt-5.2",
+    "consultTimeoutMinutes": 15
   }
 }

@@ -159,7 +159,8 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/verify-task X.Y.Z` | Verify specific task acceptance criteria |
 | `/criteria-audit` | Validate acceptance criteria metadata |
 | `/security-scan` | Run security checks (deps, secrets, code) |
-| `/codex-review` | Cross-model review using Codex CLI with doc research |
+| `/codex-review` | Cross-model code review using Codex CLI |
+| `/codex-consult` | Cross-model document consultation using Codex CLI |
 | `/progress` | Show progress through execution plan |
 | `/list-todos` | Analyze, prioritize, and research TODO items with suggestions |
 | `/run-todos` | Implement [ready]-tagged TODO items with commits |
@@ -255,8 +256,8 @@ When auto-advance stops (manual items exist, check fails, or final phase complet
 
 When Codex CLI is installed, the toolkit automatically invokes Codex for second-opinion reviews at key points:
 
-- **Generation commands** — `/product-spec`, `/technical-spec`, `/generate-plan`, `/feature-spec`, `/feature-technical-spec`, `/feature-plan`, and `/bootstrap` all run Codex review after creating documents
-- **Phase checkpoints** — `/phase-checkpoint` reviews completed phase code
+- **Generation commands** — `/product-spec`, `/technical-spec`, `/generate-plan`, `/feature-spec`, `/feature-technical-spec`, `/feature-plan`, and `/bootstrap` all run `/codex-consult` after creating documents
+- **Phase checkpoints** — `/phase-checkpoint` reviews completed phase code via `/codex-review`
 
 Codex researches current documentation before reviewing, which helps catch issues where Claude's training data may be outdated.
 
@@ -275,14 +276,17 @@ codex login
   "codexReview": {
     "enabled": true,
     "codeModel": "gpt-5.2-codex",
+    "reviewTimeoutMinutes": 10
+  },
+  "codexConsult": {
+    "enabled": true,
     "researchModel": "gpt-5.2",
-    "reviewTimeoutMinutes": 10,
-    "taskTimeoutMinutes": 60
+    "consultTimeoutMinutes": 15
   }
 }
 ```
 
-Codex findings are advisory — they don't block auto-advance. You can also invoke `/codex-review` directly for on-demand review.
+Codex findings are advisory — they don't block auto-advance. You can also invoke `/codex-review` (code diffs) or `/codex-consult` (documents) directly for on-demand review.
 
 ### Codex Task Execution
 
@@ -308,7 +312,6 @@ You can have Codex CLI execute tasks while Claude Code orchestrates:
 {
   "codexReview": {
     "codeModel": "gpt-5.2-codex",
-    "researchModel": "gpt-5.2",
     "taskTimeoutMinutes": 60
   }
 }

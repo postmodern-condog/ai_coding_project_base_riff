@@ -155,12 +155,12 @@ If CLAUDE.md doesn't reference AGENTS.md, add:
 After creating documents, run cross-model review if Codex CLI is available:
 
 1. Check if Codex CLI is installed: `codex --version`
-2. If available, run `/codex-review` on the generated documents
+2. If available, run `/codex-consult` on the generated documents
 3. Present any findings to the user before proceeding
 
-**Review invocation:**
+**Consultation invocation:**
 ```
-/codex-review --mode research --research "{detected technologies from codebase scan}" PROJECT_ROOT/features/FEATURE_NAME/EXECUTION_PLAN.md
+/codex-consult --research "{detected technologies from codebase scan}" PROJECT_ROOT/features/FEATURE_NAME/EXECUTION_PLAN.md
 ```
 
 **If Codex finds issues:**

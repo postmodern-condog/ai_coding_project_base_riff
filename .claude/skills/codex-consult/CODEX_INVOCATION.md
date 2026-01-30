@@ -1,6 +1,6 @@
-# Codex CLI Invocation
+# Codex CLI Invocation (Consultation)
 
-Detailed instructions for invoking Codex CLI for review.
+Detailed instructions for invoking Codex CLI for document consultation.
 
 ## Execution Rules (MANDATORY)
 
@@ -20,16 +20,16 @@ Detailed instructions for invoking Codex CLI for review.
 
 ```bash
 # Create output file path
-OUTPUT_FILE="/tmp/codex-review-output-$(date +%s).txt"
+OUTPUT_FILE="/tmp/codex-consult-output-$(date +%s).txt"
 
 # Read config (model selection handled by SKILL.md Step 1)
-CODEX_MODEL=$(jq -r '.codexReview.codeModel // empty' .claude/settings.local.json 2>/dev/null)
-TIMEOUT_MINS=$(jq -r '.codexReview.reviewTimeoutMinutes // 10' .claude/settings.local.json 2>/dev/null || echo "10")
+CONSULT_MODEL=$(jq -r '.codexConsult.researchModel // .codexReview.researchModel // empty' .claude/settings.local.json 2>/dev/null)
+TIMEOUT_MINS=$(jq -r '.codexConsult.consultTimeoutMinutes // 15' .claude/settings.local.json 2>/dev/null || echo "15")
 
 # Build model flag if configured
 MODEL_FLAG=""
-if [ -n "$CODEX_MODEL" ]; then
-  MODEL_FLAG="--model $CODEX_MODEL"
+if [ -n "$CONSULT_MODEL" ]; then
+  MODEL_FLAG="--model $CONSULT_MODEL"
 fi
 
 # Execute with timeout
@@ -78,7 +78,7 @@ fi
 
 **Do NOT use `2>&1`** — Codex streams progress to stderr and final output to stdout. Merging them corrupts the parseable response.
 
-**Timeout:** Use configured timeout (default: 10 minutes). Codex may need time to research.
+**Timeout:** Use configured timeout (default: 15 minutes). Consultation may need time to research.
 
 ## Failure Handling
 
@@ -95,14 +95,14 @@ Extract structured findings from Codex output:
 ```json
 {
   "status": "pass | pass_with_notes | needs_attention | error | skipped",
-  "critical_issues": [
+  "issues": [
     {
       "description": "string",
-      "location": "string (file:line or section name)",
+      "location": "string (section name or file reference)",
       "suggestion": "string"
     }
   ],
-  "recommendations": [
+  "suggestions": [
     {
       "description": "string",
       "location": "string",
@@ -110,10 +110,10 @@ Extract structured findings from Codex output:
     }
   ],
   "positive_findings": ["string"],
-  "context_preservation": {
+  "alignment_check": {
     "checked": true | false,
     "items_checked": 0,
-    "all_preserved": true | false,
+    "all_addressed": true | false,
     "missing_items": ["string"]
   },
   "raw_output": "string (full Codex response for debugging)"

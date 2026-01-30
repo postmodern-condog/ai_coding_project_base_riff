@@ -58,20 +58,26 @@ Guidelines:
 
 The toolkit supports cross-model verification using OpenAI Codex CLI:
 
-- `/codex-review` — Review current branch with documentation research. Supports
+- `/codex-review` — Review current branch code diffs. Supports
   `--upstream`, `--research`, `--base`, and `--model` flags.
+- `/codex-consult` — Get a second opinion on documents, specs, or plans (non-code content).
+  Supports `--upstream`, `--research`, and `--model` flags.
 - `/phase-checkpoint` — Automatically invokes `/codex-review` when Codex is available
 
 When Codex CLI is installed and authenticated, phase checkpoints include a second-opinion
-review. Codex researches current documentation before reviewing, catching issues where
-training data may differ between models.
+review. Generation commands (`/product-spec`, `/technical-spec`, etc.) use `/codex-consult`
+for document review. Codex researches current documentation before reviewing, catching
+issues where training data may differ between models.
 
 **Configuration** (`.claude/settings.local.json`):
 ```json
 {
   "codexReview": {
     "enabled": true,
-    "codeModel": "gpt-5.2-codex",
+    "codeModel": "gpt-5.2-codex"
+  },
+  "codexConsult": {
+    "enabled": true,
     "researchModel": "gpt-5.2"
   }
 }

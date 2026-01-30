@@ -38,7 +38,6 @@ Read `.claude/settings.local.json` for Codex settings:
 {
   "codexReview": {
     "codeModel": "gpt-5.2-codex",
-    "researchModel": "gpt-5.2",
     "taskTimeoutMinutes": 60
   }
 }

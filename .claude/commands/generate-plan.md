@@ -173,12 +173,12 @@ Run `/criteria-audit $1` to validate verification metadata in EXECUTION_PLAN.md.
 After verification passes, run cross-model review if Codex CLI is available:
 
 1. Check if Codex CLI is installed: `codex --version`
-2. If available, run `/codex-review` with upstream context
+2. If available, run `/codex-consult` with upstream context
 3. Present any findings to the user before proceeding
 
-**Review invocation:**
+**Consultation invocation:**
 ```
-/codex-review --mode research --upstream $1/TECHNICAL_SPEC.md --research "execution planning, task breakdown" $1/EXECUTION_PLAN.md
+/codex-consult --upstream $1/TECHNICAL_SPEC.md --research "execution planning, task breakdown" $1/EXECUTION_PLAN.md
 ```
 
 **If Codex finds issues:**

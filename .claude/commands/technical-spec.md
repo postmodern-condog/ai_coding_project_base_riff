@@ -130,12 +130,12 @@ After capturing (or skipping), continue the spec Q&A where you left off.
 After verification passes, run cross-model review if Codex CLI is available:
 
 1. Check if Codex CLI is installed: `codex --version`
-2. If available, run `/codex-review` with upstream context
+2. If available, run `/codex-consult` with upstream context
 3. Present any findings to the user before proceeding
 
-**Review invocation:**
+**Consultation invocation:**
 ```
-/codex-review --mode research --upstream $1/PRODUCT_SPEC.md --research "{detected technologies}" $1/TECHNICAL_SPEC.md
+/codex-consult --upstream $1/PRODUCT_SPEC.md --research "{detected technologies}" $1/TECHNICAL_SPEC.md
 ```
 
 **If Codex finds issues:**
