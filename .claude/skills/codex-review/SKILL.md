@@ -96,6 +96,9 @@ Codex authentication failed. Run:
   codex login
 ```
 
+**If ANY pre-flight check fails:** Report the specific failure and STOP.
+Do NOT attempt alternative commands or workarounds. Return status: `skipped`.
+
 ### Read Configuration
 
 Read `.claude/settings.local.json` for settings:
@@ -188,6 +191,13 @@ Key sections:
 ## Step 4: Invoke Codex
 
 See [CODEX_INVOCATION.md](CODEX_INVOCATION.md) for detailed command building.
+
+**IMPORTANT — Execution Rules:**
+- Execute synchronously. NEVER use `run_in_background` for Codex invocations.
+- If this command fails, report the exit code and return `status: error`.
+  Do NOT retry with different flags or subcommands.
+- Use the Bash tool's `timeout` parameter set to `TIMEOUT_MINS * 60 * 1000` (ms)
+  instead of the shell `timeout` command or `run_in_background`.
 
 ```bash
 OUTPUT_FILE="/tmp/codex-review-output-$(date +%s).txt"

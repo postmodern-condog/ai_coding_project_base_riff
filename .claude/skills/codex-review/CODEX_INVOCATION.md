@@ -2,6 +2,20 @@
 
 Detailed instructions for invoking Codex CLI for review.
 
+## Execution Rules (MANDATORY)
+
+1. **NEVER use `run_in_background`** — Always execute Codex synchronously.
+   Background execution generates delayed notifications for every attempt,
+   creating noise for the user.
+
+2. **NEVER retry with modified syntax** — If the command fails, report the
+   exit code and skip. Do NOT try alternative subcommands, flag combinations,
+   or workarounds.
+
+3. **Use the EXACT command documented below** — Do not improvise flags,
+   rearrange arguments, or substitute subcommands (e.g. do not switch
+   from `codex exec` to `codex review`).
+
 ## Build Command
 
 ```bash
