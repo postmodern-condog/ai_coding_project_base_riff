@@ -160,7 +160,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/security-scan` | Run security checks (deps, secrets, code) |
 | `/codex-review` | Cross-model review using Codex CLI with doc research |
 | `/progress` | Show progress through execution plan |
-| `/list-todos` | Analyze and prioritize TODO items |
+| `/list-todos` | Analyze, prioritize, and research TODO items with suggestions |
 | `/run-todos` | Implement [ready]-tagged TODO items with commits |
 | `/capture-learning` | Save project patterns to LEARNINGS.md |
 | `/update-docs` | Sync documentation with code changes (auto or manual) |

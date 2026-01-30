@@ -1,26 +1,32 @@
 # Interactive Q&A Workflow
 
-After displaying the prioritized list and summary, offer the user an interactive session to clarify requirements.
+After displaying the prioritized list and summary, offer the user an interactive session to clarify requirements or review research suggestions.
 
-## Step 1: Offer to Start Q&A
+## Step 1: Choose Action
 
 Use the AskUserQuestion tool to ask:
 
 ```
-Question: "Would you like to clarify requirements for any items?"
+Question: "What would you like to do next?"
 Header: "Q&A Mode"
 Options:
-  - Label: "Yes, let's clarify"
-    Description: "I'll ask questions about specific items to improve their requirements"
-  - Label: "No, I'm done"
-    Description: "Exit without further clarification"
+  - Label: "Clarify an item"
+    Description: "Ask questions about a specific item to improve its requirements"
+  - Label: "Review suggestions"
+    Description: "Discuss and accept/reject research suggestions for items"
+  - Label: "I'm done"
+    Description: "Exit without further changes"
 ```
 
-If the user selects "No", end the command.
+- **"Clarify an item"** → proceed to Step 2 (Select Item to Clarify)
+- **"Review suggestions"** → proceed to Step 8 (Review Suggestions)
+- **"I'm done"** → go to Exit Summary
+
+After completing either a clarification round or a suggestions review round, return to this Step 1 prompt.
 
 ## Step 2: Select Item to Clarify
 
-If the user selects "Yes", use AskUserQuestion to let them pick an item:
+Use AskUserQuestion to let them pick an item:
 
 ```
 Question: "Which item would you like to clarify? (Enter the priority number)"
@@ -149,7 +155,7 @@ Options:
 
 **If "Yes, mark as [ready]":**
 - Add `[ready]` tag to the TODO item in TODOS.md
-- Ask if the user wants to clarify another item (go to Step 8)
+- Return to Step 1 (unified action prompt)
 
 **If "No, needs more clarification":**
 - Ask what additional questions need answering
@@ -161,21 +167,61 @@ Options:
 **If "No, I'm done for now":**
 - Go to Exit Summary
 
-## Step 8: Continue or Exit
+## Step 8: Review Suggestions
 
-After marking an item ready, use AskUserQuestion to ask:
+When the user selects "Review suggestions" from Step 1:
+
+### 8a: Select Item with Suggestions
+
+Show items that have research suggestions (up to 4 per prompt):
 
 ```
-Question: "Item marked [ready]. Would you like to clarify another item?"
-Header: "Continue?"
+Question: "Which item's suggestions would you like to review?"
+Header: "Suggestions"
 Options:
-  - Label: "Yes, continue"
-    Description: "Select another item to clarify"
-  - Label: "No, I'm done"
-    Description: "Exit Q&A mode"
+  - Label: "1. {item title}"
+    Description: "{N} suggestions"
+  - Label: "2. {item title}"
+    Description: "{N} suggestions"
+  - Label: "3. {item title}"
+    Description: "{N} suggestions"
+  - Label: "4. {item title}"
+    Description: "{N} suggestions"
 ```
 
-If "Yes", return to Step 2. If "No", go to Exit Summary.
+If no items have suggestions, inform the user and return to Step 1.
+
+### 8b: Review Each Suggestion
+
+For the selected item, present each suggestion one at a time:
+
+```
+Question: "Add this suggestion to TODOS.md?"
+Header: "{Item title}"
+Options:
+  - Label: "Yes, add"
+    Description: "{first 80 chars of the suggestion text}"
+  - Label: "Skip this one"
+    Description: "Don't add to TODOS.md"
+```
+
+Output the full suggestion text before asking, so the user can read it in context.
+
+### 8c: Write Accepted Suggestions
+
+After reviewing all suggestions for the item, append accepted suggestions to the item in TODOS.md:
+
+```markdown
+**Suggestions (from research {date}):**
+- {Accepted suggestion 1}
+- {Accepted suggestion 2}
+```
+
+Use the Edit tool to add this section. If no suggestions were accepted, skip the write.
+
+### 8d: Return to Main Prompt
+
+After completing the suggestion review for one item, return to Step 1 (unified action prompt).
 
 ## Exit Summary
 
@@ -185,7 +231,8 @@ When exiting Q&A mode, output:
 ## Q&A Session Complete
 
 **Items clarified:** {count}
-{List of items that were clarified with brief summary of decisions made}
+**Suggestions accepted:** {count}
+{List of items that were clarified or had suggestions accepted, with brief summary of decisions made}
 
-TODOS.md has been updated with the clarifications above.
+TODOS.md has been updated with the changes above.
 ```
