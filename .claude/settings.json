@@ -31,18 +31,5 @@
       "Bash(grep:*)",
       "Bash(test:*)"
     ]
-  },
-  "hooks": {
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-end-logger.sh\"",
-            "timeout": 30
-          }
-        ]
-      }
-    ]
   }
 }

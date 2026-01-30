@@ -12,6 +12,7 @@ Install git hooks to enhance the development workflow.
 | `pre-push-doc-check` | Warns if docs may need updating | Before `git push` |
 | `post-commit-sync-check` | Reminds to sync target projects | After `git commit` |
 | `post-commit-doc-update` | Triggers `/update-docs` automatically | After `git commit` |
+| `session-end-logger` | Logs all Claude Code sessions for analysis | After every session (user-level) |
 
 ## Steps
 
@@ -46,11 +47,20 @@ AVAILABLE HOOKS
    Checks: Skills, config, and structural changes
    Action: Creates marker for /update-docs to process
 
-Select hooks to install: [1] [2] [3] [All] [None]
+4. session-end-logger (user-level, recommended)
+   Purpose: Logs all Claude Code sessions for automation analysis
+   Scope: ALL projects (installed at ~/.claude/ level)
+   Action: Enables /analyze-sessions to discover cross-project patterns
+   Note: Must confirm in /hooks UI after installation
+
+Select hooks to install: [1] [2] [3] [4] [All] [None]
 ```
 
 **Note:** Hooks 2 and 3 both use the `post-commit` git hook. If installing both,
 they will be combined into a single dispatcher script.
+
+**Note:** Hook 4 (session-end-logger) is a user-level Claude Code hook, not a git hook.
+It is installed to `~/.claude/hooks/` and configured in `~/.claude/settings.json`.
 
 ### 3. Install Selected Hooks
 
@@ -198,6 +208,63 @@ To bypass hooks temporarily:
 git commit --no-verify  # Skip post-commit hooks for this commit only
 git push --no-verify    # Skip pre-push hooks for this push only
 ```
+
+### session-end-logger
+
+**Scope:** User-level (not a git hook — a Claude Code SessionEnd hook)
+
+**What it does:**
+- Logs every Claude Code session to `~/.claude/logs/sessions.jsonl`
+- Records session_id, timestamp, project name, cwd, and transcript path
+- Enables `/analyze-sessions` to discover automation patterns across all projects
+
+**Installation (different from git hooks):**
+
+```bash
+# Create hooks directory
+mkdir -p ~/.claude/hooks
+
+# Copy hook script
+cp .claude/hooks/session-end-logger.sh ~/.claude/hooks/session-end-logger.sh
+chmod +x ~/.claude/hooks/session-end-logger.sh
+```
+
+Then add to `~/.claude/settings.json`:
+```json
+{
+  "hooks": {
+    "SessionEnd": [{
+      "hooks": [{
+        "type": "command",
+        "command": "bash $HOME/.claude/hooks/session-end-logger.sh",
+        "timeout": 30
+      }]
+    }]
+  }
+}
+```
+
+**Important:** After installation, you must confirm the new hook in the Claude Code
+`/hooks` UI.
+
+**Report:**
+```
+SESSION LOGGING INSTALLED
+=========================
+
+Hook: ~/.claude/hooks/session-end-logger.sh
+Config: ~/.claude/settings.json (SessionEnd hook added)
+Log file: ~/.claude/logs/sessions.jsonl
+
+Session logging is now active for ALL Claude Code projects.
+Run /analyze-sessions to discover automation opportunities.
+
+IMPORTANT: Confirm the hook in the /hooks UI.
+```
+
+**Removing:**
+1. Delete `~/.claude/hooks/session-end-logger.sh`
+2. Remove the `hooks.SessionEnd` entry from `~/.claude/settings.json`
 
 ### post-commit-doc-update
 
