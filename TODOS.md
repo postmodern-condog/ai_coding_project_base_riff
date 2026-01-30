@@ -142,7 +142,7 @@
   6. Append Codex findings section to PR body
   7. Show PR preview (title + body) for user confirmation
   8. Run `gh pr create` with confirmed title/body and any passthrough flags
-- [ ] **[P2 / Low]** Improve vercel-preview skill description — Change from vague "Resolve Vercel preview deployment URL" to clearer "Resolve Vercel preview URL with wait/fallback logic. Invoked by browser-verification for E2E testing." (audit finding D3)
+- [x] **[P2 / Low]** Improve vercel-preview skill description — **REMOVED** (will be superseded by deployment-preview rename, per user decision 2026-01-29)
 - [ ] Compare web vs CLI interface for generation workflow (see below)
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues) — **DEFERRED** (nice-to-have, not core workflow)
 - [ ] Intro commands for each Step — **DEFERRED** (unclear requirements, needs more thought)
@@ -168,6 +168,7 @@
 - [x] Add `/list-todos` command (see below) — DONE
 - [x] Recovery & Rollback Commands — DONE (phase-rollback, task-retry, phase-analyze)
 - [x] **[P1 / Medium]** Pre-push hook to check if README/docs need updating — Before every push, analyze recent commits and prompt if documentation appears outdated relative to code/command changes — DONE
+- [ ] **[P1 / High]** Research integrating with the native Task functionality that Claude Code recently added
 
 ## Future Concepts
 
