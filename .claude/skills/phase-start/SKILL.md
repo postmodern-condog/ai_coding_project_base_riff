@@ -357,4 +357,6 @@ Truly Manual ({N} items requiring human judgment):
   - Reason: {why automation not possible, e.g., "subjective UX assessment"}
 
 Next: Run /phase-checkpoint $1 when ready to verify
+
+Ready to open a PR? Run: /create-pr
 ```
