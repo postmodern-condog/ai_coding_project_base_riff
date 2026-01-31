@@ -161,6 +161,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/security-scan` | Run security checks (deps, secrets, code) |
 | `/codex-review` | Cross-model code review using Codex CLI |
 | `/codex-consult` | Cross-model document consultation using Codex CLI |
+| `/create-pr` | Create GitHub PR with automatic Codex review |
 | `/progress` | Show progress through execution plan |
 | `/list-todos` | Analyze, prioritize, and research TODO items with suggestions |
 | `/run-todos` | Implement [ready]-tagged TODO items with commits |
@@ -258,6 +259,7 @@ When Codex CLI is installed, the toolkit automatically invokes Codex for second-
 
 - **Generation commands** — `/product-spec`, `/technical-spec`, `/generate-plan`, `/feature-spec`, `/feature-technical-spec`, `/feature-plan`, and `/bootstrap` all run `/codex-consult` after creating documents
 - **Phase checkpoints** — `/phase-checkpoint` reviews completed phase code via `/codex-review`
+- **Pull requests** — `/create-pr` runs Codex review before creating the PR, includes findings in the PR body, and blocks on critical issues
 
 Codex researches current documentation before reviewing, which helps catch issues where Claude's training data may be outdated.
 
@@ -286,7 +288,7 @@ codex login
 }
 ```
 
-Codex findings are advisory — they don't block auto-advance. You can also invoke `/codex-review` (code diffs) or `/codex-consult` (documents) directly for on-demand review.
+Codex findings are advisory — they don't block auto-advance. You can also invoke `/codex-review` (code diffs), `/codex-consult` (documents), or `/create-pr` (PR with review) directly.
 
 ### Codex Task Execution
 

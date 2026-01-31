@@ -137,7 +137,7 @@ Bottom line: re-implementing deployment preview support is still worthwhile for 
 - [x] **[P0 / High x2]** Attempt automation before manual fallback — Add logic to attempt verification with available tools (curl, browser MCP, file inspection) before falling back to manual (see audit below) — DONE
 
 
-- [ ] **[P1 / Medium]** [ready] Create `/create-pr` skill with automatic Codex review — Runs Codex automatically before PR creation, includes any findings in PR description, and wraps `gh pr create`. Provides a controlled integration point for cross-model review in the PR workflow.
+- [x] **[P1 / Medium]** [ready] Create `/create-pr` skill with automatic Codex review — Runs Codex automatically before PR creation, includes any findings in PR description, and wraps `gh pr create`. Provides a controlled integration point for cross-model review in the PR workflow.
 
 **Clarifications (from Q&A 2026-01-29):**
 - **PR body content**: Include all Codex findings — critical issues, recommendations, and positive findings. Full transparency.

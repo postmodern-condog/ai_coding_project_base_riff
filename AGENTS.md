@@ -62,6 +62,9 @@ The toolkit supports cross-model verification using OpenAI Codex CLI:
   `--upstream`, `--research`, `--base`, and `--model` flags.
 - `/codex-consult` — Get a second opinion on documents, specs, or plans (non-code content).
   Supports `--upstream`, `--research`, and `--model` flags.
+- `/create-pr` — Create GitHub PR with automatic Codex review. Auto-detects code vs
+  doc changes and routes to `/codex-review` or `/codex-consult`. Blocks on critical issues
+  unless `--skip-review` is used.
 - `/phase-checkpoint` — Automatically invokes `/codex-review` when Codex is available
 
 When Codex CLI is installed and authenticated, phase checkpoints include a second-opinion
