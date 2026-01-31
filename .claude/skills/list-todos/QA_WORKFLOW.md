@@ -8,20 +8,51 @@ After displaying the prioritized list and summary, offer the user an interactive
 
 Use the AskUserQuestion tool to ask:
 
+If any items in TODOS.md currently have the `[ready]` tag (and are not completed),
+include the "Un-ready an item" option. Otherwise, show only "Clarify" and "I'm done".
+
 ```
 Question: "What would you like to do next?"
 Header: "Q&A Mode"
 Options:
   - Label: "Clarify an item"
     Description: "Ask questions about a specific item to improve its requirements"
+  - Label: "Un-ready an item"                          # Only show if [ready] items exist
+    Description: "Remove [ready] tag from an item whose requirements have changed"
   - Label: "I'm done"
     Description: "Exit without further changes"
 ```
 
 - **"Clarify an item"** → proceed to Step 2 (Select Item to Clarify)
+- **"Un-ready an item"** → proceed to Step 1b (Remove Ready Tag)
 - **"I'm done"** → go to Exit Summary
 
-After completing a clarification round, return to this Step 1 prompt.
+After completing a clarification or un-ready round, return to this Step 1 prompt.
+
+### Step 1b: Remove Ready Tag
+
+Show only items that currently have the `[ready]` tag (and are not completed):
+
+```
+Question: "Which item should have its [ready] tag removed?"
+Header: "Un-ready"
+Options:
+  - Label: "1. {ready item 1 title}"
+    Description: "Currently tagged [ready]"
+  - Label: "2. {ready item 2 title}"
+    Description: "Currently tagged [ready]"
+  ... (up to 4 items)
+```
+
+After the user selects an item:
+
+1. Use the Edit tool to remove the `[ready]` tag from that item in TODOS.md
+2. Output confirmation:
+   ```
+   Removed [ready] tag from: {item title}
+   This item will no longer be picked up by /run-todos.
+   ```
+3. Return to Step 1
 
 ## Step 2: Select Item to Clarify
 
@@ -136,7 +167,39 @@ After updating TODOS.md, output a summary of the clarified item:
 
 ## Step 7: Check Implementation Readiness
 
-Use AskUserQuestion to ask if the item is ready for implementation:
+**Guard: Validate that clarifications were actually captured.**
+
+Before offering the readiness prompt, check whether any clarifications were recorded
+for this item during *this* Q&A session (i.e., Step 4 was completed and Step 5 wrote
+clarifications to TODOS.md).
+
+- **If clarifications WERE captured** → show the readiness prompt normally.
+- **If NO clarifications were captured** (user selected the item but skipped or
+  had no questions answered) → show a warning first:
+
+```
+⚠ No clarifications were captured for this item during this session.
+Marking as [ready] without clarification may lead to implementation
+issues if requirements are unclear.
+```
+
+Then show the readiness prompt with a modified first option:
+
+```
+Question: "Is this item ready for implementation?"
+Header: "Ready?"
+Options:
+  - Label: "Yes, mark as [ready] anyway"
+    Description: "Requirements are already clear enough — no clarification needed"
+  - Label: "No, needs more clarification"
+    Description: "Continue Q&A on this item"
+  - Label: "No, move to another item"
+    Description: "Select a different item to clarify"
+  - Label: "No, I'm done for now"
+    Description: "Exit Q&A mode"
+```
+
+**If clarifications WERE captured**, use the standard prompt:
 
 ```
 Question: "Is this item ready for implementation?"
@@ -152,7 +215,7 @@ Options:
     Description: "Exit Q&A mode"
 ```
 
-**If "Yes, mark as [ready]":**
+**If "Yes, mark as [ready]" (or "Yes, mark as [ready] anyway"):**
 - Add `[ready]` tag to the TODO item in TODOS.md
 - Return to Step 1 (unified action prompt)
 

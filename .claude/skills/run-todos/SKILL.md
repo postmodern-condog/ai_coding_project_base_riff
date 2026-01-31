@@ -154,9 +154,42 @@ Clarifications:
 - {Q2}: {A2}
 ```
 
-### 2. Ask Final Clarifying Questions (if needed)
+### 2. Clarity Cross-Check
 
-If the item description is vague or missing key details, use AskUserQuestion to clarify before implementing.
+Before implementing, verify the item has sufficient detail. Check for **both**:
+
+- **Description length:** Is the item a one-liner with no context beyond the title?
+- **Clarifications section:** Does a `**Clarifications (from Q&A ...)**` block exist for this item in TODOS.md?
+
+**If the item has NEITHER a multi-sentence description NOR a clarifications section,**
+flag it to the user:
+
+```
+⚠ THIN REQUIREMENTS
+This item has no clarifications and a minimal description:
+  "{item title}"
+
+Implementing without clear requirements risks building the wrong thing.
+```
+
+Use AskUserQuestion:
+```
+Question: "'{item title}' has minimal requirements. How should we proceed?"
+Header: "Thin reqs"
+Options:
+  - Label: "Clarify now"
+    Description: "Ask questions before implementing (Recommended)"
+  - Label: "Implement anyway"
+    Description: "Proceed with best judgment based on available context"
+  - Label: "Skip this item"
+    Description: "Move to the next item"
+```
+
+- **"Clarify now"** → ask clarifying questions via AskUserQuestion, then proceed to Step 3
+- **"Implement anyway"** → proceed to Step 3
+- **"Skip this item"** → record as skipped, move to next item
+
+**If the item has a description or clarifications**, proceed directly to Step 3.
 
 ### 3. Implement
 
@@ -256,6 +289,43 @@ TODOS.md updated with completion status.
 Next: Review changes, then run:
   git push origin todo-impl-{date}
 ```
+
+## Archive Completed Items
+
+After the summary report, count the total number of completed items (`- [x]`) in
+TODOS.md (including items completed in previous sessions).
+
+**If 10 or more completed items exist**, offer to archive:
+
+```
+Question: "TODOS.md has {N} completed items. Archive them to keep the file manageable?"
+Header: "Archive"
+Options:
+  - Label: "Yes, archive (Recommended)"
+    Description: "Move completed items to TODOS-ARCHIVE.md"
+  - Label: "No, keep as-is"
+    Description: "Leave completed items in TODOS.md"
+```
+
+**If "Yes, archive":**
+
+1. Read (or create) `TODOS-ARCHIVE.md` in the project root
+2. Move all `- [x]` items (and their clarifications blocks) from TODOS.md to
+   TODOS-ARCHIVE.md under a dated heading:
+   ```markdown
+   ## Archived {YYYY-MM-DD}
+
+   - [x] **[P1 / Medium]** Item title [ready] — DONE (a1b2c3d)
+   - [x] **[P2 / Low]** Another item [ready] — DONE (e4f5g6h)
+   ```
+3. Remove the archived items from TODOS.md (keep section headings intact)
+4. Stage and commit:
+   ```bash
+   git add TODOS.md TODOS-ARCHIVE.md
+   git commit -m "chore: archive completed TODO items"
+   ```
+
+**If fewer than 10 completed items**, skip this step silently.
 
 ## Notes
 
