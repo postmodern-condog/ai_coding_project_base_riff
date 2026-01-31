@@ -121,12 +121,16 @@ Options:
 ### Create Branch
 
 ```bash
-# Commit any dirty files first
-git add -A && git diff --cached --quiet || git commit -m "wip: uncommitted changes before todo implementation"
+# If working tree is dirty, stage and commit tracked changes first
+git add -u && git diff --cached --quiet || git commit -m "wip: uncommitted changes before todo implementation"
 
 # Create todo implementation branch
 git checkout -b todo-impl-$(date +%Y-%m-%d)
 ```
+
+**Note:** Use `git add -u` (tracked files only) to avoid accidentally staging secrets,
+build artifacts, or other untracked files. If untracked files need to be included,
+stage them by name.
 
 **Verify branch creation:** Run `git branch --show-current` and confirm it matches
 `todo-impl-{date}`. If the checkout failed (e.g., branch already exists), append
@@ -190,10 +194,15 @@ Use the Edit tool to make this update.
 
 ### 6. Commit
 
+Stage the specific files changed during implementation, plus `TODOS.md`:
+
 ```bash
-git add -A
+git add {files created or modified during implementation} TODOS.md
 git commit -m "todo: {item title (shortened if needed)}"
 ```
+
+**Do NOT use `git add -A` or `git add .`** — stage files by name to avoid
+committing secrets (`.env`), credentials, or unintended artifacts.
 
 **Verify commit succeeded:** Check exit code of `git commit`. If it fails (e.g.,
 pre-commit hook rejection), fix the issue and create a new commit — do NOT use
