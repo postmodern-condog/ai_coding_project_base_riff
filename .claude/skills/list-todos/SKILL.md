@@ -111,8 +111,18 @@ Adjust score based on:
 - {Question that would improve requirements clarity}
 - {Another question, if applicable}
 
-**Suggested Next Action:** {One of: "Ready to implement", "Needs research", "Consider deferring", "Consider removing"}
+**Suggested Next Action:** {See rules below}
 ```
+
+### Suggested Next Action Rules
+
+The "Suggested Next Action" field must follow these rules:
+
+- **"Ready to implement"** — ONLY when the item has an explicit `[ready]` tag in TODOS.md. Never infer readiness from clarity or detail alone. The user must explicitly mark items as ready.
+- **"Needs clarification"** — When requirements clarity is LOW, or significant open questions remain
+- **"Needs research"** — When the approach is unclear and investigation is needed before implementation
+- **"Consider deferring"** — When explicitly marked DEFERRED, has low value, or user has deprioritized (low multiplier)
+- **"Consider removing"** — When the item appears obsolete, superseded, or no longer relevant
 
 ### For items with LOW requirements clarity:
 
@@ -163,7 +173,7 @@ Adjust score based on:
 | 2 | {title} | {N}/10 | {×N or —} | {action} |
 | ... | ... | ... | ... | ... |
 
-**Ready to implement:** {count}
+**Ready to implement ([ready] tagged):** {count}
 **Needs clarification:** {count}
 **Consider deferring:** {count}
 ```

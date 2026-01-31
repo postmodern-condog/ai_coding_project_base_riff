@@ -36,6 +36,19 @@
   }
   ```
 - **Implementation scope**: Rename skill + directory, add Netlify provider logic alongside existing Vercel logic, update browser-verification references, update README/docs references.
+- **Status: NOT READY** — Need to resolve strategic question first (see below).
+
+**Open question: Should verification run against preview deployments instead of locally? (2026-01-29)**
+
+The idea was to verify features on preview deployments rather than locally, hoping to simplify environment management and database migrations. After discussion, this is **not clearly better** and may not be worth pursuing:
+
+- **Environment parity is a real benefit** — testing the actual built artifact catches build-time issues (missing env vars, SSR problems, broken imports) that local dev servers miss.
+- **Database migrations aren't eliminated, just relocated** — preview deployments still need a database. Options (shared staging DB, per-branch DBs, ephemeral seeded DBs) each have real costs. Only platforms with native DB branching (Neon, PlanetScale) truly simplify this, and that adds platform coupling.
+- **Feedback loop speed is the critical downside** — local verification is near-instant; preview verification requires push → deploy (30s-5min) → verify. For an agent running 10+ tasks per phase, this adds up significantly.
+- **Hybrid approach may be the right answer** — local verification during `/phase-start` task execution (fast iteration), preview deployment verification at `/phase-checkpoint` boundaries (higher-fidelity integration check). This maps to what browser-verification already supports with `deployment.useForBrowserVerification`.
+- **Not all checks work remotely** — file existence, local process checks, code-level verification only work locally.
+
+Bottom line: re-implementing deployment preview support is still worthwhile for the browser-verification checkpoint use case, but the broader plan of moving all verification to preview deployments is unconvincing. Revisit if/when a concrete project surfaces where the trade-offs are clearer.
 
 - [x] **[P0 / High]** Deep audit of automation verification — ensure all components needed for human-free verification are present (see below) — DONE (84292a8)
 - [ ] **[P0 / High x0.5]** Make workflow portable across CLIs/models without breaking Claude Code "clone-and-go" sharing — **DEFERRED** (requirements unclear, revisit when specific target CLIs are identified)
@@ -124,7 +137,7 @@
 - [x] **[P0 / High x2]** Attempt automation before manual fallback — Add logic to attempt verification with available tools (curl, browser MCP, file inspection) before falling back to manual (see audit below) — DONE
 
 
-- [ ] **[P1 / Medium]** [ready] Create `/create-pr` skill with automatic Codex review — Runs `/codex-review` automatically before PR creation, includes any findings in PR description, and wraps `gh pr create`. Provides a controlled integration point for cross-model review in the PR workflow.
+- [ ] **[P1 / Medium]** [ready] Create `/create-pr` skill with automatic Codex review — Runs Codex automatically before PR creation, includes any findings in PR description, and wraps `gh pr create`. Provides a controlled integration point for cross-model review in the PR workflow.
 
 **Clarifications (from Q&A 2026-01-29):**
 - **PR body content**: Include all Codex findings — critical issues, recommendations, and positive findings. Full transparency.
@@ -133,15 +146,18 @@
 - **Arguments**: Optional focus area (e.g., `security`) + standard `gh pr create` flags (`--base`, `--title`, `--draft`). Flags pass through to `gh`.
 - **Title/body generation**: Auto-generate title from branch name and body from commit log. Show preview and let user confirm/edit before creating.
 - **Codex unavailable**: If Codex CLI is not installed, skip review silently and note "Codex Review: SKIPPED (Codex CLI not available)" in PR body. Do not block.
+- **Run location**: Project directory (execution command, not generation command).
+- **Auto-detect review type**: Check changed files in the diff. If any code files (`.ts`, `.js`, `.py`, etc.) are present, use `/codex-review`. If only non-code files (`.md`, `.json`, `.txt`, etc.) are changed, use `/codex-consult` on the diff instead. This leverages the codex-review/codex-consult split.
 - **Implementation approach**:
   1. Create `.claude/skills/create-pr/SKILL.md`
   2. Gather branch context (commits, changed files, base branch)
   3. Auto-generate PR title and body from commits
-  4. Run `/codex-review` with optional focus area
-  5. If critical issues found: show issues, block, ask user to fix or `--skip-review`
-  6. Append Codex findings section to PR body
-  7. Show PR preview (title + body) for user confirmation
-  8. Run `gh pr create` with confirmed title/body and any passthrough flags
+  4. Detect file types in diff: code files → `/codex-review`, doc-only → `/codex-consult`
+  5. Run appropriate Codex skill with optional focus area
+  6. If critical issues found: show issues, block, ask user to fix or `--skip-review`
+  7. Append Codex findings section to PR body
+  8. Show PR preview (title + body) for user confirmation
+  9. Run `gh pr create` with confirmed title/body and any passthrough flags
 - [x] **[P2 / Low]** Improve vercel-preview skill description — **REMOVED** (will be superseded by deployment-preview rename, per user decision 2026-01-29)
 - [ ] Compare web vs CLI interface for generation workflow (see below)
 - [ ] Issue tracker integration (Jira, Linear, GitHub Issues) — **DEFERRED** (nice-to-have, not core workflow)
@@ -168,23 +184,58 @@
 - [x] Add `/list-todos` command (see below) — DONE
 - [x] Recovery & Rollback Commands — DONE (phase-rollback, task-retry, phase-analyze)
 - [x] **[P1 / Medium]** Pre-push hook to check if README/docs need updating — Before every push, analyze recent commits and prompt if documentation appears outdated relative to code/command changes — DONE
-- [ ] **[P1 / High]** Research integrating with the native Task functionality that Claude Code recently added
+- [ ] **[P1 / High]** Integrate with Claude Code's native Tasks (formerly Todos) for phase execution and cross-session coordination
 
 **Clarifications (from Q&A 2026-01-29):**
 - **Motivation**: Both UI visibility (users see task progress in Claude Code's native spinner/status line) AND simpler state management (potentially replace custom phase-state.json)
 - **Approach**: Needs research first — understand native Task capabilities and limitations (persistence across sessions, dependency support, max tasks, etc.) before deciding whether to replace or augment phase-state.json
 - **Initial scope**: `/phase-start` only — create native Tasks for each EXECUTION_PLAN task during phase execution. Other skills (checkpoint, list-todos) can integrate later if the pattern works.
-- **Research questions**:
-  1. Do native Tasks persist across sessions, or are they session-scoped?
-  2. Can native Tasks express dependencies (blockedBy/blocks)?
-  3. Is there a limit on number of concurrent tasks?
-  4. Can task status be read back reliably (for state recovery)?
-  5. How do native Tasks interact with context summarization?
-- **Implementation approach (pending research)**:
-  1. Research native Task API behavior (create, update, list, get)
-  2. Prototype in `/phase-start`: create a Task per EXECUTION_PLAN task, update status as tasks complete
-  3. Evaluate whether phase-state.json can be replaced or should remain as persistent backup
-  4. If successful, expand to `/phase-checkpoint` and `/list-todos`
+
+**Research Findings (2026-01-31):**
+
+Source: [Announcement by @trq212](https://x.com/trq212/status/2014480496013803643) — Tasks are the evolution of TodoWrite, upgraded to support complex project coordination.
+
+- **Research questions (answered)**:
+  1. **Persistence**: Yes — Tasks are stored in `~/.claude/tasks/` on the filesystem, not session-scoped. Multiple sessions can share a Task List via `CLAUDE_CODE_TASK_LIST_ID` env var.
+  2. **Dependencies**: Yes — Tasks support `blockedBy`/`blocks` metadata natively (via `TaskUpdate` `addBlockedBy`/`addBlocks` params).
+  3. **Concurrent limit**: No documented hard limit. Each Task List gets a UUID directory under `~/.claude/tasks/`. Uses file-based locking (`.lock` files).
+  4. **Reliable readback**: Yes — `TaskGet` and `TaskList` tools read current state. When one session updates a Task, changes are broadcasted to all sessions on the same Task List.
+  5. **Context summarization**: Tasks survive summarization since they're filesystem-backed, not context-window-backed.
+
+- **Available tools**: `TaskCreate`, `TaskUpdate`, `TaskGet`, `TaskList` — these are built-in Claude Code tools (not MCP).
+
+- **Key capability**: Shared Task Lists via environment variable:
+  ```bash
+  CLAUDE_CODE_TASK_LIST_ID=myproject-phase-2 claude
+  ```
+  This also works with `claude -p` and the Claude Agent SDK.
+
+- **Mapping to toolkit concepts**:
+  | Toolkit Concept | Tasks Equivalent |
+  |-----------------|------------------|
+  | `EXECUTION_PLAN.md` tasks | `TaskCreate` with subject, description |
+  | `phase-state.json` status | `TaskUpdate` status (pending/in_progress/completed) |
+  | Task dependencies (step order) | `TaskUpdate` addBlockedBy/addBlocks |
+  | Cross-session state | `CLAUDE_CODE_TASK_LIST_ID` env var |
+  | Subagent coordination | Shared Task List with broadcasted updates |
+
+- **Implementation approach (updated with findings)**:
+  1. **Phase 1 — Parallel usage (low risk)**: Keep `EXECUTION_PLAN.md` + `phase-state.json`. Add `/hydrate-tasks` skill that parses EXECUTION_PLAN.md and creates native Tasks with dependencies. `/phase-start` uses native Tasks for UI visibility alongside existing state tracking.
+  2. **Phase 2 — Tasks as coordination layer**: `/phase-start` creates Tasks automatically. Subagents coordinate via shared Task List (broadcasted status updates). Task status syncs back to `EXECUTION_PLAN.md` checkboxes.
+  3. **Phase 3 — Replace phase-state.json**: Native Tasks become source of truth for execution state. `phase-state.json` removed or kept as optional export. Multi-developer workflow via shared `CLAUDE_CODE_TASK_LIST_ID`.
+
+- **New skill needed**: `/hydrate-tasks [phase-number]` — Converts EXECUTION_PLAN.md phase into native Tasks:
+  1. Parse EXECUTION_PLAN.md for phase N tasks
+  2. `TaskCreate` for each task (subject=task ID + title, description=acceptance criteria)
+  3. `TaskUpdate(addBlockedBy)` for sequential dependencies within steps
+  4. Store Task List ID in `.claude/task-list-id` for session sharing
+  5. Return summary of created tasks with dependency graph
+
+- **Integration with existing skills**:
+  - `/phase-start`: Call `/hydrate-tasks` at phase start, then `TaskUpdate(in_progress)` as each task begins, `TaskUpdate(completed)` when done
+  - `/progress`: Read native Tasks via `TaskList` for real-time status alongside EXECUTION_PLAN.md
+  - `/phase-checkpoint`: Verify all Tasks for phase are completed before proceeding
+  - Parallel Agent Orchestration: Spawn subagents with same `CLAUDE_CODE_TASK_LIST_ID` for coordinated parallel execution
 
 ## Future Concepts
 
