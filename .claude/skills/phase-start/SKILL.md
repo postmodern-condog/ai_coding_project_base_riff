@@ -154,6 +154,12 @@ See [CODEX_MODE.md](CODEX_MODE.md) for detailed Codex CLI setup and configuratio
    git checkout -b phase-$1
    ```
 
+   **Verify branch creation:**
+   ```bash
+   git branch --show-current
+   ```
+   If the output doesn't match `phase-$1`, the checkout failed. Check if branch already exists and append a suffix.
+
    After each task completion (sequential commits on same branch):
    ```bash
    git add -A

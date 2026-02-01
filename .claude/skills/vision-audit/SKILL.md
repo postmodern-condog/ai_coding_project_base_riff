@@ -1,6 +1,6 @@
 ---
 name: vision-audit
-description: Audit vision alignment, analyze SDLC gaps, research trends, and generate feature proposals.
+description: Audit project alignment with VISION.md, identify SDLC gaps, and generate feature proposals. Use when reviewing strategic direction or planning new features.
 allowed-tools: Read, Glob, Grep, Bash, WebSearch
 ---
 

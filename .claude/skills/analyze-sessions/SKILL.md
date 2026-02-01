@@ -147,6 +147,26 @@ Identify:
 - Common patterns that appear in multiple projects (shared automation opportunities)
 - Skills from the toolkit that are underused in target projects
 
+### 6b. Review Findings Before Writing
+
+Before writing the report file, output a summary of key findings to the user:
+
+```
+SESSION ANALYSIS PREVIEW
+========================
+Sessions analyzed: {N}
+Top patterns found: {count}
+
+Key findings:
+1. {finding 1}
+2. {finding 2}
+3. {finding 3}
+
+Writing full report to .claude/logs/ANALYSIS_REPORT.md...
+```
+
+This gives the user visibility before the file is written.
+
 ### 7. Generate Report
 
 Write analysis to `.claude/logs/ANALYSIS_REPORT.md` (in the toolkit):

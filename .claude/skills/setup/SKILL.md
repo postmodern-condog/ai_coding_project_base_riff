@@ -64,6 +64,11 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    ```
    If the count is 0 or the directory doesn't exist, STOP and report the copy failure.
 
+   Also verify configuration file:
+   ```bash
+   test -f "$1/.claude/verification-config.json" && echo "Config: OK" || echo "Config: MISSING (non-critical)"
+   ```
+
 3a. **Incremental Sync (When SETUP_MODE=incremental)**
 
    Skip Step 3 entirely and use this incremental approach instead:

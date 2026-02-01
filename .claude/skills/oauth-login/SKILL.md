@@ -167,8 +167,10 @@ server.listen(3847, () => {
 });
 EOF
 
+# Start callback server as BACKGROUND PROCESS
 node /tmp/oauth-callback-server.js &
 CALLBACK_PID=$!
+echo "Callback server started (PID: $CALLBACK_PID, background process)"
 
 # Verify the server started successfully
 sleep 1

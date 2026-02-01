@@ -257,7 +257,7 @@ When invoked by another skill, return structured data:
 | Authentication failed | Suggest `codex login` |
 | No commits on branch | Report nothing to review |
 | Codex times out | Return partial output if available |
-| Output is malformed | Attempt best-effort parsing |
+| Output is malformed | Attempt best-effort parsing: extract any text between known markers (e.g., "Critical Issues:", "Recommendations:"). If no structure found, return the raw output as a single recommendation with status `pass_with_notes` and note "Codex output could not be parsed — raw response included" |
 
 ## Configuration
 
