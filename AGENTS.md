@@ -11,7 +11,6 @@ This repository is a **toolkit** (prompts, slash commands, skills). It is not a
 - **Main directories:**
   - `.claude/skills/` — Skills (`SKILL.md`) — these create `/slash-commands`
   - `.claude/commands/` — Legacy command format (still works, but prefer skills)
-  - `FEATURE_PROMPTS/` — Feature workflow prompt templates
   - `deprecated/` — Legacy/reference-only prompt files (avoid editing unless required)
   - `docs/` — Static documentation site assets
 
@@ -46,6 +45,9 @@ Skills and commands are merged in Claude Code. Both create `/slash-commands`:
 
 Guidelines:
 - Keep the YAML frontmatter valid (`name`, `description`, `argument-hint`, `allowed-tools`).
+- Use `toolkit-only: true` in frontmatter for skills that should NOT sync to target
+  projects (e.g., `setup`, `update-target-projects`). All sync surfaces (setup,
+  update-target-projects, sync, install-codex-skill-pack.sh) check this flag.
 - Keep "Directory Guard" sections accurate; skills should fail fast when run in the
   wrong directory.
 - Prefer general, reusable workflows (avoid product-specific rules).
@@ -68,8 +70,10 @@ The toolkit supports cross-model verification using OpenAI Codex CLI:
 - `/phase-checkpoint` — Automatically invokes `/codex-review` when Codex is available
 
 When Codex CLI is installed and authenticated, phase checkpoints include a second-opinion
-review. Generation commands (`/product-spec`, `/technical-spec`, etc.) use `/codex-consult`
-for document review. Codex researches current documentation before reviewing, catching
+review. Generation commands (`/product-spec`, `/technical-spec`, `/feature-spec`, etc.)
+use `/codex-consult` for document review. Project-level specs (`/product-spec`,
+`/technical-spec`, `/generate-plan`) run from the toolkit; feature commands
+(`/feature-spec`, `/feature-technical-spec`, `/feature-plan`) run from the target project. Codex researches current documentation before reviewing, catching
 issues where training data may differ between models.
 
 **Configuration** (`.claude/settings.local.json`):

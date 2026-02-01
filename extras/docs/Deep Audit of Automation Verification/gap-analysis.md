@@ -8,7 +8,7 @@ intervention and what must still be manual.
 
 Files reviewed (non-exhaustive):
 - GENERATOR_PROMPT.md
-- FEATURE_PROMPTS/FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md
+- .claude/skills/feature-plan/PROMPT.md
 - START_PROMPTS.md
 - .claude/commands/phase-prep.md
 - .claude/commands/phase-start.md

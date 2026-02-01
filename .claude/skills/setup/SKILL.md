@@ -3,6 +3,7 @@ name: setup
 description: Initialize a new project with the AI Coding Toolkit. Use when setting up toolkit skills in a new or existing project.
 argument-hint: [target-directory]
 allowed-tools: Bash, Read, Write, AskUserQuestion
+toolkit-only: true
 ---
 
 Initialize a new project at `$1` with the AI Coding Toolkit.
@@ -51,8 +52,24 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
 
 3. **Copy skills to target**
 
-   Copy all skills to the target's `.claude/skills/`:
-   - `.claude/skills/` → target's `.claude/skills/`
+   Copy skills to the target's `.claude/skills/`, **excluding toolkit-only skills**:
+
+   **Filtering logic:** For each skill directory in `.claude/skills/`:
+   1. Read the skill's `SKILL.md`
+   2. Parse the YAML frontmatter (content between first `---` and closing `---`)
+   3. If frontmatter contains `toolkit-only: true`, **skip** this skill (do not copy)
+   4. Otherwise, copy the skill directory to the target
+
+   ```bash
+   for skill_dir in .claude/skills/*/; do
+     skill_name="$(basename "$skill_dir")"
+     # Check for toolkit-only flag in YAML frontmatter (between --- markers)
+     if sed -n '/^---$/,/^---$/p' "$skill_dir/SKILL.md" 2>/dev/null | grep -q '^toolkit-only: true'; then
+       continue  # Skip toolkit-only skills
+     fi
+     cp -r "$skill_dir" "$1/.claude/skills/"
+   done
+   ```
 
    Copy verification config (if missing):
    - `.claude/verification-config.json` → target's `.claude/verification-config.json`
@@ -78,7 +95,7 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    STORED_HASHES=$(jq '.files' "$1/.claude/toolkit-version.json")
    ```
 
-   For each skill in the copy list:
+   For each skill in the copy list (excluding toolkit-only skills — check `SKILL.md` frontmatter for `toolkit-only: true`):
 
    1. Calculate toolkit file hash:
       ```bash
@@ -171,10 +188,14 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    shasum -a 256 "$file" | cut -d' ' -f1
    ```
 
-   **Include entries for ALL files in skill directories:**
+   **Include entries for ALL files in non-toolkit-only skill directories:**
    ```bash
-   # Hash every .md file in every skill directory
+   # Hash every .md file in every skill directory (skip toolkit-only)
    for skill_dir in .claude/skills/*/; do
+     # Skip toolkit-only skills (parse YAML frontmatter between --- markers)
+     if sed -n '/^---$/,/^---$/p' "$skill_dir/SKILL.md" 2>/dev/null | grep -q '^toolkit-only: true'; then
+       continue
+     fi
      for file in "$skill_dir"*.md; do
        [[ -f "$file" ]] || continue
        hash=$(shasum -a 256 "$file" | cut -d' ' -f1)
@@ -186,9 +207,8 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    This ensures skills with supporting files (e.g., `audit-skills/CRITERIA.md`,
    `audit-skills/SCORING.md`) are tracked for conflict detection.
 
-   **Do NOT copy:**
-   - Generation skills (setup, product-spec, etc.) — these run from the toolkit
-   - Prompt files — these stay in the toolkit
+   **Skills with `toolkit-only: true` in frontmatter are NOT copied or tracked.**
+   These run only from the toolkit directory (e.g., setup, update-target-projects).
 
 5. **Create CLAUDE.md if it doesn't exist**
 
@@ -298,13 +318,11 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    Target: $1
    Feature directory: FEATURE_PATH
 
-   Next steps (run from THIS toolkit directory):
-   1. /feature-spec FEATURE_PATH
-   2. /feature-technical-spec FEATURE_PATH
-   3. /feature-plan FEATURE_PATH
-
-   Then switch to your feature directory:
-   4. cd FEATURE_PATH
+   Next steps (run from your project directory):
+   1. cd $1
+   2. /feature-spec <feature-name>
+   3. /feature-technical-spec <feature-name>
+   4. /feature-plan <feature-name>
    5. /fresh-start
    6. /configure-verification
    7. /phase-prep 1
@@ -316,7 +334,9 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
 ## Important
 
 - This skill must be run from the ai_coding_project_base toolkit directory
-- Generation skills run from toolkit, execution skills run from target
+- Project-level generation skills (`/product-spec`, `/technical-spec`, `/generate-plan`) run from toolkit
+- Feature skills (`/feature-spec`, `/feature-technical-spec`, `/feature-plan`) run from the target project
+- Execution skills run from target
 - Use `cp -r` for directory copies to preserve structure
 - Do not overwrite existing files without asking
 

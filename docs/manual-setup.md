@@ -40,9 +40,9 @@ If you're not using Claude Code, you can use this toolkit with any LLM by copyin
 
 | Output Document | Prompt File |
 |-----------------|-------------|
-| FEATURE_SPEC.md | `FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md` |
-| FEATURE_TECHNICAL_SPEC.md | `FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md` |
-| EXECUTION_PLAN.md + AGENTS_ADDITIONS.md | `FEATURE_PROMPTS/FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md` |
+| FEATURE_SPEC.md | `.claude/skills/feature-spec/PROMPT.md` |
+| FEATURE_TECHNICAL_SPEC.md | `.claude/skills/feature-technical-spec/PROMPT.md` |
+| EXECUTION_PLAN.md + AGENTS_ADDITIONS.md | `.claude/skills/feature-plan/PROMPT.md` |
 
 ### Execution
 

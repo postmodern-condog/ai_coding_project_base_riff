@@ -1,76 +1,60 @@
 ---
+name: feature-technical-spec
 description: Generate FEATURE_TECHNICAL_SPEC.md through guided Q&A
-argument-hint: [target-directory]
-allowed-tools: Read, Write, Edit, AskUserQuestion, Glob, Grep
+argument-hint: <feature-name>
+allowed-tools: Bash, Read, Write, Edit, AskUserQuestion, Glob, Grep
 ---
 
-Generate a feature technical specification document for the project at `$1`.
+Generate a feature technical specification document for the feature `$1`.
+
+## Directory Guard
+
+1. If `START_PROMPTS.md` or `GENERATOR_PROMPT.md` exists in the current working directory → **STOP**:
+   "You're in the toolkit repo. Feature skills run from your project directory.
+    Run: `cd ~/Projects/your-project && /feature-technical-spec $1`"
+
+2. Check `.claude/toolkit-version.json` exists in the current working directory (confirms `/setup` was run).
+   If missing → **STOP**: "Toolkit not installed. Run `/setup` from the toolkit first."
+
+3. Check `AGENTS.md` exists in the current working directory (confirms project root).
+   If missing → **STOP**: "Run this from your project root (where AGENTS.md lives)."
+
+## Arguments
+
+- `$1` = feature name (e.g., `analytics`, `dark-mode`)
+- If `$1` is empty, ask the user for the feature name
+- `PROJECT_ROOT` = current working directory
+- `FEATURE_DIR` = `PROJECT_ROOT/features/$1`
 
 ## Prerequisites
 
-- This command must be run from the ai_coding_project_base toolkit directory
-- If `$1` is empty, ask the user for the target directory path
-- Check that `$1/FEATURE_SPEC.md` exists. If not:
-  "FEATURE_SPEC.md not found at $1. Run /feature-spec $1 first."
+- Check that `FEATURE_DIR/FEATURE_SPEC.md` exists. If not:
+  "FEATURE_SPEC.md not found at features/$1/. Run `/feature-spec $1` first."
 - Check that `PROJECT_ROOT/AGENTS.md` exists (indicates an existing project). If not, warn:
-  "AGENTS.md not found at PROJECT_ROOT. Feature development assumes an existing project. Did you mean to run /product-spec for a new project?"
-  (See Project Root Detection section below for how PROJECT_ROOT is derived)
-
-## Directory Guard (Wrong Directory Check)
-
-Before starting, confirm you're in the toolkit directory by reading `FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md` from the current working directory.
-
-- If `FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md` is not present, **STOP** and tell the user:
-  - They're likely in their target project directory (or another repo)
-  - They should `cd` into the `ai_coding_project_base` toolkit repo and re-run `/feature-technical-spec $1`
+  "AGENTS.md not found. Feature development assumes an existing project. Did you mean to run `/product-spec` for a new project?"
 
 ## Existing File Guard (Prevent Overwrite)
 
-Before asking any questions, check whether `$1/FEATURE_TECHNICAL_SPEC.md` already exists.
+Before asking any questions, check whether `FEATURE_DIR/FEATURE_TECHNICAL_SPEC.md` already exists.
 
 - If it does not exist: continue normally.
 - If it exists: **STOP** and ask the user what to do:
-  1. **Backup then overwrite (recommended)**: read the existing file and write it to `$1/FEATURE_TECHNICAL_SPEC.md.bak.YYYYMMDD-HHMMSS`, then write the new document to `$1/FEATURE_TECHNICAL_SPEC.md`
-  2. **Overwrite**: replace `$1/FEATURE_TECHNICAL_SPEC.md` with the new document
+  1. **Backup then overwrite (recommended)**: read the existing file and write it to `FEATURE_DIR/FEATURE_TECHNICAL_SPEC.md.bak.YYYYMMDD-HHMMSS`, then write the new document to `FEATURE_DIR/FEATURE_TECHNICAL_SPEC.md`
+  2. **Overwrite**: replace `FEATURE_DIR/FEATURE_TECHNICAL_SPEC.md` with the new document
   3. **Abort**: do not write anything; suggest they rename/move the existing file first
-
-## Project Root Detection
-
-Derive project root from the target directory:
-
-1. If `$1` matches pattern `*/features/*` (contains `/features/` followed by a feature name):
-   - PROJECT_ROOT = parent of parent of $1 (e.g., `/project/features/foo` → `/project`)
-   - FEATURE_NAME = basename of $1
-
-2. Validate PROJECT_ROOT:
-   - Check `PROJECT_ROOT/AGENTS.md` exists
-   - If missing: "Could not find AGENTS.md at PROJECT_ROOT. Is this a valid project with the features/ structure?"
-
-3. If `$1` does NOT match the `*/features/*` pattern:
-   - Warn: "`$1` doesn't appear to be a feature directory (expected path like `/project/features/feature-name`)"
-   - Ask if they want to continue anyway
-
-4. Use PROJECT_ROOT for:
-   - Reading AGENTS.md
-   - Codebase analysis and pattern detection (steps 2-3 below)
-   - Existing code searches
-
-5. Use $1 (feature directory) for:
-   - Reading FEATURE_SPEC.md
-   - Writing FEATURE_TECHNICAL_SPEC.md
 
 ## Process
 
-Read FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md from this toolkit directory and follow its instructions exactly:
+Read `.claude/skills/feature-technical-spec/PROMPT.md` and follow its instructions exactly:
 
-1. Read `$1/FEATURE_SPEC.md` as input
+1. Read `FEATURE_DIR/FEATURE_SPEC.md` as input
 
 2. **Perform Existing Code Analysis** (REQUIRED before any design):
 
-   **Note:** All code analysis should be performed on PROJECT_ROOT, not the feature directory.
+   **Note:** All code analysis should be performed on PROJECT_ROOT (current working directory).
 
    a. **Similar Functionality Audit**
-      - Search PROJECT_ROOT for existing code that does something similar to what the feature needs
+      - Search for existing code that does something similar to what the feature needs
       - List any utilities, helpers, or patterns that could be reused
       - Flag if creating new code when existing code could be extended
       - Output:
@@ -120,7 +104,7 @@ Read FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md from this toolkit director
 
 ## Output
 
-Write the completed specification to `$1/FEATURE_TECHNICAL_SPEC.md`.
+Write the completed specification to `FEATURE_DIR/FEATURE_TECHNICAL_SPEC.md`.
 
 ## Verification (Automatic)
 
@@ -208,7 +192,7 @@ After verification passes, run cross-model review if Codex CLI is available:
 
 **Consultation invocation:**
 ```
-/codex-consult --upstream $1/FEATURE_SPEC.md --research "{detected technologies from codebase}" $1/FEATURE_TECHNICAL_SPEC.md
+/codex-consult --upstream features/$1/FEATURE_SPEC.md --research "{detected technologies from codebase}" features/$1/FEATURE_TECHNICAL_SPEC.md
 ```
 
 **If Codex finds issues:**
@@ -223,11 +207,11 @@ After verification passes, run cross-model review if Codex CLI is available:
 
 When verification is complete, inform the user:
 ```
-FEATURE_TECHNICAL_SPEC.md created and verified at $1/FEATURE_TECHNICAL_SPEC.md
+FEATURE_TECHNICAL_SPEC.md created and verified at features/$1/FEATURE_TECHNICAL_SPEC.md
 
 Verification: PASSED | PASSED WITH NOTES | NEEDS REVIEW
 Cross-Model Review: PASSED | PASSED WITH NOTES | SKIPPED
-Deferred Requirements: {count} items captured to PROJECT_ROOT/DEFERRED.md
+Deferred Requirements: {count} items captured to DEFERRED.md
 
 Next: Run /feature-plan $1
 ```

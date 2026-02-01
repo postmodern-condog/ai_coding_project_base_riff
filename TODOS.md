@@ -451,7 +451,6 @@ Create a `DEFERRED.md` file that gets auto-populated during spec generation:
 - `/product-spec` — Extract deferred items after document generation
 - `/technical-spec` — Extract deferred items after document generation
 - `/feature-spec` — Extract deferred items (append to existing DEFERRED.md)
-- `/bootstrap` — Should also scan for deferred patterns in existing docs
 
 **Questions to answer:**
 - Should deferred items have priority/effort estimates captured at deferral time?

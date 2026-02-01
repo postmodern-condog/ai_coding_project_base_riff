@@ -45,13 +45,25 @@ fi
 These files are synced from toolkit to target:
 
 **Skills** (`.claude/skills/`):
-All skill directories in the toolkit's `.claude/skills/` are synced automatically.
+All skill directories in the toolkit's `.claude/skills/` are synced automatically,
+**excluding toolkit-only skills** (those with `toolkit-only: true` in SKILL.md frontmatter).
 Skills are discovered dynamically — no hardcoded list.
 
 ```bash
-# Discover all skills
-ls -1 "$TOOLKIT_PATH/.claude/skills" | grep -v "^\."
+# Discover all skills, excluding toolkit-only
+for skill_dir in "$TOOLKIT_PATH/.claude/skills"/*/; do
+  skill_name="$(basename "$skill_dir")"
+  [[ "$skill_name" == .* ]] && continue
+  # Skip toolkit-only skills (parse YAML frontmatter between --- markers)
+  if sed -n '/^---$/,/^---$/p' "$skill_dir/SKILL.md" 2>/dev/null | grep -q '^toolkit-only: true'; then
+    continue
+  fi
+  echo "$skill_name"
+done
 ```
+
+**Cleanup of toolkit-only skills in targets:** If a toolkit-only skill is found in the target,
+treat it as an orphan and handle with the same safety rules (auto-delete if unmodified, prompt if modified).
 
 **Config** (only if missing):
 - `.claude/verification-config.json`

@@ -1,6 +1,7 @@
 ---
 name: update-target-projects
 description: Discover and sync all toolkit-using projects with the latest skills. Use when skills are modified, after the post-commit hook reminds you, or to batch-sync multiple projects.
+toolkit-only: true
 ---
 
 # Update Target Projects

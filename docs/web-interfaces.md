@@ -50,16 +50,17 @@ cd ~/Projects/my-app
 
 ```bash
 # 1. In web interface:
-#    - Paste contents of FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md
+#    - Paste contents of .claude/skills/feature-spec/PROMPT.md
 #    - Include relevant context about your existing app
 #    - Copy the resulting markdown
 
 # 2. Save to your project:
 #    - Create FEATURE_SPEC.md in your target directory
 
-# 3. Continue in Claude Code (from toolkit directory):
-/feature-technical-spec ~/Projects/my-app    # Benefits from codebase access
-/feature-plan ~/Projects/my-app
+# 3. Continue in Claude Code (from your project directory):
+cd ~/Projects/my-app
+/feature-technical-spec my-feature    # Benefits from codebase access
+/feature-plan my-feature
 
 # 4. Execute normally
 ```
@@ -72,7 +73,7 @@ The raw prompts are available for copy-paste into any LLM:
 |----------|-------------|
 | PRODUCT_SPEC.md | `PRODUCT_SPEC_PROMPT.md` |
 | TECHNICAL_SPEC.md | `TECHNICAL_SPEC_PROMPT.md` |
-| FEATURE_SPEC.md | `FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md` |
-| FEATURE_TECHNICAL_SPEC.md | `FEATURE_PROMPTS/FEATURE_TECHNICAL_SPEC_PROMPT.md` |
+| FEATURE_SPEC.md | `.claude/skills/feature-spec/PROMPT.md` |
+| FEATURE_TECHNICAL_SPEC.md | `.claude/skills/feature-technical-spec/PROMPT.md` |
 
 **Note:** EXECUTION_PLAN.md and AGENTS.md generation (`GENERATOR_PROMPT.md`) requires reading the spec files, so these are best done in Claude Code where file access is available.

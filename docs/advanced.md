@@ -15,10 +15,7 @@ export AI_CODING_TOOLKIT="$HOME/Projects/ai_coding_project_base"
 cd ~/Projects/my-existing-app
 claude
 
-# 4. Generate an execution plan from your existing context:
-/bootstrap    # Converts your description/spec into an actionable plan
-
-# Or use the full workflow:
+# 4. Generate specs and plan:
 /product-spec .
 /technical-spec .
 /generate-plan .

@@ -90,7 +90,20 @@ For each selected project:
 4. **Delete orphaned skills** (with user confirmation if locally modified)
 5. Update `toolkit-version.json` with new commit, hashes, and removed skills
 
-**Skills to sync:** All skills from `.claude/skills/` are synced dynamically.
+**Skills to sync:** All skills from `.claude/skills/` are synced dynamically, **excluding toolkit-only skills** (those with `toolkit-only: true` in SKILL.md frontmatter).
+
+**Toolkit-only filtering:**
+```bash
+# Check if a skill is toolkit-only
+is_toolkit_only() {
+  local skill_dir="$1"
+  sed -n '/^---$/,/^---$/p' "$skill_dir/SKILL.md" 2>/dev/null | grep -q '^toolkit-only: true'
+}
+```
+
+**Cleanup of toolkit-only skills in targets:** During sync, if a toolkit-only skill is found in a target project, treat it as an orphan:
+- If unmodified (hash matches last sync): delete automatically
+- If locally modified: prompt user (delete/keep/backup)
 
 ## Orphan Detection
 

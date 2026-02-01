@@ -9,13 +9,15 @@ Features are isolated in their own directories under `features/<name>/`, enablin
 ## Quick Start
 
 ```bash
-# From toolkit directory:
-/feature-spec ~/Projects/existing-app/features/analytics
-/feature-technical-spec ~/Projects/existing-app/features/analytics
-/feature-plan ~/Projects/existing-app/features/analytics   # Also copies execution skills
+# From your project directory (after /setup):
+cd ~/Projects/existing-app
 
-# From your feature directory:
-cd ~/Projects/existing-app/features/analytics
+/feature-spec analytics
+/feature-technical-spec analytics
+/feature-plan analytics
+
+# Then execute from the feature directory:
+cd features/analytics
 /fresh-start             # Detects feature mode, creates feature/analytics branch
 /configure-verification  # Set test/lint/typecheck/build/dev server commands
 /phase-prep 1
@@ -98,9 +100,9 @@ After generating the feature plan, merge `AGENTS_ADDITIONS.md` into your project
 │                                                                         │
 │   Your Feature Idea                                                     │
 │       ↓                                                                 │
-│   FEATURE_SPEC_PROMPT  ──────→  FEATURE_SPEC.md                         │
+│   /feature-spec <name>  ────→  FEATURE_SPEC.md                          │
 │       ↓                                                                 │
-│   FEATURE_TECHNICAL_SPEC_PROMPT  ────→  FEATURE_TECHNICAL_SPEC.md       │
+│   /feature-technical-spec <name>  ──→  FEATURE_TECHNICAL_SPEC.md        │
 │       ↓                                                                 │
 │   [Auto-Verify] ─────────────→  Check context preservation & quality    │
 │                                                                         │
@@ -112,7 +114,7 @@ After generating the feature plan, merge `AGENTS_ADDITIONS.md` into your project
 │                                                                         │
 │   Inputs: Specs + existing AGENTS.md                                    │
 │       ↓                                                                 │
-│   FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT  ─→  EXECUTION_PLAN.md        │
+│   /feature-plan <name>  ────→  EXECUTION_PLAN.md                        │
 │                                                  AGENTS_ADDITIONS.md    │
 │       ↓                                                                 │
 │   [Auto-Verify] ─────────────→  Check context preservation & quality    │

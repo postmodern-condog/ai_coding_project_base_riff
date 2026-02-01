@@ -64,11 +64,16 @@ fi
 
 # Dynamically discover all skills from the toolkit
 # This ensures new skills are automatically included without manual updates
+# Skills with toolkit-only: true in frontmatter are excluded from distribution
 SKILLS=()
 while IFS= read -r -d '' skill_dir; do
   skill_name="$(basename "$skill_dir")"
   # Skip hidden directories
   [[ "$skill_name" == .* ]] && continue
+  # Skip toolkit-only skills (parse YAML frontmatter between --- markers)
+  if sed -n '/^---$/,/^---$/p' "$skill_dir/SKILL.md" 2>/dev/null | grep -q '^toolkit-only: true'; then
+    continue
+  fi
   SKILLS+=("$skill_name")
 done < <(find "$SRC_DIR" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 

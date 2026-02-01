@@ -6,14 +6,23 @@
 CODEX_SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills"
 TOOLKIT_SKILLS_DIR="$(pwd)/.claude/skills"
 
-# Dynamically discover all skills from toolkit directory
-TOOLKIT_SKILLS=($(ls -1 "$TOOLKIT_SKILLS_DIR" | grep -v "^\\."))
+# Dynamically discover all skills from toolkit directory, excluding toolkit-only
+TOOLKIT_SKILLS=()
+for skill_dir in "$TOOLKIT_SKILLS_DIR"/*/; do
+  skill_name="$(basename "$skill_dir")"
+  [[ "$skill_name" == .* ]] && continue
+  # Skip toolkit-only skills (parse YAML frontmatter between --- markers)
+  if sed -n '/^---$/,/^---$/p' "$skill_dir/SKILL.md" 2>/dev/null | grep -q '^toolkit-only: true'; then
+    continue
+  fi
+  TOOLKIT_SKILLS+=("$skill_name")
+done
 
 # Discover all skills currently installed in Codex directory
 CODEX_INSTALLED=($(ls -1 "$CODEX_SKILLS_DIR" 2>/dev/null | grep -v "^\\."))
 ```
 
-**Note:** Skills are discovered dynamically from both toolkit and Codex directories.
+**Note:** Skills are discovered dynamically from both toolkit and Codex directories. Skills with `toolkit-only: true` in their SKILL.md frontmatter are excluded from distribution.
 
 ## Status Classification
 

@@ -57,7 +57,18 @@ cd ~/Projects/my-new-app
 # Review changes, then: git push origin phase-1
 ```
 
-For feature development in existing projects, see [Feature Workflow](docs/feature-workflow.md).
+For feature development in existing projects:
+
+```bash
+# From your project directory (after /setup):
+/feature-spec analytics
+/feature-technical-spec analytics
+/feature-plan analytics
+/fresh-start
+/phase-start 1
+```
+
+See [Feature Workflow](docs/feature-workflow.md) for the complete guide.
 
 ## Workflow Overview
 
@@ -109,10 +120,10 @@ For feature development in existing projects, see [Feature Workflow](docs/featur
 See [Feature Workflow](docs/feature-workflow.md) for the complete guide. The pattern is similar:
 
 ```
-/feature-spec → /feature-technical-spec → /feature-plan → /fresh-start → /phase-start
+/feature-spec <name> → /feature-technical-spec <name> → /feature-plan <name> → /fresh-start → /phase-start
 ```
 
-Features are isolated in `features/<name>/` directories, enabling concurrent feature development.
+Feature commands run from your project directory (not the toolkit). Features are isolated in `features/<name>/` directories, enabling concurrent feature development.
 
 ## Commands Reference
 
@@ -123,11 +134,15 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/product-spec [path]` | Generate product specification |
 | `/technical-spec [path]` | Generate technical specification |
 | `/generate-plan [path]` | Generate execution plan and AGENTS.md |
-| `/feature-spec [path]` | Generate feature specification |
-| `/feature-technical-spec [path]` | Generate feature technical specification |
-| `/feature-plan [path]` | Generate feature execution plan |
 | `/verify-spec <type>` | Verify spec document for quality issues |
-| `/bootstrap` | Generate plan from existing context |
+
+### Feature Commands (run from your project directory)
+
+| Command | Description |
+|---------|-------------|
+| `/feature-spec <name>` | Generate feature specification |
+| `/feature-technical-spec <name>` | Generate feature technical specification |
+| `/feature-plan <name>` | Generate feature execution plan |
 
 ### Setup Commands (run from toolkit directory)
 
@@ -157,7 +172,7 @@ Features are isolated in `features/<name>/` directories, enabling concurrent fea
 | `/phase-start N [--codex]` | Execute phase N (creates branch, commits per task). Use `--codex` to have Codex CLI execute tasks while Claude orchestrates. |
 | `/phase-checkpoint N` | Local-first verification, then production checks |
 | `/verify-task X.Y.Z` | Verify specific task acceptance criteria |
-| `/criteria-audit` | Validate acceptance criteria metadata |
+| `/criteria-audit [dir]` | Validate acceptance criteria metadata |
 | `/security-scan` | Run security checks (deps, secrets, code) |
 | `/codex-review` | Cross-model code review using Codex CLI |
 | `/codex-consult` | Cross-model document consultation using Codex CLI |
@@ -257,7 +272,7 @@ When auto-advance stops (manual items exist, check fails, or final phase complet
 
 When Codex CLI is installed, the toolkit automatically invokes Codex for second-opinion reviews at key points:
 
-- **Generation commands** — `/product-spec`, `/technical-spec`, `/generate-plan`, `/feature-spec`, `/feature-technical-spec`, `/feature-plan`, and `/bootstrap` all run `/codex-consult` after creating documents
+- **Generation commands** — `/product-spec`, `/technical-spec`, `/generate-plan`, `/feature-spec`, `/feature-technical-spec`, and `/feature-plan` all run `/codex-consult` after creating documents
 - **Phase checkpoints** — `/phase-checkpoint` reviews completed phase code via `/codex-review`
 - **Pull requests** — `/create-pr` runs Codex review before creating the PR, includes findings in the PR body, and blocks on critical issues
 
@@ -401,10 +416,6 @@ ai_coding_project_base/
 ├── TECHNICAL_SPEC_PROMPT.md
 ├── GENERATOR_PROMPT.md
 ├── START_PROMPTS.md
-├── FEATURE_PROMPTS/                 # Feature workflow prompts
-│   ├── FEATURE_SPEC_PROMPT.md
-│   ├── FEATURE_TECHNICAL_SPEC_PROMPT.md
-│   └── FEATURE_EXECUTION_PLAN_GENERATOR_PROMPT.md
 ├── .claude/
 │   ├── skills/                      # All skills (create /slash-commands)
 │   ├── commands/                    # Legacy command format (still works)

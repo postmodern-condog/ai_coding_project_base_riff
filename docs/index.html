@@ -984,16 +984,16 @@
                         <div><span class="code-flag">/phase-checkpoint</span> <span class="code-command">1</span></div>
                     </div>
                     <div class="code-block" id="feature-code" style="display: none;">
-                        <div><span class="code-comment"># From toolkit directory, set up feature in existing project</span></div>
+                        <div><span class="code-comment"># From toolkit directory, install skills</span></div>
                         <div><span class="code-flag">/setup</span> <span class="code-path">~/Projects/existing-app</span></div>
                         <div>&nbsp;</div>
-                        <div><span class="code-comment"># Generate feature specifications</span></div>
-                        <div><span class="code-flag">/feature-spec</span> <span class="code-path">~/Projects/existing-app/features/analytics</span></div>
-                        <div><span class="code-flag">/feature-technical-spec</span> <span class="code-path">~/Projects/existing-app/features/analytics</span></div>
-                        <div><span class="code-flag">/feature-plan</span> <span class="code-path">~/Projects/existing-app/features/analytics</span></div>
+                        <div><span class="code-comment"># From your project directory, generate feature specs</span></div>
+                        <div><span class="code-command">cd</span> <span class="code-path">~/Projects/existing-app</span></div>
+                        <div><span class="code-flag">/feature-spec</span> <span class="code-command">analytics</span></div>
+                        <div><span class="code-flag">/feature-technical-spec</span> <span class="code-command">analytics</span></div>
+                        <div><span class="code-flag">/feature-plan</span> <span class="code-command">analytics</span></div>
                         <div>&nbsp;</div>
-                        <div><span class="code-comment"># Execute from feature directory</span></div>
-                        <div><span class="code-command">cd</span> <span class="code-path">~/Projects/existing-app/features/analytics</span></div>
+                        <div><span class="code-comment"># Execute phases</span></div>
                         <div><span class="code-flag">/fresh-start</span> <span class="code-comment"># Creates feature/analytics branch</span></div>
                         <div><span class="code-flag">/phase-start</span> <span class="code-command">1</span></div>
                         <div><span class="code-flag">/phase-checkpoint</span> <span class="code-command">1</span></div>

@@ -1,53 +1,49 @@
 ---
+name: feature-spec
 description: Generate FEATURE_SPEC.md through guided Q&A
-argument-hint: [target-directory]
-allowed-tools: Read, Write, AskUserQuestion
+argument-hint: <feature-name>
+allowed-tools: Bash, Read, Write, AskUserQuestion
 ---
 
-Generate a feature specification document for the project at `$1`.
+Generate a feature specification document for the feature `$1`.
 
-## Prerequisites
+## Directory Guard
 
-- This command must be run from the ai_coding_project_base toolkit directory
-- If `$1` is empty, ask the user for the target directory path
+1. If `START_PROMPTS.md` or `GENERATOR_PROMPT.md` exists in the current working directory → **STOP**:
+   "You're in the toolkit repo. Feature skills run from your project directory.
+    Run: `cd ~/Projects/your-project && /feature-spec $1`"
 
-## Directory Guard (Wrong Directory Check)
+2. Check `.claude/toolkit-version.json` exists in the current working directory (confirms `/setup` was run).
+   If missing → **STOP**: "Toolkit not installed. Run `/setup` from the toolkit first."
 
-Before starting, confirm you're in the toolkit directory by reading `FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md` from the current working directory.
+3. Check `AGENTS.md` exists in the current working directory (confirms project root).
+   If missing → **STOP**: "Run this from your project root (where AGENTS.md lives)."
 
-- If `FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md` is not present, **STOP** and tell the user:
-  - They're likely in their target project directory (or another repo)
-  - They should `cd` into the `ai_coding_project_base` toolkit repo and re-run `/feature-spec $1`
+## Arguments
+
+- `$1` = feature name (e.g., `analytics`, `dark-mode`)
+- If `$1` is empty, ask the user for the feature name
+- `PROJECT_ROOT` = current working directory
+- `FEATURE_DIR` = `PROJECT_ROOT/features/$1`
+
+Create `features/$1/` if it doesn't exist:
+```bash
+mkdir -p "features/$1"
+```
 
 ## Existing File Guard (Prevent Overwrite)
 
-Before asking any questions, check whether `$1/FEATURE_SPEC.md` already exists.
+Before asking any questions, check whether `FEATURE_DIR/FEATURE_SPEC.md` already exists.
 
 - If it does not exist: continue normally.
 - If it exists: **STOP** and ask the user what to do:
-  1. **Backup then overwrite (recommended)**: read the existing file and write it to `$1/FEATURE_SPEC.md.bak.YYYYMMDD-HHMMSS`, then write the new document to `$1/FEATURE_SPEC.md`
-  2. **Overwrite**: replace `$1/FEATURE_SPEC.md` with the new document
+  1. **Backup then overwrite (recommended)**: read the existing file and write it to `FEATURE_DIR/FEATURE_SPEC.md.bak.YYYYMMDD-HHMMSS`, then write the new document to `FEATURE_DIR/FEATURE_SPEC.md`
+  2. **Overwrite**: replace `FEATURE_DIR/FEATURE_SPEC.md` with the new document
   3. **Abort**: do not write anything; suggest they rename/move the existing file first
-
-## Project Root Detection
-
-Derive project root from the target directory:
-
-1. If `$1` matches pattern `*/features/*` (contains `/features/` followed by a feature name):
-   - PROJECT_ROOT = parent of parent of $1 (e.g., `/project/features/foo` → `/project`)
-   - FEATURE_NAME = basename of $1
-
-2. Validate PROJECT_ROOT:
-   - Check `PROJECT_ROOT/AGENTS.md` exists
-   - If missing: "Could not find AGENTS.md at PROJECT_ROOT. Is this a valid project with the features/ structure?"
-
-3. If `$1` does NOT match the `*/features/*` pattern:
-   - Warn: "`$1` doesn't appear to be a feature directory (expected path like `/project/features/feature-name`)"
-   - Ask if they want to continue anyway (may indicate `/setup` was not run for Feature type)
 
 ## Process
 
-Read FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md from this toolkit directory and follow its instructions exactly:
+Read `.claude/skills/feature-spec/PROMPT.md` and follow its instructions exactly:
 
 1. Ask the user to describe the feature they want to add
 2. Work through each question category (Problem, Users, Behavior, Integration, Scope)
@@ -56,7 +52,7 @@ Read FEATURE_PROMPTS/FEATURE_SPEC_PROMPT.md from this toolkit directory and foll
 
 ## Output
 
-Write the completed specification to `$1/FEATURE_SPEC.md`.
+Write the completed specification to `FEATURE_DIR/FEATURE_SPEC.md`.
 
 ## Deferred Requirements Capture (During Q&A)
 
@@ -145,7 +141,7 @@ After writing FEATURE_SPEC.md, run cross-model review if Codex CLI is available:
 
 **Consultation invocation:**
 ```
-/codex-consult --research "feature requirements, user stories" $1/FEATURE_SPEC.md
+/codex-consult --research "feature requirements, user stories" features/$1/FEATURE_SPEC.md
 ```
 
 **If Codex finds issues:**
@@ -160,8 +156,8 @@ After writing FEATURE_SPEC.md, run cross-model review if Codex CLI is available:
 
 When complete, inform the user:
 ```
-FEATURE_SPEC.md created at $1/FEATURE_SPEC.md
-Deferred Requirements: {count} items captured to PROJECT_ROOT/DEFERRED.md
+FEATURE_SPEC.md created at features/$1/FEATURE_SPEC.md
+Deferred Requirements: {count} items captured to DEFERRED.md
 Cross-Model Review: PASSED | PASSED WITH NOTES | SKIPPED
 
 Next: Run /feature-technical-spec $1
