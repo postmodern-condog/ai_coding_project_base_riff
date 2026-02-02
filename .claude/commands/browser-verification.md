@@ -1,0 +1,1 @@
+../skills/browser-verification/SKILL.md

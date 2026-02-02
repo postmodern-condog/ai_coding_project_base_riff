@@ -1,0 +1,1 @@
+../skills/spec-verification/SKILL.md

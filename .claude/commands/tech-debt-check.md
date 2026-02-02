@@ -1,0 +1,1 @@
+../skills/tech-debt-check/SKILL.md
