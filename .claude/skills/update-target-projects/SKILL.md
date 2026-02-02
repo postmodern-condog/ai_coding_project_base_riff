@@ -6,7 +6,7 @@ toolkit-only: true
 
 # Update Target Projects
 
-Discover and sync all toolkit-using projects and the Codex CLI skill pack with the latest skills.
+Discover and sync all toolkit-using projects, the Codex CLI skill pack, and global Conductor skill symlinks with the latest skills.
 
 ## Trigger
 
@@ -15,6 +15,7 @@ Use this skill when:
 - You want to batch-sync multiple projects at once
 - You need to check which projects are out of date
 - You want to update the Codex CLI skill pack
+- You want to verify global skill symlinks for Conductor autocomplete
 
 ## Configuration
 
@@ -28,6 +29,8 @@ Use this skill when:
 
 **Search depth:** 4 levels (finds `~/Projects/*/`, `~/Projects/*/*/`, and `~/Projects/*/*/*/`)
 
+**Global skills location:** `~/.claude/skills/` (symlinks for Conductor autocomplete)
+
 ## Workflow
 
 Copy this checklist and track progress:
@@ -36,13 +39,15 @@ Copy this checklist and track progress:
 Update Target Projects Progress:
 - [ ] Phase 1: Discover projects with toolkit-version.json
 - [ ] Phase 1b: Check Codex CLI skill pack status
-- [ ] Phase 1c: Detect orphaned skills (removed from toolkit)
+- [ ] Phase 1c: Check global skill symlinks (Conductor autocomplete)
+- [ ] Phase 1d: Detect orphaned skills (removed from toolkit)
 - [ ] Phase 2: Detect activity status for each project
 - [ ] Phase 3: Check sync status (OUTDATED vs CURRENT)
-- [ ] Phase 4: Display status report (including orphans)
+- [ ] Phase 4: Display status report (including orphans and global status)
 - [ ] Phase 5: User selection (what to sync)
 - [ ] Phase 6a: Sync Codex skill pack (if selected) — includes deletions
-- [ ] Phase 6b: Sync target projects (if selected) — includes deletions
+- [ ] Phase 6b: Sync global skill symlinks (if selected)
+- [ ] Phase 6c: Sync target projects (if selected) — includes deletions
 - [ ] Phase 7: Generate summary report
 ```
 
@@ -62,7 +67,16 @@ See [CODEX_SYNC.md](CODEX_SYNC.md) for detailed Codex sync logic.
 2. Classify each skill: MISSING, SYMLINK_CURRENT, COPY_OUTDATED, etc.
 3. Determine overall Codex status
 
-### Phase 1c: Detect Orphaned Skills
+### Phase 1c: Check Global Skill Symlinks
+
+See [GLOBAL_SYNC.md](GLOBAL_SYNC.md) for detailed global sync logic.
+
+1. Scan `~/.claude/skills/` for existing entries
+2. Classify each: SYMLINK_CURRENT, MISSING, SYMLINK_OTHER, REAL_DIR
+3. Detect orphaned symlinks (pointing to deleted toolkit skills)
+4. Determine overall global status
+
+### Phase 1d: Detect Orphaned Skills
 
 Identify skills that exist in targets but have been removed from toolkit:
 
@@ -86,6 +100,11 @@ TOOLKIT SYNC STATUS
 Toolkit: /path/to/toolkit
 Current: abc1234 (2026-01-23)
 
+GLOBAL SKILLS (Conductor Autocomplete)
+───────────────────────────────────────
+Location: ~/.claude/skills
+Status:   CURRENT (30 symlinks active)
+
 CODEX CLI SKILL PACK
 ────────────────────
 Location: ~/.codex/skills
@@ -102,22 +121,29 @@ TARGET PROJECTS
 
 Prompt with options:
 1. Sync everything (Recommended)
-2. Codex skill pack only
-3. Target projects only
-4. Select specific items
-5. Include ACTIVE projects too
-6. Skip for now
+2. Global skill symlinks only
+3. Codex skill pack only
+4. Target projects only
+5. Select specific items
+6. Include ACTIVE projects too
+7. Skip for now
 
 ### Phase 6: Execute Sync
 
 **6a: Codex Sync** — See [CODEX_SYNC.md](CODEX_SYNC.md)
-**6b: Project Sync** — See [PROJECT_SYNC.md](PROJECT_SYNC.md)
+**6b: Global Skills Sync** — See [GLOBAL_SYNC.md](GLOBAL_SYNC.md)
+**6c: Project Sync** — See [PROJECT_SYNC.md](PROJECT_SYNC.md)
 
 ### Phase 7: Summary Report
 
 ```
 SYNC COMPLETE
 =============
+
+Global Skills (Conductor Autocomplete):
+  Symlinks created: 2
+  Symlinks removed: 1 (orphaned)
+  Already current:  28
 
 Codex CLI Skill Pack:
   Skills updated:  3
