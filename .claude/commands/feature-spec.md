@@ -1,1 +1,0 @@
-../skills/feature-spec/SKILL.md

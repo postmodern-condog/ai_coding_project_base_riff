@@ -1,1 +1,0 @@
-../skills/codex-consult/SKILL.md

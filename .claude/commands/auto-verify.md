@@ -1,1 +1,0 @@
-../skills/auto-verify/SKILL.md

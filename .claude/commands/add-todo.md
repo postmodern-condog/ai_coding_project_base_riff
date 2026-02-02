@@ -1,1 +1,0 @@
-../skills/add-todo/SKILL.md

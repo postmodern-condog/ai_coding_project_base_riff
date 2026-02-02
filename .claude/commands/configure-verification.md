@@ -1,1 +1,0 @@
-../skills/configure-verification/SKILL.md

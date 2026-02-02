@@ -1,1 +1,0 @@
-../skills/phase-checkpoint/SKILL.md

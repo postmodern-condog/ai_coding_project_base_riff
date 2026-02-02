@@ -1,1 +1,0 @@
-../skills/audit-skills/SKILL.md

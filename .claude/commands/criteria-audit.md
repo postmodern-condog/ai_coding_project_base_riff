@@ -1,1 +1,0 @@
-../skills/criteria-audit/SKILL.md

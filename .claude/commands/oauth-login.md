@@ -1,1 +1,0 @@
-../skills/oauth-login/SKILL.md

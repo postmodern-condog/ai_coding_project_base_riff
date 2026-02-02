@@ -1,1 +1,0 @@
-../skills/vision-audit/SKILL.md
