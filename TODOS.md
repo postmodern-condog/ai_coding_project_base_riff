@@ -184,6 +184,75 @@ Bottom line: re-implementing deployment preview support is still worthwhile for 
 - [x] Add `/list-todos` command (see below) — DONE
 - [x] Recovery & Rollback Commands — DONE (phase-rollback, task-retry, phase-analyze)
 - [x] **[P1 / Medium]** Pre-push hook to check if README/docs need updating — Before every push, analyze recent commits and prompt if documentation appears outdated relative to code/command changes — DONE
+- [ ] **[P1 / High]** Implement GitHub Merge Queue for Async Multi-Agent Integration — Solve the painful synchronous merge/rebase process when integrating work from multiple AI coding tools (Codex App worktrees + Claude Code)
+
+**Problem Being Solved:**
+When using multiple AI coding tools in parallel:
+- Codex App creates fire-and-forget threads in git worktrees that commit/push to branches
+- Claude Code runs interactively in the main checkout
+- The workflow is fluid: sometimes starts from main, sometimes feature branches; sometimes Codex first, sometimes Claude first
+- Integration becomes a painful synchronous process: Codex PRs get stale, manual rebasing required, conflicts must be resolved synchronously
+
+**The Solution: GitHub Merge Queue**
+GitHub Merge Queue makes integration async and automatic:
+- PRs are tested against latest base + other queued changes via temporary `merge_group` branches
+- Rebasing happens automatically as part of queue processing
+- PRs merge in order once CI passes
+- Developer never manually rebases — the queue handles it
+
+**Implementation Requirements:**
+
+1. **Enable Merge Queue on repositories**
+   - Repository Settings → Rules → Branch protection → Require merge queue
+   - Enable auto-delete branches after merge
+
+2. **Update CI workflows to support `merge_group` trigger**
+   ```yaml
+   on:
+     pull_request:
+       types: [opened, synchronize, reopened]
+     merge_group:
+       types: [checks_requested]  # CRITICAL - without this, queue won't get required checks
+   ```
+
+3. **Auto-queue PRs from AI agents**
+   ```yaml
+   name: Auto-Queue Agent PRs
+   on:
+     pull_request:
+       types: [opened, ready_for_review]
+
+   jobs:
+     auto-queue:
+       if: startsWith(github.head_ref, 'codex/')
+       runs-on: ubuntu-latest
+       steps:
+         - name: Add to merge queue
+           run: gh pr merge ${{ github.event.pull_request.number }} --squash --auto
+           env:
+             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+   ```
+
+4. **Enable git rerere for conflict memory**
+   ```bash
+   git config --global rerere.enabled true
+   ```
+
+**Integration with Existing Toolkit:**
+- Update CODEX_APP_WORKFLOWS.md to document merge queue as the recommended integration strategy
+- Add merge queue setup to `/setup` command for new projects
+- Consider adding to workstream contract verification
+
+**References:**
+- GitHub Merge Queue Docs: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue
+- How GitHub uses merge queue internally: https://github.blog/engineering/engineering-principles/how-github-uses-merge-queue-to-ship-hundreds-of-changes-every-day/
+- Codex consultation recommends this as "simplest architecture that achieves async integration"
+
+**Goals Addressed (from PROJECT_GOALS.md):**
+- G1: Parallel workstreams within a single project
+- G2: Fire-and-forget automation (kick off and walk away)
+- G4: Maximum automation
+
 - [ ] **[P1 / High]** Integrate with Claude Code's native Tasks (formerly Todos) for phase execution and cross-session coordination
 
 **Clarifications (from Q&A 2026-01-29):**
