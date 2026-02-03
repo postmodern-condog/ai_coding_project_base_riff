@@ -156,6 +156,64 @@ Verification not configured. Configure now?
 
 **Note:** In non-interactive/CI environments, if no response is possible, treat as "n" (remind later) and continue without blocking.
 
+## Phase State Detection (Auto-Resume)
+
+Before reading specs, check for existing phase state to enable seamless resumption:
+
+1. Check if `.claude/phase-state.json` exists in PROJECT_ROOT (or FEATURE_DIR if feature mode)
+
+2. If it exists, read and parse it:
+   ```json
+   {
+     "current_phase": "Phase 2",
+     "completed_tasks": ["1.1", "1.2", "1.3", "2.1"],
+     "in_progress_task": "2.2",
+     "last_updated": "2026-02-02T10:30:00Z"
+   }
+   ```
+
+3. If phase state found, report:
+   ```
+   RESUMING SESSION
+   ================
+   Current phase: {current_phase}
+   Completed: {count} tasks
+   In progress: Task {in_progress_task} (if any)
+   Last activity: {relative time, e.g., "2 hours ago"}
+   ```
+
+4. If `in_progress_task` exists, offer to continue:
+   - "Continue with Task {id}: {task title}?" [Y/n]
+   - If yes, jump directly to that task after context load
+
+5. If no phase state exists, this is a fresh start — continue normally
+
+## Branch Context Detection
+
+Detect the current git branch and load relevant context:
+
+1. Get current branch:
+   ```bash
+   git branch --show-current 2>/dev/null
+   ```
+
+2. If branch matches `feature/*` pattern:
+   - Extract feature name from branch (e.g., `feature/analytics-dashboard` → `analytics-dashboard`)
+   - Look for matching feature directory: `PROJECT_ROOT/features/{feature-name}/`
+   - If found and MODE is "greenfield", suggest: "Switch to feature mode? Found feature directory for this branch."
+
+3. Summarize recent branch activity:
+   ```bash
+   git log --oneline -5 2>/dev/null
+   ```
+   Report: "Recent commits on this branch: {summary}"
+
+4. Check for uncommitted changes:
+   ```bash
+   git status --porcelain 2>/dev/null
+   ```
+   If changes exist, report: "Note: {N} uncommitted changes in working tree"
+
 ## Required Context
 
 Read these files first:
