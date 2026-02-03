@@ -55,7 +55,8 @@ CURRENT_COMMIT=$(git rev-parse HEAD)
 
 if [ "$LAST_COMMIT" != "$CURRENT_COMMIT" ]; then
   SKILL_CHANGES=$(git diff --name-only "$LAST_COMMIT".."$CURRENT_COMMIT" -- .claude/skills 2>/dev/null | wc -l)
-  if [ "$SKILL_CHANGES" -gt 0 ]; then
+  WORKSTREAM_CHANGES=$(git diff --name-only "$LAST_COMMIT".."$CURRENT_COMMIT" -- .workstream 2>/dev/null | wc -l)
+  if [ "$SKILL_CHANGES" -gt 0 ] || [ "$WORKSTREAM_CHANGES" -gt 0 ]; then
     echo "OUTDATED"
   else
     echo "CURRENT"
@@ -181,4 +182,80 @@ Options:
 1. Sync anyway
 2. Skip this project
 3. Show full git status
+```
+
+## Workstream Scripts Sync
+
+In addition to skills, sync the `.workstream/` scripts to each target project.
+
+**Files synced (from toolkit `.workstream/`):**
+
+| File | Target location | Notes |
+|------|----------------|-------|
+| `lib.sh` | `.workstream/lib.sh` | Shared utility library |
+| `setup.sh` | `.workstream/setup.sh` | Worktree initializer |
+| `dev.sh` | `.workstream/dev.sh` | Dev server launcher |
+| `verify.sh` | `.workstream/verify.sh` | Quality gate runner |
+| `README.md` | `.workstream/README.md` | Documentation |
+| `workstream.json.example` | `.workstream/workstream.json.example` | Schema reference |
+
+**NOT synced:**
+
+- `workstream.json` — Project-owned config (each project has different ports/commands)
+
+**Sync logic:**
+
+```bash
+sync_workstream_scripts() {
+  local project_path="$1"
+  local toolkit_ws="$TOOLKIT_PATH/.workstream"
+  local target_ws="$project_path/.workstream"
+
+  mkdir -p "$target_ws"
+
+  for file in lib.sh setup.sh dev.sh verify.sh README.md workstream.json.example; do
+    local src="$toolkit_ws/$file"
+    local dest="$target_ws/$file"
+
+    if [ ! -f "$src" ]; then continue; fi
+
+    local src_hash=$(shasum -a 256 "$src" | cut -d' ' -f1)
+    local dest_hash=""
+    if [ -f "$dest" ]; then
+      dest_hash=$(shasum -a 256 "$dest" | cut -d' ' -f1)
+    fi
+
+    if [ "$src_hash" = "$dest_hash" ]; then
+      echo "  $file — current"
+    else
+      cp "$src" "$dest"
+      echo "  $file — updated"
+    fi
+  done
+
+  # Ensure scripts are executable
+  chmod +x "$target_ws"/*.sh 2>/dev/null || true
+}
+```
+
+**Tracking in toolkit-version.json:**
+
+Workstream script hashes are stored under a `"workstream"` key:
+
+```json
+{
+  "schema_version": "1.0",
+  "toolkit_commit": "abc1234",
+  "files": { ... },
+  "workstream": {
+    ".workstream/lib.sh": {
+      "hash": "{sha256}",
+      "synced_at": "{ISO timestamp}"
+    },
+    ".workstream/setup.sh": { ... },
+    ".workstream/dev.sh": { ... },
+    ".workstream/verify.sh": { ... },
+    ".workstream/README.md": { ... }
+  }
+}
 ```

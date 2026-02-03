@@ -92,6 +92,33 @@ issues where training data may differ between models.
 
 Codex findings are advisory and don't block workflows.
 
+## Workstream Contract (`.workstream/`)
+
+The toolkit includes orchestrator-agnostic scripts for initializing, running, and
+verifying git worktrees. These scripts enable parallel fire-and-forget workstreams
+with any AI agent (Codex App, Claude Code, Conductor) or manual usage.
+
+**Scripts:**
+
+| Script | Purpose |
+|--------|---------|
+| `.workstream/setup.sh` | Initialize a worktree (install deps, copy env files, symlink settings) |
+| `.workstream/dev.sh [PORT]` | Start dev server with auto-allocated port |
+| `.workstream/verify.sh` | Run quality gate (typecheck → lint → test → build) |
+| `.workstream/lib.sh` | Shared utility library (sourced by other scripts) |
+
+**Configuration:** Each project may create a `workstream.json` at the repo root (not
+synced from toolkit — project-specific). See `.workstream/workstream.json.example`
+for the schema and `.workstream/README.md` for full documentation.
+
+**Syncing:** Workstream scripts are synced to target projects alongside skills via
+`/setup` and `/update-target-projects`. The scripts themselves are toolkit-owned
+(always updated on sync); `workstream.json` is project-owned (never overwritten).
+
+**Codex App integration:** The `.codex/setup.sh` wrapper delegates to
+`.workstream/setup.sh`. Configure it in Codex App Settings (Cmd+,) →
+Local Environments → Setup script.
+
 ## Validation
 
 - Run `npm run lint` before finishing changes that touch Markdown files.

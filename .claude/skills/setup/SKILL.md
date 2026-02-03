@@ -86,6 +86,42 @@ Initialize a new project at `$1` with the AI Coding Toolkit.
    test -f "$1/.claude/verification-config.json" && echo "Config: OK" || echo "Config: MISSING (non-critical)"
    ```
 
+3b. **Copy workstream scripts to target**
+
+   Copy `.workstream/` scripts from the toolkit to the target project:
+
+   ```bash
+   mkdir -p "$1/.workstream"
+   for file in lib.sh setup.sh dev.sh verify.sh README.md workstream.json.example; do
+     if [ -f ".workstream/$file" ]; then
+       cp ".workstream/$file" "$1/.workstream/$file"
+     fi
+   done
+   chmod +x "$1/.workstream/"*.sh 2>/dev/null || true
+   ```
+
+   **Do NOT copy `workstream.json`** — this is project-owned and created by the user.
+
+   **Verify copies:**
+   ```bash
+   ls -la "$1/.workstream/" 2>/dev/null
+   ```
+   Confirm `setup.sh`, `dev.sh`, `verify.sh`, and `lib.sh` exist and are executable.
+
+3c. **Copy Codex App templates to target**
+
+   Copy `.codex/` templates from the toolkit to the target project:
+
+   ```bash
+   mkdir -p "$1/.codex"
+   cp ".codex/setup.sh" "$1/.codex/setup.sh"
+   cp ".codex/AGENTS.md" "$1/.codex/AGENTS.md"
+   chmod +x "$1/.codex/setup.sh"
+   ```
+
+   These are recommended defaults for Codex App integration. Users configure
+   the setup script in Codex App Settings (Cmd+,) → Local Environments.
+
 3a. **Incremental Sync (When SETUP_MODE=incremental)**
 
    Skip Step 3 entirely and use this incremental approach instead:

@@ -334,6 +334,31 @@ You can have Codex CLI execute tasks while Claude Code orchestrates:
 }
 ```
 
+### Parallel Workstreams (Worktree Contract)
+
+Run multiple AI agents in parallel using git worktrees. Each worktree gets isolated dependencies, env files, and dev server ports:
+
+```bash
+# Create a worktree for a feature
+git worktree add ../my-feature -b feature/my-feature
+cd ../my-feature
+
+# Initialize it (installs deps, copies .env, symlinks settings)
+bash .workstream/setup.sh
+
+# Start dev server (auto-allocates a port unique to this worktree)
+bash .workstream/dev.sh
+
+# Run full quality gate before PR
+bash .workstream/verify.sh
+```
+
+The `.workstream/` scripts are orchestrator-agnostic — they work with Codex App (worktree mode), Claude Code, Conductor, or manual usage. Each project can optionally create a `workstream.json` to configure dev commands, ports, and verification steps.
+
+**Codex App:** Configure `bash .codex/setup.sh` as the setup script in Settings (Cmd+,) → Local Environments. When creating a worktree thread, select this environment and Codex will automatically get a ready-to-use workspace.
+
+See `.workstream/README.md` for full documentation.
+
 ### Local-First Verification
 
 Phase checkpoints run local verification first (tests, lint, security scan). Production verification (deployment, integration) only runs after local passes. This prevents wasted cycles on production checks when basic issues exist.
@@ -426,6 +451,16 @@ ai_coding_project_base/
 │   │   ├── vercel-preview/          # Vercel preview URL resolution
 │   │   └── ...                      # Security, tech-debt, etc.
 │   └── hooks/                       # Git hooks + session logger template
+├── .workstream/                     # Worktree setup/run/verify scripts
+│   ├── lib.sh                       # Shared utility library
+│   ├── setup.sh                     # Initialize worktree environment
+│   ├── dev.sh                       # Start dev server on allocated port
+│   ├── verify.sh                    # Run quality gate (fail-fast)
+│   ├── workstream.json.example      # Config template
+│   └── README.md                    # Full documentation
+├── .codex/                          # Codex App integration
+│   ├── setup.sh                     # Wrapper → .workstream/setup.sh
+│   └── AGENTS.md                    # Codex thread instructions
 ├── docs/                            # Detailed documentation
 ├── extras/                          # Landing page, optional tools
 └── AGENTS.md                        # Toolkit contributor guidelines
@@ -433,6 +468,7 @@ ai_coding_project_base/
 
 ## Documentation
 
+- [Codex App Workflows](CODEX_APP_WORKFLOWS.md) — Parallel workstreams with Codex App and Claude Code
 - [Feature Workflow](docs/feature-workflow.md) — Adding features to existing projects
 - [Verification Deep Dive](docs/verification.md) — TDD, security, spec verification details
 - [Recovery Commands](docs/recovery-commands.md) — Handling failures and rollbacks

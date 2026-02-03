@@ -41,6 +41,7 @@ Update Target Projects Progress:
 - [ ] Phase 1b: Check Codex CLI skill pack status
 - [ ] Phase 1c: Check global skill symlinks (Conductor autocomplete)
 - [ ] Phase 1d: Detect orphaned skills (removed from toolkit)
+- [ ] Phase 1e: Check workstream scripts status
 - [ ] Phase 2: Detect activity status for each project
 - [ ] Phase 3: Check sync status (OUTDATED vs CURRENT)
 - [ ] Phase 4: Display status report (including orphans and global status)
@@ -48,6 +49,7 @@ Update Target Projects Progress:
 - [ ] Phase 6a: Sync Codex skill pack (if selected) — includes deletions
 - [ ] Phase 6b: Sync global skill symlinks (if selected)
 - [ ] Phase 6c: Sync target projects (if selected) — includes deletions
+- [ ] Phase 6d: Sync workstream scripts (if selected)
 - [ ] Phase 7: Generate summary report
 ```
 
@@ -75,6 +77,22 @@ See [GLOBAL_SYNC.md](GLOBAL_SYNC.md) for detailed global sync logic.
 2. Classify each: SYMLINK_CURRENT, MISSING, SYMLINK_OTHER, REAL_DIR
 3. Detect orphaned symlinks (pointing to deleted toolkit skills)
 4. Determine overall global status
+
+### Phase 1e: Check Workstream Scripts Status
+
+Detect `.workstream/` scripts in target projects and compare file hashes with toolkit:
+
+1. Check if target has `.workstream/` directory
+2. For each script (`lib.sh`, `setup.sh`, `dev.sh`, `verify.sh`, `README.md`):
+   - Compare SHA256 hash with toolkit version
+   - Classify: MISSING, CURRENT, OUTDATED
+3. Check `workstream.json.example` separately (it's a reference, not a project file)
+4. Track status in `toolkit-version.json` under a `"workstream"` key
+
+Status determination:
+- `MISSING` — no `.workstream/` directory in target
+- `CURRENT` — all script hashes match toolkit
+- `OUTDATED` — one or more scripts differ from toolkit
 
 ### Phase 1d: Detect Orphaned Skills
 
@@ -133,6 +151,17 @@ Prompt with options:
 **6a: Codex Sync** — See [CODEX_SYNC.md](CODEX_SYNC.md)
 **6b: Global Skills Sync** — See [GLOBAL_SYNC.md](GLOBAL_SYNC.md)
 **6c: Project Sync** — See [PROJECT_SYNC.md](PROJECT_SYNC.md)
+
+**6d: Workstream Scripts Sync** — Copy `.workstream/*.sh`, `README.md`, and `workstream.json.example` to target projects:
+
+1. For each target project selected for sync:
+   - Create `.workstream/` directory if missing
+   - Copy scripts: `lib.sh`, `setup.sh`, `dev.sh`, `verify.sh`
+   - Copy documentation: `README.md`, `workstream.json.example`
+   - Run `chmod +x .workstream/*.sh`
+2. Compare hashes before copying — skip if CURRENT
+3. Update `toolkit-version.json` `"workstream"` key with new hashes
+4. Do NOT copy or overwrite `workstream.json` (project-owned config)
 
 ### Phase 7: Summary Report
 
