@@ -51,6 +51,7 @@ Update Target Projects Progress:
 - [ ] Phase 6b: Sync global skill symlinks (if selected)
 - [ ] Phase 6c: Sync target projects (if selected) — includes deletions
 - [ ] Phase 6d: Sync workstream scripts (if selected)
+- [ ] Phase 6g: Sync Codex App setup wrapper (if selected)
 - [ ] Phase 6e: Adopt global skills (if selected) — migrate local to global
 - [ ] Phase 6f: Revert to local skills (if selected) — copy from global back to project
 - [ ] Phase 7: Generate summary report
@@ -246,6 +247,15 @@ copies and global symlinks are healthy).
 2. Compare hashes before copying — skip if CURRENT
 3. Update `toolkit-version.json` `"workstream"` key with new hashes
 4. Do NOT copy or overwrite `workstream.json` (project-owned config)
+
+**6g: Codex App Setup Wrapper Sync** — Copy `.codex/setup.sh` to target projects:
+
+1. For each target project selected for sync:
+   - Create `.codex/` directory if missing
+   - Copy `setup.sh` from toolkit `.codex/setup.sh`
+   - Run `chmod +x .codex/setup.sh`
+2. Compare hashes before copying — skip if CURRENT
+3. Do NOT overwrite `.codex/environments/` or other Codex App config (project-owned)
 
 **6e: Adopt Global Skills** — Migrate from local to global resolution:
 
