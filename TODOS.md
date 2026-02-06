@@ -253,6 +253,8 @@ GitHub Merge Queue makes integration async and automatic:
 - G2: Fire-and-forget automation (kick off and walk away)
 - G4: Maximum automation
 
+- [ ] **[P1 / Medium]** Refactor the todos-related flow so that tasks get checked off when they're completed or started
+
 - [ ] **[P1 / High]** Integrate with Claude Code's native Tasks (formerly Todos) for phase execution and cross-session coordination
 
 **Clarifications (from Q&A 2026-01-29):**

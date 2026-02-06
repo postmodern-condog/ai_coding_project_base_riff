@@ -431,7 +431,7 @@ Codex review uses existing configuration from `.claude/settings.local.json`:
 {
   "codexReview": {
     "enabled": true,
-    "codeModel": "gpt-5.2-codex"
+    "codeModel": "gpt-5.3-codex"
   },
   "codexConsult": {
     "enabled": true,

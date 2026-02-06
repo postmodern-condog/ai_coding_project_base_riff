@@ -130,7 +130,7 @@ issues where training data may differ between models.
 {
   "codexReview": {
     "enabled": true,
-    "codeModel": "gpt-5.2-codex"
+    "codeModel": "gpt-5.3-codex"
   },
   "codexConsult": {
     "enabled": true,

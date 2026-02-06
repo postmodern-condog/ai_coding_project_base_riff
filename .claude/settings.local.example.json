@@ -16,13 +16,13 @@
   },
   "codexReview": {
     "enabled": true,
-    "codeModel": "gpt-5.2-codex",
-    "reviewTimeoutMinutes": 10,
+    "codeModel": "gpt-5.3-codex",
+    "reviewTimeoutMinutes": 20,
     "taskTimeoutMinutes": 60
   },
   "codexConsult": {
     "enabled": true,
     "researchModel": "gpt-5.2",
-    "consultTimeoutMinutes": 15
+    "consultTimeoutMinutes": 20
   }
 }

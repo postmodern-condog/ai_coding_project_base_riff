@@ -293,13 +293,13 @@ codex login
 {
   "codexReview": {
     "enabled": true,
-    "codeModel": "gpt-5.2-codex",
-    "reviewTimeoutMinutes": 10
+    "codeModel": "gpt-5.3-codex",
+    "reviewTimeoutMinutes": 20
   },
   "codexConsult": {
     "enabled": true,
     "researchModel": "gpt-5.2",
-    "consultTimeoutMinutes": 15
+    "consultTimeoutMinutes": 20
   }
 }
 ```
@@ -329,7 +329,7 @@ You can have Codex CLI execute tasks while Claude Code orchestrates:
 ```json
 {
   "codexReview": {
-    "codeModel": "gpt-5.2-codex",
+    "codeModel": "gpt-5.3-codex",
     "taskTimeoutMinutes": 60
   }
 }
