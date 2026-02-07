@@ -745,6 +745,89 @@ If the user chose to merge directly to main (Options 1 or 2):
 
 ---
 
+### Phase 5: Cleanup
+
+After the integration PR is merged (Option 3) or the direct merge succeeds (Options 1/2), **automatically prompt** for full cleanup. Do NOT wait for the user to ask.
+
+#### Step 5.1 — Prompt for cleanup
+
+Present the cleanup plan:
+
+```
+Integration complete! Ready to clean up?
+
+This will:
+  • Close original PRs #63, #64, #65, #66 (with "Included in #67" comment)
+  • Delete remote branches for all original PRs
+  • Delete the integration branch (local + remote)
+  • Delete the safety tag
+  • Switch to main and pull latest
+  • Prune stale remote-tracking references
+  • Delete local branches whose remotes are gone
+
+Proceed? [Y/n]
+```
+
+If the user confirms (or says nothing indicating yes), execute all cleanup steps. If they decline, report what manual steps they'd need to take later.
+
+#### Step 5.2 — Execute cleanup
+
+**Close original PRs and delete their remote branches:**
+```bash
+for PR in <pr-numbers>; do
+  gh pr close $PR --comment "Included in integration PR #<integration-pr>" --delete-branch
+done
+```
+
+**Switch to main and pull:**
+```bash
+git checkout main
+git pull origin main
+```
+
+**Delete local integration branch:**
+```bash
+git branch -D integrate/<name> 2>/dev/null
+```
+
+**Delete safety tag:**
+```bash
+git tag -d pre-merge/<timestamp> 2>/dev/null
+```
+
+**Prune stale remotes and delete orphaned local branches:**
+```bash
+git fetch --prune
+# Delete local branches whose remote tracking branch is gone
+git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -D
+```
+
+**Verify clean state:**
+```bash
+git status
+git branch
+```
+
+#### Step 5.3 — Report final state
+
+```
+Cleanup Complete
+════════════════
+  ✓ PRs #63, #64, #65, #66 closed
+  ✓ Remote branches deleted (4 PR branches + integration)
+  ✓ Local integration branch deleted
+  ✓ Safety tag deleted
+  ✓ On main, up to date with origin
+
+  Remaining local branches:
+    * main
+    (list any other local branches that still have remotes)
+
+  Ready for new work.
+```
+
+---
+
 ## Error Handling
 
 ### Fatal errors (abort immediately)
@@ -803,8 +886,8 @@ gh pr checks <PR_NUMBER>
 ## Guardrails
 
 - **NEVER force-push** to any branch during this process
-- **NEVER delete remote branches** without explicit user confirmation
-- **NEVER delete safety tags** — only report their names for manual cleanup
+- **NEVER delete remote branches** without explicit user confirmation (Phase 5 cleanup prompt counts as confirmation)
+- **NEVER delete safety tags** without explicit user confirmation (Phase 5 cleanup prompt counts as confirmation)
 - **NEVER merge directly to main** without user confirmation at Step 4.3
 - **NEVER auto-merge RED-tier PRs** without `--force` or explicit confirmation
 - **NEVER suppress security findings** — always report detected secrets/CVEs
