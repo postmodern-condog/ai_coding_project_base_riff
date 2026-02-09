@@ -7,6 +7,24 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Task, WebFetch, WebSearch
 
 Execute all steps and tasks in Phase $1 from EXECUTION_PLAN.md.
 
+## Workflow
+
+Copy this checklist and track progress:
+
+```
+Phase Start Progress:
+- [ ] Parse arguments and detect execution mode
+- [ ] Context detection (project root vs feature)
+- [ ] Directory guard (EXECUTION_PLAN.md + AGENTS.md)
+- [ ] Context check (compact if <40% remaining)
+- [ ] Codex mode prerequisites (if --codex)
+- [ ] Git setup (commit dirty files, create phase branch)
+- [ ] Execute tasks sequentially (test → implement → verify → commit)
+- [ ] Track state in phase-state.json
+- [ ] Phase completion summary
+- [ ] Auto-advance to checkpoint (if conditions met)
+```
+
 ## Arguments
 
 | Argument | Required | Description |

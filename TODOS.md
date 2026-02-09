@@ -822,6 +822,12 @@ A lightweight alternative to a full "compound documentation" system — a simple
 ---
 
 
+### Move Product Specification Flow to Target Directory
+
+- [ ] **[P2 / Medium]** Move product specification flow to run from target directory — Currently `/product-spec` and `/technical-spec` run from the toolkit repo. Refactor so they run from the target project directory like feature commands (`/feature-spec`, `/feature-technical-spec`, `/feature-plan`) already do.
+
+---
+
 ### Enhanced `/phase-prep` with Future Phase Preview
 
 Add a second section to `/phase-prep` output showing human prep requirements for future phases, allowing users to front-load setup work.

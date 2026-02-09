@@ -7,6 +7,22 @@ allowed-tools: Bash, Read, Write, AskUserQuestion
 
 Generate a feature specification document for the feature `$1`.
 
+## Workflow
+
+Copy this checklist and track progress:
+
+```
+Feature Spec Progress:
+- [ ] Directory guard
+- [ ] Handle arguments (feature name)
+- [ ] Create feature directory
+- [ ] Existing file guard (prevent overwrite)
+- [ ] Run guided Q&A process (from PROMPT.md)
+- [ ] Write FEATURE_SPEC.md
+- [ ] Capture deferred requirements
+- [ ] Cross-model review (if Codex available)
+```
+
 ## Directory Guard
 
 1. If `START_PROMPTS.md` or `GENERATOR_PROMPT.md` exists in the current working directory → **STOP**:

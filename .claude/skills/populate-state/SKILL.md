@@ -13,6 +13,23 @@ Use this command when:
 - phase-state.json is missing or corrupted
 - State has drifted from actual progress
 
+## Workflow
+
+Copy this checklist and track progress:
+
+```
+Populate State Progress:
+- [ ] Directory guard (verify EXECUTION_PLAN.md exists)
+- [ ] Ensure .claude directory exists
+- [ ] Parse EXECUTION_PLAN.md (phases, tasks, criteria)
+- [ ] Parse git history (commits, branches, timestamps)
+- [ ] Detect features (features/*/EXECUTION_PLAN.md)
+- [ ] Identify blockers (BLOCKED markers, stale tasks)
+- [ ] Generate .claude/phase-state.json
+- [ ] Determine task and phase statuses
+- [ ] Output summary report
+```
+
 ## Directory Guard (Wrong Directory Check)
 
 Before starting:
