@@ -9,21 +9,18 @@ Features are isolated in their own directories under `features/<name>/`, enablin
 ## Quick Start
 
 ```bash
-# From your project directory (after /setup):
+# Specification runs from project root (after /setup):
 cd ~/Projects/existing-app
-
 /feature-spec analytics
 /feature-technical-spec analytics
 /feature-plan analytics
 
-# Then execute from the feature directory:
+# Execution runs from the feature directory:
 cd features/analytics
-/fresh-start             # Detects feature mode, creates feature/analytics branch
-/configure-verification  # Set test/lint/typecheck/build/dev server commands
-/phase-prep 1
-/phase-start 1
-/phase-checkpoint 1
+/fresh-start    # Detects feature mode, auto-advances through phases
 ```
+
+**Important:** Specification commands (`/feature-spec`, `/feature-technical-spec`, `/feature-plan`) run from the project root. Execution commands (`/fresh-start`, `/phase-start`, `/phase-checkpoint`) run from `features/<name>/`. The skills auto-detect feature mode from the directory path.
 
 ## Directory Structure
 
@@ -85,11 +82,13 @@ main
 
 ## Merging AGENTS_ADDITIONS.md
 
-After generating the feature plan, merge `AGENTS_ADDITIONS.md` into your project's main `AGENTS.md`:
+When you run `/fresh-start` from the feature directory, it automatically offers to merge `AGENTS_ADDITIONS.md` into your project's `AGENTS.md`:
 
-1. Review the additions for feature-specific rules
-2. Add relevant sections to your `AGENTS.md`
-3. Remove or consolidate any duplicate guidance
+1. Each proposed section is shown with where it would be inserted
+2. You approve, skip, or edit each section individually
+3. Applied sections are marked with `<!-- Added for FEATURE_NAME -->` comments
+
+If you prefer manual merging, decline the prompt and edit `AGENTS.md` yourself.
 
 ## Workflow Diagram
 
@@ -125,12 +124,11 @@ After generating the feature plan, merge `AGENTS_ADDITIONS.md` into your project
 │                          EXECUTION PHASE                                │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│   Add generated documents to project root                               │
-│   Merge AGENTS_ADDITIONS.md into existing AGENTS.md                     │
+│   cd features/<name>/                                                   │
 │       ↓                                                                 │
-│   START_PROMPTS  ────→  Execute phases iteratively with AI agents       │
+│   /fresh-start  ────────→  Merge AGENTS_ADDITIONS, auto-advance         │
 │                                                                         │
-│   Phase 1 → Checkpoint → Phase 2 → Checkpoint → Phase 3 → ...           │
+│   Phase 1 → Checkpoint → Phase 2 → Checkpoint → Phase 3 → ...          │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```

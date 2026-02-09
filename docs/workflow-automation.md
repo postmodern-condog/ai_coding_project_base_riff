@@ -2,15 +2,26 @@
 
 The toolkit automates phase progression, verification, and project syncing so you can focus on the work that requires human judgment.
 
+## Simplified Execution
+
+After generating specs and plan, execution is typically **one command**:
+
+```bash
+cd ~/Projects/my-app     # or cd features/<name>/ for feature work
+/fresh-start
+```
+
+`/fresh-start` auto-chains the entire execution workflow:
+
+```
+/fresh-start → /phase-prep 1 → /phase-start 1 → /phase-checkpoint 1 → /phase-prep 2 → ...
+                     ↓              ↓                  ↓
+                 (if ready)    (if no manual)    (if all pass)
+```
+
+The chain stops when human input is needed (manual verification, external setup, stuck detection) and resumes when you re-run `/fresh-start` or the specific phase command.
+
 ## Auto-Advance
-
-The toolkit automatically chains phase commands when no human intervention is required:
-
-```
-/phase-prep 1 → /phase-start 1 → /phase-checkpoint 1 → /phase-prep 2 → ...
-      ↓              ↓                  ↓
-  (if ready)    (if no manual)    (if all pass)
-```
 
 **Core Principle:** If AI completes verification, AI auto-advances. If human intervention is needed, human triggers the next step.
 

@@ -95,9 +95,9 @@ Before starting:
         "tasks": {
           "2.1.A": {"status": "COMPLETE", "completed_at": "..."},
           "2.1.B": {"status": "COMPLETE", "completed_at": "..."},
-          "2.2.A": {"status": "IN_PROGRESS"},
+          "2.2.A": {"status": "IN_PROGRESS", "failures": {"consecutive": 0, "verification_attempts": {}, "last_errors": []}},
           "2.2.B": {"status": "NOT_STARTED"},
-          "2.3.A": {"status": "BLOCKED", "blocker": "Needs API key", "since": "..."}
+          "2.3.A": {"status": "BLOCKED", "blocker": "Needs API key", "since": "...", "failures": {"consecutive": 1, "verification_attempts": {"V-003": 3}, "last_errors": ["timeout connecting to API"]}}
         }
       }
     ]

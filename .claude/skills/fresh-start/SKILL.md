@@ -33,7 +33,9 @@ If `$1` is provided, treat `$1` as the working directory and read files under `$
 
 ## Context Detection
 
-Determine working context before validation:
+Determine working context before validation.
+
+**Convention:** For feature work, run all execution commands from the feature directory (`features/<name>/`), not the project root. The skills auto-detect feature mode from the path.
 
 1. Let WORKING_DIR = `$1` if provided, otherwise current working directory
 
@@ -133,20 +135,31 @@ If MODE = "feature", check for and offer to merge workflow additions:
 
 4. Ask: "Apply these workflow additions to AGENTS.md now? (recommended before starting work)"
 
-5. If user approves:
-   - Read current PROJECT_ROOT/AGENTS.md
-   - Use AGENTS_ADDITIONS.md as instructions to edit AGENTS.md:
-     - Extract the "Content to add" blocks
-     - Insert each block at the location specified in "Where to add"
-     - If location is unclear, append to end of AGENTS.md
-   - Add a comment marker where content was added: `<!-- Added for FEATURE_NAME -->`
-   - Prepend a header to AGENTS_ADDITIONS.md indicating merge is complete:
-     ```
-     <!-- MERGED into PROJECT_ROOT/AGENTS.md on YYYY-MM-DD -->
-     ```
-   - Report: "Applied workflow additions to AGENTS.md"
+5. **Show diff for each section and collect approvals:**
 
-6. If user declines:
+   For each section/block in AGENTS_ADDITIONS.md:
+   a. Display the section heading and its content
+   b. Show where it would be inserted in AGENTS.md:
+      - If a matching heading exists in AGENTS.md → append under that heading
+      - If no match → append as a new section at end of AGENTS.md
+   c. Ask via AskUserQuestion: "Apply this addition?"
+      - Options: "Yes, apply" / "Skip this section" / "Edit first" (let user modify before applying)
+
+   Apply approved sections using Edit tool:
+   - Insert under matching heading if one exists, otherwise append as new section
+   - Add a comment marker: `<!-- Added for FEATURE_NAME -->`
+   - Preserve existing AGENTS.md formatting and structure
+
+   After all sections processed, prepend a header to AGENTS_ADDITIONS.md:
+   ```
+   <!-- MERGED into PROJECT_ROOT/AGENTS.md on YYYY-MM-DD -->
+   <!-- Applied: {list of applied sections} -->
+   <!-- Skipped: {list of skipped sections} -->
+   ```
+
+   Report: "Applied {N}/{total} workflow additions to AGENTS.md"
+
+6. If user declines all:
    - Report: "Skipped. You can manually apply AGENTS_ADDITIONS.md changes later."
    - Continue with fresh-start (don't block)
 
