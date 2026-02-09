@@ -333,39 +333,42 @@ Only runs after local verification passes:
 
 This prevents wasted cycles on production checks when basic issues exist locally.
 
-### Auto-Advance
+## Vercel Preview Integration
 
-When verification passes with no manual items, the workflow automatically advances:
+For projects deployed to Vercel, browser verification can run against preview deployments instead of localhost.
 
+**Benefits:**
+- Real HTTPS environment (matches production)
+- OAuth callbacks work correctly
+- Tests production-like build output
+- No need to run local dev server
+
+**Setup:**
+```bash
+# During configure-verification, enable deployment verification
+/configure-verification
+# Answer "Yes" to "Do you deploy to Vercel?"
 ```
-/phase-prep → /phase-start → /phase-checkpoint → /phase-prep N+1
-     ↓              ↓               ↓
-  (if ready)   (if no manual)  (if all pass)
-```
 
-**Core Principle:** If AI completes verification → AI auto-advances. If human completes verification → human triggers next step.
+**How it works:**
+1. Push changes to trigger Vercel deployment
+2. Run `/phase-checkpoint` — it resolves the preview URL automatically
+3. Browser tests run against `https://your-app-xyz.vercel.app`
+4. If no preview found, falls back to localhost (configurable)
 
-Auto-advance conditions for each command:
-
-| Command | Auto-Advances When |
-|---------|-------------------|
-| `/phase-prep N` | All Pre-Phase Setup items are PASS |
-| `/phase-start N` | All tasks complete AND no truly manual items (auto-verify attempted first) |
-| `/phase-checkpoint N` | All automated checks pass AND no truly manual items remain |
-
-Each transition shows a 15-second countdown. Press Enter to pause and take manual control.
-
-**Configuration** (`.claude/settings.local.json`):
+**Configuration in `.claude/verification-config.json`:**
 ```json
 {
-  "autoAdvance": {
-    "enabled": true,      // default: true
-    "delaySeconds": 15    // default: 15
+  "deployment": {
+    "enabled": true,
+    "service": "vercel",
+    "useForBrowserVerification": true,
+    "fallbackToLocal": true,
+    "waitForDeployment": true,
+    "deploymentTimeout": 300
   }
 }
 ```
-
-**Session Tracking:** During auto-advance chains, progress is logged to `.claude/auto-advance-session.json`. When the chain stops, a summary report shows all completed steps and why it stopped.
 
 ## Security Scanning
 

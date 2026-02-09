@@ -11,6 +11,16 @@ Both Claude Code and Codex CLI use the same skill files from `.claude/skills/`. 
 
 The skills follow the [Agent Skills open standard](https://developers.openai.com/codex/skills/), which both platforms support. Claude Code-specific fields (like `allowed-tools`) are simply ignored by Codex.
 
+## Prerequisites
+
+```bash
+# Install Codex CLI
+npm install -g @openai/codex
+
+# Authenticate
+codex login
+```
+
 ## Installation
 
 ### Manual Installation
@@ -112,6 +122,63 @@ The skill files are identical, but runtime behavior may differ:
 - MCP tool detection may behave differently between platforms
 - Some Claude Code features (like `allowed-tools` permission scoping) are ignored by Codex
 - Subagent execution (`context: fork`) may work differently
+
+## Cross-Model Review Configuration
+
+When Codex CLI is installed, the toolkit automatically invokes it for second-opinion reviews at key points:
+
+- **Generation commands** — `/product-spec`, `/technical-spec`, `/generate-plan`, and all feature commands run `/codex-consult` after creating documents
+- **Phase checkpoints** — `/phase-checkpoint` reviews completed phase code via `/codex-review`
+- **Pull requests** — `/create-pr` runs Codex review before creating the PR, includes findings in the PR body, and blocks on critical issues
+
+Codex researches current documentation before reviewing, which helps catch issues where Claude's training data may be outdated. Findings are advisory — they don't block auto-advance.
+
+**Configuration** (`.claude/settings.local.json`):
+```json
+{
+  "codexReview": {
+    "enabled": true,
+    "codeModel": "gpt-5.3-codex",
+    "reviewTimeoutMinutes": 20
+  },
+  "codexConsult": {
+    "enabled": true,
+    "researchModel": "gpt-5.2",
+    "consultTimeoutMinutes": 20
+  }
+}
+```
+
+You can also invoke `/codex-review` (code diffs), `/codex-consult` (documents), or `/create-pr` (PR with review) directly at any time.
+
+## Codex Task Execution
+
+You can have Codex CLI execute tasks while Claude Code orchestrates:
+
+```bash
+/phase-start 1 --codex
+```
+
+**How it works:**
+- Claude Code reads tasks and builds prompts
+- Codex CLI executes each task (with web search for current docs)
+- Claude Code verifies results and commits
+- Auto-advance and state tracking work normally
+
+**When to use `--codex`:**
+- Tasks involve external APIs where current documentation matters
+- You want cross-model execution for different perspectives
+- Codex's web search during implementation adds value
+
+**Configuration** (`.claude/settings.local.json`):
+```json
+{
+  "codexReview": {
+    "codeModel": "gpt-5.3-codex",
+    "taskTimeoutMinutes": 60
+  }
+}
+```
 
 ## Troubleshooting
 

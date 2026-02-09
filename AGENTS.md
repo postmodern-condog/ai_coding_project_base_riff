@@ -53,7 +53,7 @@ Guidelines:
 - Prefer general, reusable workflows (avoid product-specific rules).
 - If a skill references additional assets, link them explicitly.
 - If you add/rename a skill:
-  - Update `README.md` (commands list / file structure section) accordingly.
+  - Update `docs/commands.md` (command reference) accordingly.
   - Ensure the skill aligns with constraints in `.claude/settings.json`.
 
 ## Global Skill Resolution
