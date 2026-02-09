@@ -7,6 +7,24 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 
 Orient to a project directory and load context for execution.
 
+## Workflow
+
+Copy this checklist and track progress:
+
+```
+Fresh Start Progress:
+- [ ] Detect context (project root vs feature directory)
+- [ ] Directory guard (verify AGENTS.md + EXECUTION_PLAN.md exist)
+- [ ] Git initialization (if needed)
+- [ ] Feature branch setup (feature mode only)
+- [ ] AGENTS_ADDITIONS merge (feature mode only)
+- [ ] Read context and summarize
+- [ ] Auto-configure verification (first run only)
+- [ ] Phase state detection
+- [ ] Auto-prep phase (first run only)
+- [ ] Branch context detection
+```
+
 ## Project Directory
 
 Use the current working directory by default.
@@ -132,61 +150,61 @@ If MODE = "feature", check for and offer to merge workflow additions:
    - Report: "Skipped. You can manually apply AGENTS_ADDITIONS.md changes later."
    - Continue with fresh-start (don't block)
 
-## Verification Configuration (First Run)
+## Auto-Configure Verification (First Run Only)
 
-Check if verification is configured:
+Silently auto-detect verification commands if not already configured.
 
-1. Check if `PROJECT_ROOT/.claude/verification-config.json` exists and is non-empty
-2. If it exists and has content, skip this section
-3. If missing or empty, check for a `"skipped": true` marker — if present, skip
-4. Otherwise, prompt the user:
+1. Check if `PROJECT_ROOT/.claude/verification-config.json` exists
+2. **Skip this section if ANY of these are true:**
+   - File exists and contains real config (has a `commands` key)
+   - File exists with only `{"skipped": true}` (user previously opted out)
+3. **Run auto-detection if:**
+   - File does not exist
+   - File is empty
 
-```
-Verification not configured. Configure now?
+Invoke `/configure-verification` with PROJECT_ROOT. This runs silently with no
+prompts and prints a one-line summary.
 
-[Y] Yes - run /configure-verification (recommended)
-[n] No - remind me later
-[s] Skip - don't ask again for this project
-```
+## Phase State Detection
 
-**Handling:**
-- **Y (default):** Invoke `/configure-verification` with PROJECT_ROOT, then continue
-- **n:** Report "Run `/configure-verification` before `/phase-prep` to enable automated verification." and continue
-- **s:** Create `.claude/verification-config.json` with `{"skipped": true}` and continue
-
-**Note:** In non-interactive/CI environments, if no response is possible, treat as "n" (remind later) and continue without blocking.
-
-## Phase State Detection (Auto-Resume)
-
-Before reading specs, check for existing phase state to enable seamless resumption:
+Check for existing phase state to determine if this is a resume or first run:
 
 1. Check if `.claude/phase-state.json` exists in PROJECT_ROOT (or FEATURE_DIR if feature mode)
 
-2. If it exists, read and parse it:
-   ```json
-   {
-     "current_phase": "Phase 2",
-     "completed_tasks": ["1.1", "1.2", "1.3", "2.1"],
-     "in_progress_task": "2.2",
-     "last_updated": "2026-02-02T10:30:00Z"
-   }
-   ```
+2. **If valid phase state exists** (file exists, parses correctly, has `current_phase`):
+   - This is a **resume**. Skip auto-configure and auto-prep (already done).
+   - Report:
+     ```
+     RESUMING SESSION
+     ================
+     Current phase: {current_phase}
+     Completed: {count} tasks
+     In progress: Task {in_progress_task} (if any)
+     Last activity: {relative time, e.g., "2 hours ago"}
+     ```
+   - If `in_progress_task` exists, offer to continue:
+     - "Continue with Task {id}: {task title}?" [Y/n]
+     - If yes, jump directly to that task after context load
+   - **Do not run auto-prep on resume.** Go straight to Branch Context Detection.
 
-3. If phase state found, report:
-   ```
-   RESUMING SESSION
-   ================
-   Current phase: {current_phase}
-   Completed: {count} tasks
-   In progress: Task {in_progress_task} (if any)
-   Last activity: {relative time, e.g., "2 hours ago"}
-   ```
+3. **If no phase state exists** (or file is invalid/stale):
+   - This is a **first run**. Continue to Auto-Prep Phase section.
 
-4. If `in_progress_task` exists, offer to continue:
-   - "Continue with Task {id}: {task title}?" [Y/n]
-   - If yes, jump directly to that task after context load
+## Auto-Prep Phase (First Run Only)
 
-5. If no phase state exists, this is a fresh start — continue normally
+**Skip this section entirely if resuming** (phase-state.json exists and is valid).
+
+After context reading and verification config, automatically prepare the next phase:
+
+1. **Determine next phase number:**
+   - If no phase state exists → Phase 1
+   - If phase state exists but is stale/invalid → Phase 1
+
+2. **Invoke `/phase-prep {next_phase}`** silently.
+   - Phase-prep will verify prerequisites and auto-advance to `/phase-start` if
+     all checks pass (via its existing auto-advance logic).
+   - If phase-prep blocks (human setup needed), it will report what's needed
+     and the user runs `/phase-start` manually after resolving.
 
 ## Branch Context Detection
 
