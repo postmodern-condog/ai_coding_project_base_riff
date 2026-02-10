@@ -258,7 +258,8 @@ Before starting any task, load:
 2. Specification documents:
    - Greenfield projects: PRODUCT_SPEC.md and TECHNICAL_SPEC.md
    - Feature work: FEATURE_SPEC.md and FEATURE_TECHNICAL_SPEC.md
-3. Your task definition from EXECUTION_PLAN.md
+3. DESIGN_STYLE_GUIDE.md (if the task involves user-facing UI)
+4. Your task definition from EXECUTION_PLAN.md
 
 **Preserve context while debugging.** If tests fail within a task, continue in the same conversation until resolved.
 

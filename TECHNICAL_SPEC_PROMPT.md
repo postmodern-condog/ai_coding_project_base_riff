@@ -68,6 +68,7 @@ Once we have enough to generate a strong technical specification document, tell 
    - Key dependencies and libraries
    - Edge cases and boundary conditions
    - Authentication/authorization approach (if applicable)
+   - **Visual design approach** — If the project has a user-facing UI, reference `DESIGN_STYLE_GUIDE.md` and note how the chosen tech stack implements its guidance (e.g. design token strategy, component library choice, spacing/color system)
 
 3. Is structured in whatever way best communicates this specific system
 
