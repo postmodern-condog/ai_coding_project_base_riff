@@ -8,7 +8,7 @@ A structured framework for AI agents to build software autonomously — with ver
 
 A framework that turns ad-hoc AI prompting into a repeatable workflow with automatic verification. Three phases:
 
-1. **Specify** — Guided Q&A produces `PRODUCT_SPEC.md` and `TECHNICAL_SPEC.md`
+1. **Specify** — Guided Q&A produces `PRODUCT_SPEC.md` and `TECHNICAL_SPEC.md` (with `DESIGN_STYLE_GUIDE.md` for UI projects)
 2. **Plan** — Generator creates `EXECUTION_PLAN.md` (tasks with testable acceptance criteria) and `AGENTS.md` (workflow rules)
 3. **Execute** — AI agents work task-by-task with automatic verification after each one
 
@@ -113,6 +113,7 @@ See [Command Reference](docs/commands.md) for the full list including feature, s
 your-project/
 ├── PRODUCT_SPEC.md          # What you're building
 ├── TECHNICAL_SPEC.md        # How it's built
+├── DESIGN_STYLE_GUIDE.md    # Visual design & UX guidance (for UI projects)
 ├── EXECUTION_PLAN.md        # Tasks with acceptance criteria
 ├── AGENTS.md                # Workflow rules for AI agents
 ├── LEARNINGS.md             # Discovered patterns (created as you work)
