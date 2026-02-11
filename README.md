@@ -32,8 +32,8 @@ Codex CLI users: see [Codex CLI Setup](docs/codex-cli.md). Not using Claude Code
 
 ```bash
 # 1. Clone the toolkit
-git clone https://github.com/benjaminshoemaker/ai_coding_project_base.git
-cd ai_coding_project_base
+git clone https://github.com/postmodern-condog/ai_coding_project_base_riff.git
+cd ai_coding_project_base_riff
 
 # 2. Generate specs and plan (from toolkit directory)
 /product-spec ~/Projects/my-new-app
